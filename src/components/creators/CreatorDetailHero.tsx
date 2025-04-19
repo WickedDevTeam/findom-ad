@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -10,20 +10,24 @@ interface CreatorDetailHeroProps {
 }
 
 const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
+  const [imageError, setImageError] = useState(false);
+  const fallbackImage = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158";
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
         <div className="relative">
           <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-findom-purple">
             <img 
-              src={creator.profileImage} 
+              src={imageError ? fallbackImage : creator.profileImage} 
               alt={creator.name} 
               className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
             />
           </div>
           {creator.isFeatured && (
             <div className="absolute -top-2 -right-2">
-              <Badge className="badge-featured">Featured</Badge>
+              <Badge className="bg-findom-purple text-white border-0">Featured</Badge>
             </div>
           )}
         </div>
@@ -73,7 +77,7 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
             <p className="text-white/70 mb-1">Categories:</p>
             <div className="flex flex-wrap gap-2">
               {creator.categories.map((category) => (
-                <Link key={category} to={`/category/${category.toLowerCase()}`}>
+                <Link key={category} to={`/${category.toLowerCase()}`}>
                   <Badge variant="outline" className="hover:bg-findom-purple/20 transition-colors">
                     {category}
                   </Badge>

@@ -13,6 +13,7 @@ import SignupPage from "./pages/SignupPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
+import CategoryPage from "./pages/CategoryPage";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,17 @@ const App = () => (
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/admin" element={<AdminPage />} />
+            
+            {/* Category Routes */}
+            <Route path="/findoms" element={<CategoryPage />} />
+            <Route path="/catfish" element={<CategoryPage />} />
+            <Route path="/ai-bots" element={<CategoryPage />} />
+            <Route path="/celebrities" element={<CategoryPage />} />
+            <Route path="/twitter" element={<CategoryPage />} />
+            <Route path="/blackmail" element={<CategoryPage />} />
+            <Route path="/pay-pigs" element={<CategoryPage />} />
+            <Route path="/bots" element={<CategoryPage />} />
+            
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>
