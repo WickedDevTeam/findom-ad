@@ -12,6 +12,7 @@ import CreateListingPage from "./pages/CreateListingPage";
 import SignupPage from "./pages/SignupPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
+import NotificationsPage from "./pages/NotificationsPage";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/creator/:username" element={<CreatorDetailPage />} />
             <Route path="/promotion" element={<PromotionPage />} />
             <Route path="/create-listing" element={<CreateListingPage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="*" element={<NotFound />} />
