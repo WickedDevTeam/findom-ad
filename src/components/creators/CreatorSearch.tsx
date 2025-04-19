@@ -14,13 +14,13 @@ const filters = ['All', 'Findom', 'Catfish', 'AI Bots', 'Celebrities'];
 
 const CreatorSearch = ({ onSearch, onFilterChange, selectedFilter }: CreatorSearchProps) => {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       <div className="relative">
         <Search className="absolute left-3 top-2.5 h-5 w-5 text-white/50" />
         <Input
           type="search"
           placeholder="Search creators..."
-          className="pl-10 bg-black/20 border-white/10"
+          className="pl-10 bg-black/20 border-white/10 transition-all duration-200 focus:bg-black/30 focus:border-findom-purple"
           onChange={(e) => onSearch(e.target.value)}
         />
       </div>
@@ -30,7 +30,13 @@ const CreatorSearch = ({ onSearch, onFilterChange, selectedFilter }: CreatorSear
           <Badge
             key={filter}
             variant={selectedFilter === filter ? 'default' : 'outline'}
-            className="cursor-pointer hover:bg-white/10"
+            className={`
+              cursor-pointer transition-all duration-200
+              ${selectedFilter === filter 
+                ? 'bg-findom-purple hover:bg-findom-purple/90' 
+                : 'hover:bg-white/10'
+              }
+            `}
             onClick={() => onFilterChange(filter)}
           >
             {filter}
