@@ -10,6 +10,7 @@ import { PendingSubmission, StatsData } from '@/types/admin';
 import Dashboard from '@/components/admin/Dashboard';
 import Listings from '@/components/admin/Listings';
 import Submissions from '@/components/admin/Submissions';
+import { Badge } from '@/components/ui/badge';
 
 // Admin dashboard statistics data
 const statsData: StatsData[] = [
