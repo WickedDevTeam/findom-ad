@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -20,14 +20,31 @@ import {
   Edit, 
   Trash, 
   Star, 
-  AlertCircle 
+  AlertCircle,
+  BarChart,
+  Users,
+  DollarSign,
+  Eye
 } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart as Chart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
+import { promotionPackages } from '@/data/promotions';
+import { Creator } from '@/types';
+
+// Admin dashboard statistics data
+const statsData = [
+  { name: 'Jan', listings: 4, visitors: 1000, revenue: 240 },
+  { name: 'Feb', listings: 6, visitors: 1200, revenue: 320 },
+  { name: 'Mar', listings: 8, visitors: 1500, revenue: 480 },
+  { name: 'Apr', listings: 12, visitors: 2000, revenue: 520 },
+  { name: 'May', listings: 16, visitors: 2400, revenue: 620 },
+  { name: 'Jun', listings: 20, visitors: 3000, revenue: 820 },
+];
 
 const AdminPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  const pendingSubmissions = [
+  const [pendingSubmissions, setPendingSubmissions] = useState([
     { 
       id: 'p1', 
       name: 'Emma Watson', 
@@ -44,9 +61,30 @@ const AdminPage = () => {
       type: 'Free', 
       submittedAt: '2024-04-14T08:15:00Z'
     },
-  ];
+    { 
+      id: 'p3', 
+      name: 'Jessica Smith', 
+      username: 'jessica-findom', 
+      category: 'Findoms', 
+      type: 'Premium', 
+      submittedAt: '2024-04-16T12:30:00Z'
+    },
+  ]);
   
-  const filteredCreators = creators.filter(creator => 
+  const [activeCreators, setActiveCreators] = useState<Creator[]>(creators);
+  const [currentTab, setCurrentTab] = useState('dashboard');
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    // Simulate API loading
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 800);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  const filteredCreators = activeCreators.filter(creator => 
     creator.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     creator.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -57,28 +95,53 @@ const AdminPage = () => {
   );
   
   const handleApprove = (id: string) => {
+    setPendingSubmissions(prev => prev.filter(item => item.id !== id));
+    
     toast.success('Submission approved!', {
       description: `The submission has been approved and published.`
     });
   };
   
   const handleReject = (id: string) => {
+    setPendingSubmissions(prev => prev.filter(item => item.id !== id));
+    
     toast.error('Submission rejected', {
       description: 'The submission has been rejected.'
     });
   };
   
   const handleDelete = (id: string) => {
+    setActiveCreators(prev => prev.filter(creator => creator.id !== id));
+    
     toast.success('Listing deleted', {
       description: 'The listing has been permanently removed.'
     });
   };
   
   const handleFeature = (id: string) => {
-    toast.success('Listing featured', {
-      description: 'The listing is now featured on the homepage.'
+    setActiveCreators(prev => 
+      prev.map(creator => 
+        creator.id === id 
+          ? { ...creator, isFeatured: !creator.isFeatured } 
+          : creator
+      )
+    );
+    
+    const creator = activeCreators.find(c => c.id === id);
+    const action = creator?.isFeatured ? 'unfeatured' : 'featured';
+    
+    toast.success(`Listing ${action}`, {
+      description: `The listing is now ${action} ${action === 'featured' ? 'on the homepage' : ''}.`
     });
   };
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="h-12 w-12 border-4 border-findom-purple/30 border-t-findom-purple rounded-full animate-spin"></div>
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-8">
@@ -101,8 +164,9 @@ const AdminPage = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="listings" className="w-full">
+      <Tabs defaultValue="dashboard" value={currentTab} onValueChange={setCurrentTab} className="w-full">
         <TabsList className="mb-6">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="listings">Listings</TabsTrigger>
           <TabsTrigger value="submissions">
             Pending Submissions
@@ -111,6 +175,112 @@ const AdminPage = () => {
           <TabsTrigger value="promotions">Promotions</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
+        
+        <TabsContent value="dashboard" className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="bg-black/30 backdrop-blur-sm border border-white/10">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium flex items-center gap-2">
+                  <Users className="h-4 w-4 text-findom-purple" />
+                  Active Listings
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">{activeCreators.length}</div>
+                <p className="text-xs text-white/70">+12% from last month</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-black/30 backdrop-blur-sm border border-white/10">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium flex items-center gap-2">
+                  <Eye className="h-4 w-4 text-findom-green" />
+                  Monthly Visitors
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">3,246</div>
+                <p className="text-xs text-white/70">+24% from last month</p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-black/30 backdrop-blur-sm border border-white/10">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-md font-medium flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-findom-orange" />
+                  Revenue
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold">$820</div>
+                <p className="text-xs text-white/70">+32% from last month</p>
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <Card className="bg-black/30 backdrop-blur-sm border border-white/10">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium flex items-center gap-2">
+                  <BarChart className="h-5 w-5 text-findom-purple" />
+                  Listings Growth
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={statsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                      <XAxis dataKey="name" stroke="#888" />
+                      <YAxis stroke="#888" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '8px',
+                          color: 'white'
+                        }} 
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="listings" stroke="#8884d8" activeDot={{ r: 8 }} />
+                      <Line type="monotone" dataKey="visitors" stroke="#82ca9d" />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-black/30 backdrop-blur-sm border border-white/10">
+              <CardHeader>
+                <CardTitle className="text-lg font-medium flex items-center gap-2">
+                  <DollarSign className="h-5 w-5 text-findom-orange" />
+                  Revenue
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <Chart data={statsData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+                      <XAxis dataKey="name" stroke="#888" />
+                      <YAxis stroke="#888" />
+                      <Tooltip 
+                        contentStyle={{ 
+                          backgroundColor: 'rgba(0, 0, 0, 0.8)', 
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          borderRadius: '8px',
+                          color: 'white'
+                        }} 
+                      />
+                      <Legend />
+                      <Bar dataKey="revenue" fill="#8884d8" />
+                    </Chart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
         
         <TabsContent value="listings" className="space-y-6">
           <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg overflow-hidden">
@@ -146,6 +316,9 @@ const AdminPage = () => {
                               src={creator.profileImage} 
                               alt={creator.name} 
                               className="w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=50&h=50&fit=crop';
+                              }}
                             />
                           </div>
                           <span>{creator.name}</span>
@@ -163,16 +336,21 @@ const AdminPage = () => {
                       </TableCell>
                       <TableCell>
                         {creator.isFeatured ? (
-                          <Badge className="badge-featured">Featured</Badge>
+                          <Badge className="bg-findom-purple text-white">Featured</Badge>
                         ) : creator.isNew ? (
-                          <Badge className="badge-new">New</Badge>
+                          <Badge className="bg-findom-green text-white">New</Badge>
                         ) : (
                           <Badge variant="outline">Active</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
-                          <Button variant="ghost" size="icon" onClick={() => handleFeature(creator.id)}>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            onClick={() => handleFeature(creator.id)}
+                            className={creator.isFeatured ? "text-findom-purple" : ""}
+                          >
                             <Star className="h-4 w-4" />
                           </Button>
                           <Button variant="ghost" size="icon">
@@ -257,28 +435,54 @@ const AdminPage = () => {
         </TabsContent>
         
         <TabsContent value="promotions">
-          <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-6">
-            <h3 className="text-xl font-bold mb-4">Promotion Settings</h3>
-            <p className="text-white/70 mb-6">
-              Manage promotional packages, featured listings, and sponsorship opportunities.
-            </p>
-            
-            <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Primary Sponsor Price ($)</label>
-                  <Input type="number" defaultValue="49.99" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Featured Listing Price ($)</label>
-                  <Input type="number" defaultValue="29.99" />
-                </div>
-              </div>
-              
-              <div className="pt-4">
-                <Button>Save Changes</Button>
-              </div>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {promotionPackages.map(promo => (
+                <Card key={promo.id} className="bg-black/30 backdrop-blur-sm border border-white/10">
+                  <CardHeader>
+                    <CardTitle className="flex justify-between items-center">
+                      <span>{promo.title}</span>
+                      <Badge className="bg-findom-purple">${promo.price}/{promo.duration}</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-white/70">{promo.description}</p>
+                    <div className="flex justify-between items-center">
+                      {promo.limited && (
+                        <div className="text-sm text-white/70">
+                          <span className="text-findom-orange font-bold">{promo.remaining}</span> spots remaining
+                        </div>
+                      )}
+                      <Button variant="outline">Edit Package</Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
+            
+            <Card className="bg-black/30 backdrop-blur-sm border border-white/10 p-6">
+              <h3 className="text-xl font-bold mb-4">Promotion Settings</h3>
+              <p className="text-white/70 mb-6">
+                Manage promotional packages, featured listings, and sponsorship opportunities.
+              </p>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Primary Sponsor Price ($)</label>
+                    <Input type="number" defaultValue="49.99" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Featured Listing Price ($)</label>
+                    <Input type="number" defaultValue="29.99" />
+                  </div>
+                </div>
+                
+                <div className="pt-4">
+                  <Button>Save Changes</Button>
+                </div>
+              </div>
+            </Card>
           </div>
         </TabsContent>
         
