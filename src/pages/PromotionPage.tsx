@@ -4,7 +4,7 @@ import PricingSectionDemo from '@/components/ui/pricing-section-demo';
 
 const PromotionPage = () => {
   return (
-    <div>
+    <div className="pt-4 md:pt-8">
       <PricingSectionDemo />
     </div>
   );

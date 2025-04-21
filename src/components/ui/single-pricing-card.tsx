@@ -133,6 +133,7 @@ export function SinglePricingCard({
               isInView={isInView}
               animationEnabled={animationEnabled}
               cardClassName={cardClassName}
+              setCurrentTestimonialIndex={setCurrentTestimonialIndex}
             />
           </motion.div>
         ) : (
@@ -153,6 +154,7 @@ export function SinglePricingCard({
             isInView={isInView}
             animationEnabled={animationEnabled}
             cardClassName={cardClassName}
+            setCurrentTestimonialIndex={setCurrentTestimonialIndex}
           />
         )}
       </div>
@@ -165,6 +167,7 @@ interface SinglePricingCardContentProps
   currentTestimonialIndex: number
   isInView: boolean
   cardClassName?: string
+  setCurrentTestimonialIndex: React.Dispatch<React.SetStateAction<number>>
 }
 
 function SinglePricingCardContent({
@@ -184,6 +187,7 @@ function SinglePricingCardContent({
   isInView,
   animationEnabled,
   cardClassName,
+  setCurrentTestimonialIndex,
 }: SinglePricingCardContentProps) {
   const BadgeIcon = badge?.icon
   const FeaturesBadgeIcon = featuresBadge?.icon
@@ -397,3 +401,5 @@ function SinglePricingCardContent({
     </Card>
   )
 }
+
+export { SinglePricingCard }
