@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
@@ -50,7 +49,6 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
           onError={() => setImageError(true)}
         />
         <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
-          <FavoriteButton creatorId={creator.id} />
           {creator.isFeatured && (
             <AppBadge variant="featured" className="shadow-sm">
               Featured
