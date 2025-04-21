@@ -15,8 +15,9 @@ const Navbar = ({ children }: NavbarProps) => {
     <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-40 border-b border-white/10">
       <div className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
         <div className="flex items-center gap-2 md:gap-6">
-          {children}
+          {/* Always show logo in desktop and mobile */}
           <Logo />
+          {children}
         </div>
         <div className="flex items-center gap-2 md:gap-4">
           <Link to="/notifications" className="relative">

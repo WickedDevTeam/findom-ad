@@ -34,7 +34,7 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <X className="h-5 w-5" />
           </Button>
         </div>
-        <nav className="space-y-2 flex-1 mt-2">
+        <nav className="space-y-1 flex-1 mt-2"> {/* Made space more compact (was space-y-2) */}
           <SidebarItem 
             to="/" 
             icon={<span className="text-xl">🏠</span>} 
