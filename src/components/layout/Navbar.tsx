@@ -22,7 +22,7 @@ const Navbar = ({
     }
   };
   return <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
-      <div className="container mx-auto sm:px-6 flex justify-between items-center px-0 py-[12px]">
+      <div className="container mx-auto sm:px-6 flex justify-between items-center py-[12px] px-0">
         <div className="flex items-center gap-2 md:gap-4">
           <Logo />
           {children}
