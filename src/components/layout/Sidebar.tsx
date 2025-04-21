@@ -3,8 +3,8 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import Logo from '@/components/shared/Logo'; // Add Logo to sidebar
 
-// Category => emoji mapping for sidebar
 const CATEGORY_LINKS = [
   { to: '/findoms', emoji: '👑', label: 'Findoms' },
   { to: '/pay-pigs', emoji: '🐷', label: 'Pay Pigs' },
@@ -27,14 +27,17 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   return (
     <aside className={`w-[208px] h-screen bg-black border-r border-white/10 fixed left-0 top-0 z-50 transition-transform duration-300 
       ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-      <div className="flex flex-col h-full p-4">
+      <div className="flex flex-col h-full p-0">
+        <div className="flex flex-col items-center mt-2 mb-3">
+          <Logo forSidebar />
+        </div>
         {/* Mobile close button */}
-        <div className="flex justify-end md:hidden">
+        <div className="flex justify-end md:hidden px-2">
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
         </div>
-        <nav className="space-y-1 flex-1 mt-2"> {/* Made space more compact (was space-y-2) */}
+        <nav className="space-y-0.5 flex-1 mt-1 px-2"> {/* Compact spacing */}
           <SidebarItem 
             to="/" 
             icon={<span className="text-xl">🏠</span>} 

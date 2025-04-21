@@ -2,22 +2,36 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
-import { Badge } from '@/components/ui/badge';
+import AppBadge from '@/components/shared/AppBadge';
 import { Twitter, Link as LinkIcon, DollarSign, Heart } from 'lucide-react';
 
 interface CreatorDetailHeroProps {
   creator: Creator;
 }
 
+const CATEGORY_EMOJIS: Record<string, string> = {
+  Findoms: '👑',
+  Catfish: '🐟',
+  'AI Bots': '🤖',
+  'Pay Pigs': '🐷',
+  Celebrities: '🌟',
+  Blackmail: '💸',
+  Twitter: '🐦',
+  Bots: '⚡️',
+  Other: '🔗'
+};
+
 const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   const [imageError, setImageError] = useState(false);
   const fallbackImage = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158";
+  const mainCategory = creator.categories[0];
+  const categoryEmoji = CATEGORY_EMOJIS[mainCategory] || CATEGORY_EMOJIS["Other"];
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+      <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
         <div className="relative">
-          <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-findom-purple">
+          <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-findom-purple shadow-lg">
             <img 
               src={imageError ? fallbackImage : creator.profileImage} 
               alt={creator.name} 
@@ -27,16 +41,32 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
           </div>
           {creator.isFeatured && (
             <div className="absolute -top-2 -right-2">
-              <Badge className="bg-findom-purple text-white border-0">Featured</Badge>
+              <AppBadge variant="featured" className="shadow-xl">
+                Featured
+              </AppBadge>
             </div>
           )}
         </div>
         
-        <div className="text-center md:text-left">
-          <h1 className="text-4xl font-bold text-white mb-2">{creator.name}</h1>
-          <p className="text-lg text-white/70 mb-4">{creator.username}</p>
-          
-          <div className="flex flex-wrap gap-3 justify-center md:justify-start">
+        <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
+          <h1 className="text-4xl font-extrabold text-white mb-1">{creator.name}</h1>
+          <p className="text-lg text-white/80 mb-3">@{creator.username}</p>
+          <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+            {creator.categories.map((category) => (
+              <AppBadge
+                key={category}
+                variant="category"
+                className="flex items-center gap-1 text-sm font-semibold"
+              >
+                <span>{CATEGORY_EMOJIS[category] || ''}</span>
+                {category}
+              </AppBadge>
+            ))}
+            <AppBadge variant="type" className="text-sm font-semibold">
+              {creator.type}
+            </AppBadge>
+          </div>
+          <div className="flex flex-wrap gap-2 justify-center md:justify-start">
             {creator.socialLinks.twitter && (
               <a href={creator.socialLinks.twitter} target="_blank" rel="noopener noreferrer" 
                 className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors">
@@ -70,28 +100,35 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
           </div>
         </div>
       </div>
-      
-      <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-6 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-2">
           <div>
-            <p className="text-white/70 mb-1">Categories:</p>
+            <p className="text-white/70 mb-1 font-medium">Categories</p>
             <div className="flex flex-wrap gap-2">
               {creator.categories.map((category) => (
-                <Link key={category} to={`/${category.toLowerCase()}`}>
-                  <Badge variant="outline" className="hover:bg-findom-purple/20 transition-colors">
-                    {category}
-                  </Badge>
-                </Link>
+                <AppBadge
+                  key={category}
+                  variant="category"
+                  className="flex items-center gap-1"
+                >
+                  <span>{CATEGORY_EMOJIS[category] || ''}</span>{category}
+                </AppBadge>
               ))}
             </div>
           </div>
           <div>
-            <p className="text-white/70 mb-1">Type:</p>
-            <Badge variant="outline" className="bg-black/50">
+            <p className="text-white/70 mb-1 font-medium">Type</p>
+            <AppBadge variant="type" className="capitalize">
               {creator.type}
-            </Badge>
+            </AppBadge>
           </div>
         </div>
+        {creator.bio && (
+          <div className="mt-4">
+            <p className="text-white/70 mb-1 font-medium">Short Bio</p>
+            <div className="text-white/80 text-lg">{creator.bio}</div>
+          </div>
+        )}
       </div>
     </div>
   );
