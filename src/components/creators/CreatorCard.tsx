@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
@@ -55,7 +56,7 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
             </AppBadge>
           )}
           {creator.isNew && (
-            <AppBadge variant="info" className="shadow-lg">
+            <AppBadge variant="default" className="shadow-lg">
               New
             </AppBadge>
           )}
