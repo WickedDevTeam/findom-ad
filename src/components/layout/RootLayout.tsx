@@ -36,7 +36,7 @@ const RootLayout = () => {
           y: -10
         }} transition={{
           duration: 0.3
-        }} className="container mx-auto sm:px-6 py-8 px-[89px]">
+        }} className="container mx-auto sm:px-6 py-8 px-[90px]">
             <Outlet />
           </motion.div>
         </AnimatePresence>

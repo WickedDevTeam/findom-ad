@@ -1,14 +1,11 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Mail } from 'lucide-react';
-
 const HeroSection = () => {
-  return (
-    <div className="py-12 flex flex-col md:flex-row gap-12">
-      <div className="flex-1 space-y-6">
+  return <div className="py-12 flex flex-col md:flex-row gap-12">
+      <div className="flex-1 space-y-6 my-0 py-[7px]">
         <div className="space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white">
             Chat With Top Rated<br />
@@ -55,8 +52,6 @@ const HeroSection = () => {
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default HeroSection;
