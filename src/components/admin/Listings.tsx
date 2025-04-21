@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Creator, SocialLinks } from '@/types';
+import { Json } from '@/integrations/supabase/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,16 +34,13 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [sortField, setSortField] = useState<string>('createdAt');
 
-  // Update creators when props change
   useEffect(() => {
     setCreators(initialCreators);
   }, [initialCreators]);
 
-  // Update filtered results when filters change
   useEffect(() => {
     let results = [...creators];
     
-    // Apply search filter
     if (localSearchTerm) {
       results = results.filter(creator => 
         creator.name.toLowerCase().includes(localSearchTerm.toLowerCase()) ||
@@ -51,7 +48,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
       );
     }
     
-    // Apply category filter
     if (categoryFilter !== 'all') {
       results = results.filter(creator => 
         creator.categories.some(category => 
@@ -60,7 +56,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
       );
     }
     
-    // Apply status filter
     if (statusFilter !== 'all') {
       if (statusFilter === 'featured') {
         results = results.filter(creator => creator.isFeatured);
@@ -71,7 +66,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
       }
     }
     
-    // Apply sorting
     results.sort((a, b) => {
       if (sortField === 'createdAt') {
         return sortOrder === 'asc' 
@@ -92,7 +86,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
     setFilteredCreators(results);
   }, [creators, localSearchTerm, categoryFilter, statusFilter, sortField, sortOrder]);
 
-  // Get all unique categories from creators
   const getAllCategories = () => {
     const categories = new Set<string>();
     creators.forEach(creator => {
@@ -129,7 +122,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
     setIsNewListingOpen(false);
     toast.success(`Listing ${isNew ? 'created' : 'updated'} successfully`);
     
-    // Refresh the creators list
     fetchCreators();
   };
 
@@ -142,9 +134,7 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
       if (error) throw error;
       
       if (data) {
-        // Need to format the data to match Creator type
         const formattedCreators: Creator[] = data.map(item => {
-          // Parse social_links from JSON if it's a string
           let socialLinks: SocialLinks = {
             twitter: undefined,
             throne: undefined,
@@ -167,7 +157,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
               console.error('Error parsing social_links JSON:', e);
             }
           } else if (item.social_links && typeof item.social_links === 'object') {
-            // Handle direct object format
             const links = item.social_links as Record<string, any>;
             socialLinks = {
               twitter: links.twitter || undefined,
@@ -190,13 +179,12 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
             isFeatured: item.is_featured,
             isNew: item.is_new,
             type: item.type,
-            categories: [], // Will be populated below
-            gallery: [],    // Would need a separate query
+            categories: [],
+            gallery: [],
             createdAt: item.created_at,
           };
         });
         
-        // For each creator, get their categories
         for (const creator of formattedCreators) {
           const { data: categoryLinks } = await supabase
             .from('creator_categories')
@@ -216,7 +204,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
             }
           }
           
-          // Get gallery images
           const { data: galleryImages } = await supabase
             .from('creator_galleries')
             .select('image_url')
@@ -237,7 +224,6 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
 
   const handleExportData = () => {
     try {
-      // Convert the data to CSV
       const headers = ['Name', 'Username', 'Categories', 'Status', 'Created At'];
       const csvData = filteredCreators.map(creator => [
         creator.name,
@@ -247,13 +233,10 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
         new Date(creator.createdAt).toLocaleString()
       ]);
       
-      // Add headers
       csvData.unshift(headers);
       
-      // Convert to CSV string
       const csvString = csvData.map(row => row.join(',')).join('\n');
       
-      // Create a Blob and download link
       const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -461,7 +444,7 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
                           </Button>
                           <Button 
                             variant="ghost" 
-                            size="icon"
+                            size="icon" 
                             onClick={(e) => {
                               e.stopPropagation();
                               setSelectedCreator(creator);

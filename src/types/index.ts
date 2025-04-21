@@ -1,4 +1,5 @@
 
+
 export interface Creator {
   id: string;
   name: string;
@@ -33,3 +34,4 @@ export interface SocialLinks {
   onlyfans?: string | null;
   other?: string | null;
 }
+

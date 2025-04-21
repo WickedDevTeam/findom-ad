@@ -29,6 +29,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AlertCircle, Check, Image, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { SocialLinks } from '@/types';
+import { Json } from '@/integrations/supabase/types';
 
 // Form schema validation
 const listingFormSchema = z.object({
@@ -320,12 +321,15 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
           throne: values.throne || null,
         };
         
+        // Convert SocialLinks to a JSON-compatible object for Supabase
+        const socialLinksJson = socialLinks as unknown as Json;
+        
         const creatorData = {
           name: values.name,
           username: values.username,
           bio: values.bio,
           type: values.type,
-          social_links: socialLinks,
+          social_links: socialLinksJson,
           is_verified: true,
           is_new: !listingId, // Only new if creating
           profile_image: profileImagePath || profileImageUrl, // Use existing or new image
