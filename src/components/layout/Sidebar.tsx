@@ -61,7 +61,6 @@ const Sidebar = ({
   isOpen,
   onClose,
 }: SidebarProps) => {
-  // isOpen and onClose are accepted in case the parent needs them, but shadcn Sidebar handles collapse.
   return (
     <UISidebar>
       <SidebarContent>
@@ -72,7 +71,6 @@ const Sidebar = ({
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    {/* Use Link for client-side routing if path is present */}
                     <Link to={item.url}>
                       <item.icon className="mr-2" />
                       <span>{item.title}</span>
