@@ -24,7 +24,7 @@ const FeaturedCreators = ({
         </Link>
       </div>
 
-      <div className="grid grid-cols-4 md:grid-cols-1 gap-7">
+      <div className="grid grid-cols-4 md:grid-cols-5 gap-8">
         {creators.slice(0, 3).map(creator => {
         const [imageError, setImageError] = React.useState(false);
         const imageSrc = !creator.profileImage || imageError ? getDicebearSrc(creator.name) : creator.profileImage;
