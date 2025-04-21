@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -8,7 +8,6 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/use-auth';
-import { supabase } from '@/integrations/supabase/client';
 import {
   Form,
   FormControl,
@@ -18,6 +17,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(2, {
@@ -36,7 +37,8 @@ const formSchema = z.object({
 
 const SignupPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, signUp, authError } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // If user is already authenticated, redirect to home
   React.useEffect(() => {
@@ -56,34 +58,37 @@ const SignupPage = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    
     try {
-      const { error } = await supabase.auth.signUp({
-        email: values.email,
-        password: values.password,
-        options: {
-          data: {
-            full_name: values.name,
-          },
-        },
-      });
+      const { success, error } = await signUp(
+        values.email, 
+        values.password, 
+        { full_name: values.name }
+      );
 
-      if (error) {
+      if (!success) {
+        console.error('Signup error:', error);
         toast.error('Signup failed', {
-          description: error.message,
+          description: error || 'An unexpected error occurred',
         });
+        setIsSubmitting(false);
         return;
       }
 
       toast.success('Account created!', {
-        description: 'Welcome to Findom.ad. You can now log in.',
+        description: 'Welcome to Findom.ad. Please check your email to confirm your account.',
       });
       
       form.reset();
       navigate('/signin');
     } catch (error: any) {
+      console.error('Signup exception:', error);
       toast.error('Signup failed', {
         description: error.message || 'An unexpected error occurred',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -96,6 +101,13 @@ const SignupPage = () => {
             Sign up to create and manage your listings
           </p>
         </div>
+
+        {authError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -162,8 +174,8 @@ const SignupPage = () => {
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Create Account
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating Account...' : 'Create Account'}
             </Button>
 
             <div className="text-center text-sm text-white/60">

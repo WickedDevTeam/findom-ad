@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -15,8 +15,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/use-auth';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 const formSchema = z.object({
   email: z.string().email({
@@ -29,7 +30,8 @@ const formSchema = z.object({
 
 const SigninPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, signIn, authError } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // If user is already authenticated, redirect to home
   React.useEffect(() => {
@@ -47,16 +49,17 @@ const SigninPage = () => {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
+    
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email: values.email,
-        password: values.password,
-      });
+      const { success, error } = await signIn(values.email, values.password);
 
-      if (error) {
+      if (!success) {
+        console.error('Login error:', error);
         toast.error('Login failed', {
-          description: error.message,
+          description: error || 'An unexpected error occurred',
         });
+        setIsSubmitting(false);
         return;
       }
 
@@ -66,9 +69,12 @@ const SigninPage = () => {
       
       navigate('/');
     } catch (error: any) {
+      console.error('Login exception:', error);
       toast.error('Login failed', {
         description: error.message || 'An unexpected error occurred',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -81,6 +87,13 @@ const SigninPage = () => {
             Welcome back to Findom.ad
           </p>
         </div>
+
+        {authError && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{authError}</AlertDescription>
+          </Alert>
+        )}
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -112,8 +125,8 @@ const SigninPage = () => {
               )}
             />
 
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing in...' : 'Sign In'}
             </Button>
 
             <div className="text-center text-sm text-white/60">

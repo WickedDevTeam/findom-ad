@@ -1,5 +1,5 @@
 
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,6 +9,7 @@ export function useAuth() {
   const { user, session, loading } = useContext(AuthContext);
   const navigate = useNavigate();
   const toast = useToast();
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const signOut = async () => {
     try {
@@ -27,6 +28,49 @@ export function useAuth() {
     }
   };
 
+  const signIn = async (email: string, password: string) => {
+    setAuthError(null);
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      setAuthError(error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
+  const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
+    setAuthError(null);
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: metadata,
+        },
+      });
+
+      if (error) {
+        setAuthError(error.message);
+        return { success: false, error: error.message };
+      }
+
+      return { success: true, data };
+    } catch (error: any) {
+      setAuthError(error.message);
+      return { success: false, error: error.message };
+    }
+  };
+
   const requireAuth = (callback?: () => void) => {
     if (!loading && !user) {
       toast.toast({
@@ -34,7 +78,7 @@ export function useAuth() {
         description: 'You must be logged in to access this page',
         variant: 'destructive',
       });
-      navigate('/');
+      navigate('/signin');
       return false;
     }
     if (callback && user) {
@@ -47,7 +91,10 @@ export function useAuth() {
     user,
     session,
     loading,
+    authError,
     signOut,
+    signIn,
+    signUp,
     requireAuth,
     isAuthenticated: !!user,
   };
