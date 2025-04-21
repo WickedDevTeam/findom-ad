@@ -9,6 +9,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarFooter,
+  useSidebar
 } from "@/components/ui/sidebar";
 import { InfoCard, InfoCardContent, InfoCardTitle, InfoCardDescription, InfoCardFooter as InfoCardFooterEl, InfoCardDismiss, InfoCardAction } from "@/components/ui/info-card";
 import {
@@ -58,16 +59,9 @@ const items = [
   },
 ];
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const Sidebar = ({
-  isOpen,
-  onClose,
-}: SidebarProps) => {
+const Sidebar = () => {
   const { user, signOut, isAuthenticated } = useAuth();
+  const { openMobile, setOpenMobile } = useSidebar();
   
   const email = user?.email || 'user@example.com';
   const displayName = user?.user_metadata?.full_name || email?.split('@')[0] || 'User';
@@ -75,7 +69,7 @@ const Sidebar = ({
   const initials = displayName.charAt(0).toUpperCase();
 
   return (
-    <UISidebar>
+    <UISidebar variant="sidebar" collapsible="offcanvas" isOpen={openMobile} onClose={() => setOpenMobile(false)}>
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
@@ -83,7 +77,7 @@ const Sidebar = ({
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link to={item.url}>
+                    <Link to={item.url} className="flex items-center gap-2">
                       <span className="mr-2">{item.emoji}</span>
                       <span>{item.title}</span>
                     </Link>
@@ -127,7 +121,7 @@ const Sidebar = ({
               {isAuthenticated ? (
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={avatarUrl} />
-                  <AvatarFallback className="bg-findom-purple/40">
+                  <AvatarFallback className="bg-gray-700">
                     {initials}
                   </AvatarFallback>
                 </Avatar>

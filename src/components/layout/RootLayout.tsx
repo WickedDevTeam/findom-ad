@@ -52,7 +52,7 @@ const RootLayoutContent = () => {
         <MobileSidebarToggle />
       </Navbar>
       
-      <Sidebar isOpen={openMobile} onClose={() => setOpenMobile(false)} />
+      <Sidebar />
       
       <main className="md:pl-[208px] pt-[72px] min-h-screen transition-all duration-300">
         <AnimatePresence mode="wait">
