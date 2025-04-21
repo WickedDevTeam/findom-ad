@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
@@ -8,12 +7,11 @@ import { Tag } from 'lucide-react';
 // Young influencer/model placeholder rotation
 const getProfilePlaceholder = (idx: number) => {
   const imgs = [
-    // All real model style images (Unsplash)
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=facearea&facepad=2', // model
-    'https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?w=400&h=400&fit=facearea&facepad=2', // model
-    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=facearea&facepad=2', // model
-    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=facearea&facepad=2', // model
-    'https://images.unsplash.com/photo-1464983953574-0892a716854b?w=400&h=400&fit=facearea&facepad=2'  // model
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=facearea&facepad=3', // young woman
+    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400&h=400&fit=facearea&facepad=3', // young woman
+    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=facearea&facepad=3', // young woman
+    'https://images.unsplash.com/photo-1464983953574-0892a716854b?w=400&h=400&fit=facearea&facepad=3', // young woman
+    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=facearea&facepad=3', // young woman
   ];
   return imgs[idx % imgs.length];
 };
@@ -25,7 +23,6 @@ interface CreatorCardProps {
 const CreatorCard = ({ creator }: CreatorCardProps) => {
   const [imageError, setImageError] = useState(false);
 
-  // Use only placeholder if missing or error (rotating young model images)
   const imageSrc =
     !creator.profileImage || imageError
       ? getProfilePlaceholder(Number(creator.id.replace(/\D/g, "")) || 0)
@@ -45,7 +42,6 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
           className="w-full h-full object-cover transition duration-200 group-hover:scale-105 bg-findom-dark"
           onError={() => setImageError(true)}
         />
-        {/* Removed overlapping featured badge from here */}
       </div>
       <div className="p-5 pb-4 flex flex-col gap-1.5 bg-black/50">
         <div className="flex items-baseline gap-2">
