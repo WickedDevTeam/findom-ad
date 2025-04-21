@@ -30,7 +30,7 @@ const Navbar = ({
       searchInputRef.current.focus();
     }
   }, [searchOpen]);
-  return <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
+  return <header className="fixed top-0 left-0 right-0 backdrop-blur-md z-50 border-b border-white/10 bg-gray-950">
       <div className="container mx-auto px-3 sm:px-6 flex justify-between items-center h-[72px]">
         <div className="flex items-center gap-1 sm:gap-4">
           {children}
