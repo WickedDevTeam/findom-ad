@@ -43,10 +43,10 @@ const FindomSidebar = () => {
         <div className="px-2 pt-3 pb-3">
           <Logo forSidebar hideInHeader={false} />
         </div>
-        <SidebarGroup className="py-0 my-0">
+        <SidebarGroup className="py-0 my-0 px-[8px]">
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="py-0 my-0">
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={location.pathname === '/'}>
                   <Link to="/">
