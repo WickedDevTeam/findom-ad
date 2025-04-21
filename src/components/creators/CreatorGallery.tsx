@@ -1,15 +1,14 @@
 
 import React, { useState } from 'react';
 
-// Real young instagram model style placeholders (horizontal/gallery size)
+// All instagram model style placeholders (horizontal/gallery size)
 const getRealModelPlaceholder = (idx: number) => {
   const placeholders = [
-    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1200&q=80&fit=facearea&facepad=3', // young woman
-    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=1200&q=80&fit=facearea&facepad=3', // young woman
-    'https://images.unsplash.com/photo-1464983953574-0892a716854b?w=1200&q=80&fit=facearea&facepad=3', // young woman
-    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=1200&q=80&fit=facearea&facepad=3', // young woman
-    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=1200&q=80&fit=facearea&facepad=3', // young woman sitting bed, laptop
-    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1200&q=80&fit=facearea&facepad=3', // young woman, white shirt
+    'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=1000&fit=facearea&facepad=2',
+    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=1000&fit=facearea&facepad=2',
+    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=1000&fit=facearea&facepad=2',
+    'https://images.unsplash.com/photo-1464983953574-0892a716854b?w=1000&fit=facearea&facepad=2',
+    'https://images.unsplash.com/photo-1454023492550-5696f8ff10e1?w=1000&fit=facearea&facepad=2'
   ];
   return placeholders[idx % placeholders.length];
 };
@@ -19,10 +18,10 @@ interface CreatorGalleryProps {
 }
 
 /**
- * Horizontal infinite carousel, designed to snap and feel modern & snappy.
+ * Horizontal infinite carousel, snappy and with modern slideshow UI.
  */
 const CreatorGallery = ({ images }: CreatorGalleryProps) => {
-  // Always at least 5 images, use real model placeholders if not present
+  // For gallery, always at least 5 actual (or placeholder) model images
   const imageCount = images && images.length ? images.length : 0;
   const allImages = imageCount > 0
     ? images.map((img, idx) => img && img.length > 8 ? img : getRealModelPlaceholder(idx))
@@ -46,7 +45,7 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
     // eslint-disable-next-line
   }, [total]);
 
-  // Modern, snappy gallery UI
+  // Final, modern, snappy gallery UI
   return (
     <div className="relative max-w-2xl mx-auto select-none bg-black/30 rounded-xl p-2 shadow-lg">
       <div className="flex items-center justify-center gap-1">
@@ -62,7 +61,7 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
         {/* Carousel track */}
         <div className="w-full flex items-center justify-center overflow-hidden h-80 relative mx-12">
           {allImages.map((img, idx) => {
-            // Only show nearby images, fade others for snappy effect
+            // Only show nearby images, fade others
             const dist = Math.abs(activeIdx - idx);
             let show = false;
             let z = 1;
@@ -90,7 +89,6 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
                   transition: "all 0.333s cubic-bezier(.63,.21,.27,1.01)",
                 }}
                 onClick={() => setActiveIdx(idx)}
-                draggable={false}
               />
             );
           })}

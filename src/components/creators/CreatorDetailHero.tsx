@@ -1,12 +1,13 @@
+
 import React, { useState } from 'react';
 import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
 import { Twitter, Link as LinkIcon, DollarSign, Heart } from 'lucide-react';
 import FavoriteButton from './FavoriteButton';
 
-// Real young instagram model profile placeholder
+// Real woman/instagram model profile placeholder
 const getProfileModelPlaceholder = () =>
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=facearea&facepad=3';
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=facearea&facepad=2';
 
 interface CreatorDetailHeroProps {
   creator: Creator;
@@ -14,6 +15,7 @@ interface CreatorDetailHeroProps {
 
 const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   const [imageError, setImageError] = useState(false);
+  // Use the provided profile image, or the stylish real-woman placeholder (not dicebear)
   const imageSrc =
     !creator.profileImage || imageError
       ? getProfileModelPlaceholder()
@@ -106,7 +108,7 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
         </div>
       </div>
 
-      {/* "Featured" pill moved to bio section only */}
+      {/* Moved "Featured" pill and bio together as a tidy section */}
       <div className="space-y-3 sm:space-y-4 flex flex-col">
         <div className="flex items-center gap-2">
           <h2 className="text-xl sm:text-2xl font-bold text-white mb-0">Bio</h2>
