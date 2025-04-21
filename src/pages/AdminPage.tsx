@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,6 +9,7 @@ import { PendingSubmission, StatsData } from '@/types/admin';
 import Dashboard from '@/components/admin/Dashboard';
 import Listings from '@/components/admin/Listings';
 import Submissions from '@/components/admin/Submissions';
+import NotionSync from '@/components/admin/NotionSync';
 import { Badge } from '@/components/ui/badge';
 
 // Admin dashboard statistics data
@@ -138,6 +138,7 @@ const AdminPage = () => {
             Pending Submissions
             <Badge className="ml-2 bg-findom-orange">{pendingSubmissions.length}</Badge>
           </TabsTrigger>
+          <TabsTrigger value="notion-sync">Notion Sync</TabsTrigger>
         </TabsList>
         
         <TabsContent value="dashboard">
@@ -160,6 +161,10 @@ const AdminPage = () => {
             onReject={handleReject}
             searchTerm={searchTerm}
           />
+        </TabsContent>
+
+        <TabsContent value="notion-sync">
+          <NotionSync />
         </TabsContent>
       </Tabs>
     </div>
