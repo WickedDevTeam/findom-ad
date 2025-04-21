@@ -28,6 +28,7 @@ interface AppBadgeProps {
   variant?: AppBadgeVariant;
   icon?: React.ReactNode;
   className?: string;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 const badgeStyles = {
@@ -47,6 +48,7 @@ export function AppBadge({
   variant = "default",
   icon,
   className,
+  onClick,
 }: AppBadgeProps) {
   const IconComponent = icon !== undefined 
     ? icon 
@@ -58,8 +60,10 @@ export function AppBadge({
         "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-sm font-medium transition-all",
         "shadow-sm ring-1 ring-inset ring-white/5",
         badgeStyles[variant],
+        onClick && "cursor-pointer",
         className
       )}
+      onClick={onClick}
     >
       {IconComponent && (
         <span className="mr-1 opacity-80">{IconComponent}</span>

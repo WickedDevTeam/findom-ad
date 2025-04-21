@@ -27,15 +27,25 @@ const fetchMyFavorites = async (): Promise<Creator[]> => {
     .select("*")
     .in("id", ids);
 
-  // Frontend types expect categories, socialLinks, gallery, etc. Try to load those as empty if missing.
-  return (
-    creators?.map((c) => ({
-      ...c,
-      categories: c.categories ?? [],
-      socialLinks: c.social_links ?? {},
-      gallery: c.gallery ?? [],
-    })) ?? []
-  );
+  if (!creators) return [];
+
+  // Map database creators to frontend Creator type
+  return creators.map((c) => ({
+    id: c.id,
+    name: c.name,
+    username: c.username,
+    profileImage: c.profile_image,
+    coverImage: c.cover_image || undefined,
+    bio: c.bio,
+    socialLinks: c.social_links || {},
+    isVerified: c.is_verified,
+    isFeatured: c.is_featured,
+    isNew: c.is_new,
+    type: c.type,
+    categories: [], // We'll populate these if needed in the future
+    gallery: [], // We'll populate these if needed in the future
+    createdAt: c.created_at
+  }));
 };
 
 const MyFavoritesPage = () => {
@@ -58,7 +68,7 @@ const MyFavoritesPage = () => {
         <CreatorGrid creators={creators} />
       ) : (
         <div className="py-12 text-center text-white/70">
-          <p className="text-lg">You haven’t favorited any creators yet! ❤️</p>
+          <p className="text-lg">You haven't favorited any creators yet! ❤️</p>
         </div>
       )}
     </div>

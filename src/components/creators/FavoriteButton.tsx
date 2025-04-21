@@ -81,7 +81,7 @@ export const FavoriteButton = ({
       )}
       onClick={(e) => {
         e.preventDefault();
-        mutate(isFavorite !!);
+        mutate(!!isFavorite);
       }}
     >
       {isFavorite ? (
