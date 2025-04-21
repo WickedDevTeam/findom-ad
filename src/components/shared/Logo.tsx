@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -14,26 +13,17 @@ const Logo = ({
 }: LogoProps) => {
   const isMobile = useIsMobile();
   
-  // On mobile sidebar, use a more compact logo
+  // Don't render logo at all in sidebar on mobile
   if (forSidebar && isMobile) {
-    return (
-      <Link 
-        to="/" 
-        className={`flex items-center gap-1 truncate ${className}`}
-        style={{ minWidth: 0 }}
-      >
-        <span className="text-findom-green text-2xl font-black">💸</span>
-        <span className="font-bold text-lg truncate">Findom.ad</span>
-      </Link>
-    );
+    return null;
   }
   
-  // Desktop sidebar or regular logo
+  // Always keep emoji and text inline and truncate text first
   return (
     <Link 
       to="/" 
       className={forSidebar 
-        ? `flex items-center gap-2 truncate w-full ${className}` 
+        ? `flex items-center gap-2 px-4 py-3 truncate w-full ${className}` 
         : `flex items-center gap-2 truncate ${className}`
       } 
       style={{ minWidth: 0 }}
