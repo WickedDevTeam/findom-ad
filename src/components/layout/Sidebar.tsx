@@ -1,8 +1,20 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Twitter, Zap, DollarSign, Fish, Star, Crown, PiggyBank, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+// Category => emoji mapping for sidebar
+const CATEGORY_LINKS = [
+  { to: '/findoms', emoji: '👑', label: 'Findoms' },
+  { to: '/pay-pigs', emoji: '🐷', label: 'Pay Pigs' },
+  { to: '/catfish', emoji: '🐟', label: 'Catfish' },
+  { to: '/ai-bots', emoji: '🤖', label: 'AI Bots' },
+  { to: '/twitter', emoji: '🐦', label: '(X) Twitter' },
+  { to: '/celebrities', emoji: '🌟', label: 'Celebrities' },
+  { to: '/blackmail', emoji: '💸', label: 'Blackmail' },
+  { to: '/bots', emoji: '⚡️', label: 'Bots' },
+];
 
 interface SidebarProps {
   isOpen: boolean;
@@ -11,7 +23,7 @@ interface SidebarProps {
 
 export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
-  
+
   return (
     <aside className={`w-[208px] h-screen bg-black border-r border-white/10 fixed left-0 top-0 z-50 transition-transform duration-300 
       ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
@@ -22,64 +34,24 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
             <X className="h-5 w-5" />
           </Button>
         </div>
-        
-        <nav className="space-y-2 flex-1">
+        <nav className="space-y-2 flex-1 mt-2">
           <SidebarItem 
             to="/" 
-            icon={<Home className="w-5 h-5" />} 
+            icon={<span className="text-xl">🏠</span>} 
             label="Back Home" 
             isActive={location.pathname === '/'}
             onClick={onClose}
           />
-          <SidebarItem 
-            to="/twitter" 
-            icon={<Twitter className="w-5 h-5" />} 
-            label="(X) Twitter" 
-            isActive={location.pathname === '/twitter'}
-            onClick={onClose}
-          />
-          <SidebarItem 
-            to="/bots" 
-            icon={<Zap className="w-5 h-5" />} 
-            label="AI Bots" 
-            isActive={['/bots', '/ai-bots'].includes(location.pathname)}
-            onClick={onClose}
-          />
-          <SidebarItem 
-            to="/blackmail" 
-            icon={<DollarSign className="w-5 h-5" />} 
-            label="Blackmail" 
-            isActive={location.pathname === '/blackmail'}
-            onClick={onClose}
-          />
-          <SidebarItem 
-            to="/catfish" 
-            icon={<Fish className="w-5 h-5" />} 
-            label="Catfish" 
-            isActive={location.pathname === '/catfish'}
-            onClick={onClose}
-          />
-          <SidebarItem 
-            to="/celebrities" 
-            icon={<Star className="w-5 h-5" />} 
-            label="Celebrities" 
-            isActive={location.pathname === '/celebrities'}
-            onClick={onClose}
-          />
-          <SidebarItem 
-            to="/findoms" 
-            icon={<Crown className="w-5 h-5" />} 
-            label="Findoms" 
-            isActive={location.pathname === '/findoms'}
-            onClick={onClose}
-          />
-          <SidebarItem 
-            to="/pay-pigs" 
-            icon={<PiggyBank className="w-5 h-5" />} 
-            label="Pay Pigs" 
-            isActive={location.pathname === '/pay-pigs'}
-            onClick={onClose}
-          />
+          {CATEGORY_LINKS.map((link) => (
+            <SidebarItem
+              key={link.to}
+              to={link.to}
+              icon={<span className="text-xl">{link.emoji}</span>}
+              label={link.label}
+              isActive={location.pathname === link.to}
+              onClick={onClose}
+            />
+          ))}
         </nav>
       </div>
     </aside>
