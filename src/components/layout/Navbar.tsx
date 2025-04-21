@@ -1,11 +1,14 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Logo from '../shared/Logo';
-import { Bell, Search as SearchIcon, X } from 'lucide-react';
+import { Bell, Search as SearchIcon, X, Menu } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
+import { useSidebar } from '@/components/ui/sidebar';
+
 const Navbar = ({
   children
 }: {
@@ -15,6 +18,8 @@ const Navbar = ({
   const [searchValue, setSearchValue] = useState('');
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { toggleSidebar } = useSidebar();
+  
   const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (searchValue.trim()) {
@@ -30,10 +35,19 @@ const Navbar = ({
       searchInputRef.current.focus();
     }
   }, [searchOpen]);
+  
   return <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
       <div className="container mx-auto px-3 sm:px-6 flex justify-between items-center h-[72px]">
         <div className="flex items-center gap-1 sm:gap-4">
           {children}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden text-white/80 hover:text-white"
+            onClick={toggleSidebar}
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <Logo hideInHeader={false} />
         </div>
         
@@ -55,7 +69,12 @@ const Navbar = ({
           <Link to="/notifications" className="relative">
             <Button variant="ghost" size="icon" className="text-white/80 hover:text-white p-1 sm:p-2">
               <Bell className="h-5 w-5" />
-              <Badge className="absolute -top-1 -right-1 h-4 w-4 bg-findom-purple rounded-full flex items-center justify-center p-0">3</Badge>
+              <Badge 
+                variant="destructive" 
+                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-white rounded-full"
+              >
+                3
+              </Badge>
             </Button>
           </Link>
           <Button variant="ghost" asChild className="hidden sm:flex">

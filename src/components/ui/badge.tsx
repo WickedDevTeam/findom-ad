@@ -29,8 +29,8 @@ const badgeVariants = cva(
           "border-[#5d64d9]/80 bg-[#5d64d9]/10 text-[#A8B6FC] [&_svg]:text-[#A8B6FC]",
         failed:
           "border-[#A23B7C]/80 bg-[#A23B7C]/10 text-[#ffb3e1] [&_svg]:text-[#ffb3e1]",
-        destructive: // alias to failed
-          "border-[#A23B7C]/80 bg-[#A23B7C]/10 text-[#ffb3e1] [&_svg]:text-[#ffb3e1]",
+        destructive: // Updated to use red with white text for notification indicators
+          "border-[#ea384c]/80 bg-[#ea384c] text-white [&_svg]:text-white",
         outline:
           "border-white/20 bg-black/60 text-white/90",
         default:
