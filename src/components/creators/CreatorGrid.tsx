@@ -2,25 +2,55 @@
 import React from 'react';
 import CreatorCard from './CreatorCard';
 import { Creator } from '@/types';
+import { motion } from 'framer-motion';
 
 interface CreatorGridProps {
   creators: Creator[];
   title?: string;
+  subtitle?: string;
 }
 
-const CreatorGrid = ({ creators, title }: CreatorGridProps) => {
+const CreatorGrid = ({ creators, title, subtitle }: CreatorGridProps) => {
   if (creators.length === 0) {
     return null;
   }
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="space-y-4">
-      {title && <h2 className="text-xl font-bold text-white mb-2">{title}</h2>}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+    <div className="space-y-6">
+      {title && (
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white">{title}</h2>
+          {subtitle && <p className="text-white/60 mt-1">{subtitle}</p>}
+        </div>
+      )}
+      
+      <motion.div 
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+        variants={container}
+        initial="hidden"
+        animate="show"
+      >
         {creators.map((creator) => (
-          <CreatorCard key={creator.id} creator={creator} />
+          <motion.div key={creator.id} variants={item}>
+            <CreatorCard creator={creator} />
+          </motion.div>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 };
