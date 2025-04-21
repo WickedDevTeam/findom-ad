@@ -130,7 +130,7 @@ export function useProfile() {
       let finalAvatarUrl = avatarUrl;
       if (avatarFile) {
         try {
-          finalAvatarUrl = await uploadAvatar(avatarFile);
+          finalAvatarUrl = await uploadAvatar(userId, avatarFile);
           setAvatarUrl(finalAvatarUrl); // Immediately show after upload
         } catch (error: any) {
           toast.toast({
@@ -145,16 +145,21 @@ export function useProfile() {
       const updates = {
         id: userId,
         display_name: displayName.trim(),
-        username: username.trim(),
+        username: username.trim().toLowerCase(),
         bio: bio.trim(),
         avatar_url: finalAvatarUrl,
         interests,
         updated_at: new Date().toISOString(),
       };
 
+      console.log('Updating profile with:', updates);
+      
       const { error } = await supabase.from('profiles').upsert(updates);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Profile update error:', error);
+        throw error;
+      }
 
       toast.toast({
         title: 'Success',

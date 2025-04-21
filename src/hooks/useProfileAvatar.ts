@@ -43,12 +43,23 @@ export function useProfileAvatar() {
   }, [toast]);
 
   // Upload avatar to storage - memoized with useCallback
-  const uploadAvatar = useCallback(async (file: File) => {
+  const uploadAvatar = useCallback(async (userId: string, file: File) => {
     try {
       setUploadLoading(true);
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
+      const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
+      
+      // Check if avatars bucket exists, create if not
+      const { data: buckets } = await supabase.storage.listBuckets();
+      if (!buckets?.find(bucket => bucket.name === 'avatars')) {
+        const { error: bucketError } = await supabase.storage.createBucket('avatars', {
+          public: true,
+          fileSizeLimit: 5242880 // 5MB in bytes
+        });
+        
+        if (bucketError) throw bucketError;
+      }
       
       const { error: uploadError } = await supabase.storage
         .from('avatars')
