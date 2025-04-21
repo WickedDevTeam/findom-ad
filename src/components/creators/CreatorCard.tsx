@@ -1,37 +1,30 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
-import FavoriteButton from './FavoriteButton';
 import { Tag } from 'lucide-react';
 
-const CATEGORY_EMOJIS: Record<string, string> = {
-  Findoms: '👑',
-  Catfish: '🐟',
-  'AI Bots': '🤖',
-  'Pay Pigs': '🐷',
-  Celebrities: '🌟',
-  Blackmail: '💸',
-  Twitter: '🐦',
-  Bots: '⚡️',
-  Other: '🔗'
+const getProfilePlaceholder = (idx: number) => {
+  const imgs = [
+    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=facearea&facepad=2',
+    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=400&h=400&fit=facearea&facepad=2',
+    'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=400&h=400&fit=facearea&facepad=2',
+  ];
+  return imgs[idx % imgs.length];
 };
 
 interface CreatorCardProps {
   creator: Creator;
 }
 
-const getDicebearSrc = (name: string) =>
-  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-    name.trim().substring(0, 20)
-  )}&backgroundColor=transparent`;
-
 const CreatorCard = ({ creator }: CreatorCardProps) => {
   const [imageError, setImageError] = useState(false);
 
+  // Use only placeholder if missing or error
   const imageSrc =
     !creator.profileImage || imageError
-      ? getDicebearSrc(creator.name)
+      ? getProfilePlaceholder(Number(creator.id.replace(/\D/g, "")) || 0)
       : creator.profileImage;
 
   const mainCategory = creator.categories[0] || "Other";

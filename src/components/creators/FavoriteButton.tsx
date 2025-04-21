@@ -101,19 +101,19 @@ export const FavoriteButton = ({
       className="absolute inset-0 flex items-center justify-center pointer-events-none"
       aria-hidden="true"
     >
-      <span className="block w-[76px] h-[76px] rounded-full bg-pink-300/20 border-2 border-pink-400/40 animate-favorite-burst"></span>
+      <span className="block w-[68px] h-[68px] rounded-full bg-pink-300/20 border-2 border-pink-400/40 animate-favorite-burst"></span>
     </span>
   ) : null;
 
   // Burst heart confetti (only visible on pop)
   const HeartConfetti = () => (
     <span className="absolute inset-0 flex items-center justify-center pointer-events-none" aria-hidden="true">
-      <span className="relative w-[90px] h-[90px] block">
+      <span className="relative w-[81px] h-[81px] block">
         {/* Main heart in center, extra hearts rotate and move out */}
         <svg
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-heart-burst-heart0"
-          width={17}
-          height={17}
+          width={15}
+          height={15}
           style={{ zIndex: 10 }}
           viewBox="0 0 24 24"
         >
@@ -125,8 +125,8 @@ export const FavoriteButton = ({
         </svg>
         <svg
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-heart-burst-heart1"
-          width={15}
-          height={15}
+          width={13}
+          height={13}
           viewBox="0 0 24 24"
         >
           <path
@@ -137,8 +137,8 @@ export const FavoriteButton = ({
         </svg>
         <svg
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-heart-burst-heart2"
-          width={11}
-          height={11}
+          width={10}
+          height={10}
           viewBox="0 0 24 24"
         >
           <path
@@ -149,8 +149,8 @@ export const FavoriteButton = ({
         </svg>
         <svg
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-heart-burst-heart3"
-          width={8}
-          height={8}
+          width={7}
+          height={7}
           viewBox="0 0 24 24"
         >
           <path
@@ -161,8 +161,8 @@ export const FavoriteButton = ({
         </svg>
         <svg
           className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 animate-heart-burst-heart4"
-          width={12}
-          height={12}
+          width={10}
+          height={10}
           viewBox="0 0 24 24"
         >
           <path
@@ -181,7 +181,7 @@ export const FavoriteButton = ({
       aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
       disabled={isPending}
       className={cn(
-        "group transition focus:outline-none relative",
+        "group transition focus:outline-none relative scale-[0.90]", // 10% smaller
         className,
         isPending && "opacity-60 pointer-events-none"
       )}
@@ -190,7 +190,7 @@ export const FavoriteButton = ({
     >
       <div
         className={cn(
-          "relative flex items-center justify-center w-14 h-14 rounded-full shadow-2xl transition-all",
+          "relative flex items-center justify-center w-12 h-12 rounded-full shadow-2xl transition-all", // was w-14 h-14, now 10% smaller
           buttonBg,
           animating ? "scale-110" : "hover:scale-105",
           "border-pink-500/80"
@@ -205,7 +205,7 @@ export const FavoriteButton = ({
         {ringBurst}
         <Heart
           className={cn(
-            "w-7 h-7 transition-all duration-300 drop-shadow-md",
+            "w-6 h-6 transition-all duration-300 drop-shadow-md", // was w-7 h-7, now 10% smaller
             heartColor,
             heartPulse
           )}
