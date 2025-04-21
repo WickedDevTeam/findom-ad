@@ -256,9 +256,11 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           created_at: string | null
+          display_name: string | null
           email: string | null
           full_name: string | null
           id: string
+          interests: Json | null
           is_admin: boolean | null
           subscription_expires_at: string | null
           subscription_status: string | null
@@ -270,9 +272,11 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
           id: string
+          interests?: Json | null
           is_admin?: boolean | null
           subscription_expires_at?: string | null
           subscription_status?: string | null
@@ -284,9 +288,11 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           created_at?: string | null
+          display_name?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
+          interests?: Json | null
           is_admin?: boolean | null
           subscription_expires_at?: string | null
           subscription_status?: string | null
