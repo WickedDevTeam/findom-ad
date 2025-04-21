@@ -8,6 +8,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Footer } from '@/components/ui/footer'; // <-- added import
 
 const RootLayout = () => {
   const location = useLocation();
@@ -45,6 +46,7 @@ const RootLayout = () => {
             </AnimatePresence>
           </main>
         </div>
+        <Footer /> {/* Footer appears on all pages */}
       </div>
     </SidebarProvider>
   );
