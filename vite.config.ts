@@ -35,7 +35,13 @@ export default defineConfig(({ mode }) => ({
             '@radix-ui/react-tooltip',
           ],
           components: [
-            '@/components/ui',
+            // Fix: Changed from directory to individual components to avoid EISDIR error
+            '@/components/ui/button',
+            '@/components/ui/sidebar',
+            '@/components/ui/animated-group',
+            '@/components/ui/dialog',
+            '@/components/ui/drawer',
+            '@/components/ui/form',
           ],
           tanstack: ['@tanstack/react-query'],
           animations: ['framer-motion']
