@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
@@ -110,37 +111,7 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
           </div>
         </div>
       </div>
-      <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-6 mt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-2">
-          <div>
-            <p className="text-white/70 mb-1 font-medium">Categories</p>
-            <div className="flex flex-wrap gap-2">
-              {creator.categories.map((category) => (
-                <AppBadge
-                  key={category}
-                  variant="category"
-                  categoryName={category}
-                  className="text-base"
-                >
-                  {category}
-                </AppBadge>
-              ))}
-            </div>
-          </div>
-          <div>
-            <p className="text-white/70 mb-1 font-medium">Type</p>
-            <AppBadge variant="type" className="capitalize">
-              {creator.type}
-            </AppBadge>
-          </div>
-        </div>
-        {creator.bio && (
-          <div className="mt-4">
-            <p className="text-white/70 mb-1 font-medium">Short Bio</p>
-            <div className="text-white/80 text-lg">{creator.bio}</div>
-          </div>
-        )}
-      </div>
+      {/* Removed the redundant categories section here to prevent duplication */}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { getCreatorByUsername, creators } from '@/data/creators';
 import CreatorDetailHero from '@/components/creators/CreatorDetailHero';
@@ -9,13 +9,21 @@ import SimilarCreators from '@/components/creators/SimilarCreators';
 const CreatorDetailPage = () => {
   const { username } = useParams<{ username: string }>();
   const creator = username ? getCreatorByUsername(username) : undefined;
+  const pageTopRef = useRef<HTMLDivElement>(null);
+  
+  // Scroll to top when the page loads
+  useEffect(() => {
+    if (pageTopRef.current) {
+      pageTopRef.current.scrollIntoView({ behavior: 'auto' });
+    }
+  }, [username]);
   
   if (!creator) {
     return <Navigate to="/not-found" />;
   }
   
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8" ref={pageTopRef}>
       <CreatorDetailHero creator={creator} />
       
       <div className="space-y-3 sm:space-y-4">
