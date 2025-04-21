@@ -3,55 +3,42 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupConte
 import Logo from '@/components/shared/Logo';
 import { Link, useLocation } from 'react-router-dom';
 import SidebarUserProfile from './SidebarUserProfile';
-
-const CATEGORY_LINKS = [
-  {
-    to: '/findoms',
-    emoji: '👑',
-    label: 'Findoms'
-  },
-  {
-    to: '/pay-pigs',
-    emoji: '🐷',
-    label: 'Pay Pigs'
-  },
-  {
-    to: '/catfish',
-    emoji: '🐟',
-    label: 'Catfish'
-  },
-  {
-    to: '/ai-bots',
-    emoji: '🤖',
-    label: 'AI Bots'
-  },
-  {
-    to: '/twitter',
-    emoji: '🐦',
-    label: '(X) Twitter'
-  },
-  {
-    to: '/celebrities',
-    emoji: '🌟',
-    label: 'Celebrities'
-  },
-  {
-    to: '/blackmail',
-    emoji: '💸',
-    label: 'Blackmail'
-  },
-  {
-    to: '/bots',
-    emoji: '⚡️',
-    label: 'Bots'
-  }
-];
-
+const CATEGORY_LINKS = [{
+  to: '/findoms',
+  emoji: '👑',
+  label: 'Findoms'
+}, {
+  to: '/pay-pigs',
+  emoji: '🐷',
+  label: 'Pay Pigs'
+}, {
+  to: '/catfish',
+  emoji: '🐟',
+  label: 'Catfish'
+}, {
+  to: '/ai-bots',
+  emoji: '🤖',
+  label: 'AI Bots'
+}, {
+  to: '/twitter',
+  emoji: '🐦',
+  label: '(X) Twitter'
+}, {
+  to: '/celebrities',
+  emoji: '🌟',
+  label: 'Celebrities'
+}, {
+  to: '/blackmail',
+  emoji: '💸',
+  label: 'Blackmail'
+}, {
+  to: '/bots',
+  emoji: '⚡️',
+  label: 'Bots'
+}];
 const FindomSidebar = () => {
   const location = useLocation();
-  
-  return (
-    <Sidebar className="z-20">
+  return <Sidebar className="z-20">
       <SidebarContent>
         <div className="px-2 pt-3 pb-3">
           <Logo forSidebar hideInHeader={false} />
@@ -72,7 +59,7 @@ const FindomSidebar = () => {
                   <SidebarMenuButton asChild isActive={location.pathname === link.to}>
                     <Link to={link.to} className="py-0 my-0">
                       <span className="text-xl">{link.emoji}</span>
-                      <span className="font-medium text-lg text-left">{link.label}</span>
+                      <span className="text-lg text-left font-normal px-0 mx-0">{link.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
@@ -85,8 +72,6 @@ const FindomSidebar = () => {
           <SidebarUserProfile />
         </SidebarGroup>
       </SidebarFooter>
-    </Sidebar>
-  );
+    </Sidebar>;
 };
-
 export default FindomSidebar;
