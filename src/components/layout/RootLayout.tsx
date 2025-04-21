@@ -25,7 +25,6 @@ const RootLayout = () => {
         />
       )}
       
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <Navbar>
         <Button 
           variant="ghost" 
@@ -36,6 +35,8 @@ const RootLayout = () => {
           <Menu className="h-5 w-5" />
         </Button>
       </Navbar>
+      
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <main className="md:pl-[208px] pt-[72px] min-h-screen transition-all duration-300">
         <AnimatePresence mode="wait">

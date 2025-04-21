@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 interface LogoProps {
@@ -15,7 +16,9 @@ const Logo = ({
       <span className={forSidebar ? "text-findom-green text-3xl font-black shrink-0" : "text-findom-green text-2xl font-black shrink-0"}>
         💸
       </span>
-      
+      <span className={forSidebar ? "font-bold text-lg truncate" : "font-bold text-base truncate"}>
+        FinDom Directory
+      </span>
     </Link>;
 };
 export default Logo;

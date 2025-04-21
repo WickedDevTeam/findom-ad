@@ -25,10 +25,10 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const location = useLocation();
 
   return (
-    <aside className={`w-[208px] h-screen bg-black border-r border-white/10 fixed left-0 top-0 z-50 transition-transform duration-300 
+    <aside className={`w-[208px] h-screen fixed left-0 top-0 pt-[72px] bg-black border-r border-white/10 z-40 transition-transform duration-300 
       ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-      <div className="flex flex-col h-full p-0">
-        <div className="flex flex-col items-center mt-2 mb-3">
+      <div className="flex flex-col h-[calc(100%-72px)] p-0 overflow-y-auto">
+        <div className="flex flex-col items-center mt-2 mb-3 md:hidden">
           <Logo forSidebar />
         </div>
         {/* Mobile close button */}
