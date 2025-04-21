@@ -69,12 +69,11 @@ const Navbar = ({
           <Link to="/notifications" className="relative">
             <Button variant="ghost" size="icon" className="text-white/80 hover:text-white p-1 sm:p-2">
               <Bell className="h-5 w-5" />
-              <Badge 
-                variant="destructive" 
-                className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-white rounded-full"
+              <span 
+                className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-[#ea384c] text-white text-xs font-medium"
               >
                 3
-              </Badge>
+              </span>
             </Button>
           </Link>
           <Button variant="ghost" asChild className="hidden sm:flex">
