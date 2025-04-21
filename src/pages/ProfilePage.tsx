@@ -30,6 +30,7 @@ const ProfilePage = () => {
     loading, initialLoading, savingProfile,
     handleSave,
     categories, interests, toggleInterest, categoriesLoading,
+    categoriesError, retryCategoriesFetch,
     errors,
   } = useProfile();
 
@@ -75,6 +76,8 @@ const ProfilePage = () => {
           interests={interests}
           toggleInterest={toggleInterest}
           loading={categoriesLoading}
+          error={categoriesError}
+          onRetry={retryCategoriesFetch}
         />
 
         <div>

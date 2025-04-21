@@ -18,7 +18,12 @@ export function useProfile() {
   // Composite hooks
   const { avatarUrl, setAvatarUrl, avatarFile, onAvatarChange, uploadAvatar, uploadLoading } = useProfileAvatar();
   const { errors, validateProfile, setErrors } = useProfileValidation();
-  const { interests, setInterests, categories, categoriesLoading, toggleInterest } = useProfileInterests();
+  const { 
+    interests, setInterests, 
+    categories, categoriesLoading, 
+    toggleInterest, error: categoriesError, 
+    retryFetchCategories 
+  } = useProfileInterests();
 
   // Profile state
   const [displayName, setDisplayName] = useState('');
@@ -184,6 +189,7 @@ export function useProfile() {
     
     // Interests
     categories, interests, toggleInterest, categoriesLoading,
+    categoriesError, retryCategoriesFetch: retryFetchCategories,
     
     // Actions
     handleSave,
