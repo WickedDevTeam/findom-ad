@@ -17,7 +17,7 @@ const SimilarCreators = ({
   }
   return <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">You May Also Like:</h2>
-      <div className="grid grid-cols-5 gap-6">
+      <div className="grid grid-cols-6 gap-6">
         {similarCreators.map(creator => <CreatorCard key={creator.id} creator={creator} />)}
       </div>
     </div>;
