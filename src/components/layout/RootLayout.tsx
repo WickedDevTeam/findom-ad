@@ -15,7 +15,7 @@ const RootLayout = () => {
   
   return (
     <SidebarProvider>
-      <div className="min-h-screen text-white bg-gray-950 w-full">
+      <div className="min-h-screen text-white bg-gray-950 w-full flex flex-col">
         <Navbar>
           <Button 
             variant="ghost" 
@@ -27,22 +27,24 @@ const RootLayout = () => {
           </Button>
         </Navbar>
         
-        <Sidebar />
-        
-        <main className="md:pl-[208px] pt-[72px] min-h-screen transition-all duration-300">
-          <AnimatePresence mode="wait">
-            <motion.div 
-              key={location.pathname} 
-              initial={{ opacity: 0, y: 10 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0, y: -10 }} 
-              transition={{ duration: 0.3 }} 
-              className="container mx-auto px-3 sm:px-6 py-4 sm:py-8"
-            >
-              <Outlet />
-            </motion.div>
-          </AnimatePresence>
-        </main>
+        <div className="flex flex-1">
+          <Sidebar />
+          
+          <main className="md:pl-[208px] pt-[72px] flex-1 w-full transition-all duration-300">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={location.pathname} 
+                initial={{ opacity: 0, y: 10 }} 
+                animate={{ opacity: 1, y: 0 }} 
+                exit={{ opacity: 0, y: -10 }} 
+                transition={{ duration: 0.3 }} 
+                className="container mx-auto px-3 sm:px-6 py-4 sm:py-8"
+              >
+                <Outlet />
+              </motion.div>
+            </AnimatePresence>
+          </main>
+        </div>
       </div>
     </SidebarProvider>
   );

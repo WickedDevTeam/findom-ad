@@ -2,7 +2,6 @@ import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
 import { PanelLeft } from "lucide-react"
-import Logo from "@/components/shared/Logo"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
@@ -179,9 +178,6 @@ const Sidebar = React.forwardRef<
           ref={ref}
           {...props}
         >
-          <div className="sticky top-0 z-20 w-full bg-sidebar flex items-center justify-center">
-            <Logo forSidebar />
-          </div>
           <div className="flex-1 flex flex-col">{children}</div>
         </div>
       )
@@ -201,9 +197,6 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
-            <div className="sticky top-0 z-20 w-full bg-sidebar flex items-center justify-center">
-              <Logo forSidebar />
-            </div>
             <div className="flex h-full w-full flex-col">{children}</div>
           </SheetContent>
         </Sheet>
@@ -246,9 +239,6 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
-            <div className="sticky top-0 z-20 w-full bg-sidebar flex items-center justify-center">
-              <Logo forSidebar />
-            </div>
             <div className="flex-1 flex flex-col">{children}</div>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -38,7 +37,7 @@ const Navbar = ({
     <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
       <div className="container mx-auto px-3 sm:px-6 flex justify-between items-center h-[72px]">
         <div className="flex items-center gap-1 sm:gap-4">
-          <Logo />
+          <Logo hideInHeader={false} />
           {children}
         </div>
         
@@ -96,7 +95,6 @@ const Navbar = ({
         </div>
       </div>
       
-      {/* Mobile searchbox when active - better positioned */}
       {searchOpen && (
         <div className="sm:hidden px-3 pb-3 bg-black/80 backdrop-blur-md">
           <form onSubmit={onSearch} className="w-full relative">
