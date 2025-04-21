@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { VariantProps, cva } from "class-variance-authority"
@@ -197,6 +198,7 @@ const Sidebar = React.forwardRef<
               "w-[--sidebar-width] max-w-[92vw] bg-sidebar/90 bg-opacity-95 p-0 text-sidebar-foreground border-r border-sidebar-border rounded-r-2xl shadow-xl outline-none animate-slide-in-right",
               "flex flex-col min-h-svh transition-all duration-300 ease-in-out",
               "backdrop-blur-2xl",
+              // Hide the default close button, we'll position our own
               "[&>button]:hidden",
               className
             )}
@@ -207,10 +209,22 @@ const Sidebar = React.forwardRef<
             }
             side={side}
           >
-            <div className="sticky top-0 left-0 right-0 z-30 flex items-center justify-center bg-sidebar/95 backdrop-blur-xl border-b border-sidebar-border py-5 px-1">
+            {/* Fixed header with logo that's always visible */}
+            <div className="sticky top-0 left-0 right-0 z-30 flex items-center justify-between bg-sidebar/95 backdrop-blur-xl border-b border-sidebar-border py-5 px-4">
               <Logo forSidebar className="mx-auto" />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="absolute right-3 top-3 text-muted-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                onClick={() => setOpenMobile(false)}
+              >
+                <PanelLeft className="h-4 w-4" />
+                <span className="sr-only">Close Sidebar</span>
+              </Button>
             </div>
-            <div className="flex-1 overflow-y-auto scrollbar-none px-1 py-2">
+            
+            {/* Scrollable content area */}
+            <div className="flex-1 overflow-y-auto scrollbar-none px-2 py-3">
               <div className="space-y-3">{children}</div>
             </div>
           </SheetContent>
@@ -254,10 +268,12 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             className="flex h-full w-full flex-col bg-sidebar group-data-[variant=floating]:rounded-lg group-data-[variant=floating]:border group-data-[variant=floating]:border-sidebar-border group-data-[variant=floating]:shadow"
           >
-            <div className="sticky top-0 z-20 w-full bg-sidebar flex items-center justify-center py-4">
+            <div className="sticky top-0 z-20 w-full bg-sidebar bg-opacity-85 backdrop-blur-md flex items-center justify-center py-4">
               <Logo forSidebar />
             </div>
-            <div className="flex-1 flex flex-col">{children}</div>
+            <div className="flex-1 flex flex-col overflow-y-auto scrollbar-none px-1">
+              {children}
+            </div>
           </div>
         </div>
       </div>
@@ -380,7 +396,7 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2", className)}
+      className={cn("flex flex-col gap-2 p-2 mt-auto", className)}
       {...props}
     />
   )

@@ -7,6 +7,8 @@ import { Bell, Search as SearchIcon, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
+import NavbarProfileMenu from './NavbarProfileMenu';
+import { SidebarTrigger } from '../ui/sidebar';
 
 const Navbar = ({
   children
@@ -38,8 +40,11 @@ const Navbar = ({
     <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
       <div className="container mx-auto px-3 sm:px-6 flex justify-between items-center h-[72px]">
         <div className="flex items-center gap-1 sm:gap-4">
+          {/* Show SidebarTrigger only on mobile */}
+          <div className="md:hidden flex items-center">
+            {children}
+          </div>
           <Logo />
-          {children}
         </div>
         
         {/* Center-aligned search form - hidden on mobile */}
@@ -93,6 +98,7 @@ const Navbar = ({
           <Button variant="outline" asChild className="hidden xs:flex">
             <Link to="/admin">Admin</Link>
           </Button>
+          <NavbarProfileMenu />
         </div>
       </div>
       

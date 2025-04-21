@@ -2,7 +2,6 @@
 import React from 'react';
 import {
   Sidebar as ShadcnSidebar,
-  SidebarProvider,
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
@@ -12,7 +11,9 @@ import {
   SidebarFooter,
 } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/use-auth';
-import { User, ChevronsUpDown } from 'lucide-react';
+import { User, ChevronsUpDown, LogOut } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import NavbarProfileMenu from './NavbarProfileMenu';
 
 const CATEGORY_LINKS = [
   { to: '/findoms', emoji: '👑', label: 'Findoms' },
@@ -25,11 +26,10 @@ const CATEGORY_LINKS = [
   { to: '/bots', emoji: '⚡️', label: 'Bots' },
 ];
 
-import { Link, useLocation } from 'react-router-dom';
-
 const Sidebar = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
 
   return (
     <ShadcnSidebar>
@@ -62,20 +62,38 @@ const Sidebar = () => {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      
       <SidebarFooter>
-        {user && (
+        {user ? (
           <SidebarGroup>
-            <SidebarMenuButton className="w-full justify-between gap-3 h-12 cursor-default">
+            <SidebarMenuButton 
+              className="w-full justify-between gap-3 h-12" 
+              onClick={() => navigate('/profile')}
+            >
               <div className="flex items-center gap-2">
                 <User className="h-5 w-5 rounded-md" />
                 <div className="flex flex-col items-start">
                   <span className="text-sm font-medium">{user?.user_metadata?.full_name || user.email?.split('@')[0]?.toUpperCase() || "User"}</span>
-                  <span className="text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground truncate max-w-[120px]">
                     {user.email}
                   </span>
                 </div>
               </div>
-              <ChevronsUpDown className="h-5 w-5 rounded-md" />
+              <ChevronsUpDown className="h-5 w-5" />
+            </SidebarMenuButton>
+            
+            <SidebarMenuButton onClick={signOut} className="w-full mt-1">
+              <LogOut className="h-4 w-4 mr-2" />
+              <span>Log out</span>
+            </SidebarMenuButton>
+          </SidebarGroup>
+        ) : (
+          <SidebarGroup>
+            <SidebarMenuButton 
+              className="w-full justify-center" 
+              onClick={() => navigate('/signup')}
+            >
+              <span>Sign In</span>
             </SidebarMenuButton>
           </SidebarGroup>
         )}
