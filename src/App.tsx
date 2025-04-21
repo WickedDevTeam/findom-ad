@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import RootLayout from "./components/layout/RootLayout";
 import { Skeleton } from "./components/ui/skeleton";
+import { AuthProvider } from "./components/auth/AuthProvider";
 
 // Lazy load pages to reduce initial bundle size
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -40,7 +41,7 @@ const queryClient = new QueryClient({
     queries: {
       refetchOnWindowFocus: false, // Prevents unnecessary refetches when window regains focus
       staleTime: 60000, // Data considered fresh for 1 minute
-      cacheTime: 5 * 60 * 1000, // Cache data for 5 minutes
+      gcTime: 5 * 60 * 1000, // Cache data for 5 minutes (replacing deprecated cacheTime)
       retry: 1, // Only retry failed requests once
     },
   },
