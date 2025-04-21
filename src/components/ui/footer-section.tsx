@@ -1,34 +1,24 @@
+"use client";
 
-"use client"
-
-import * as React from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Textarea } from "@/components/ui/textarea"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Facebook, Instagram, Linkedin, Moon, Send, Sun, Twitter } from "lucide-react"
-
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Facebook, Instagram, Linkedin, Moon, Send, Sun, Twitter } from "lucide-react";
 function Footerdemo() {
-  const [isDarkMode, setIsDarkMode] = React.useState(true)
-
+  const [isDarkMode, setIsDarkMode] = React.useState(true);
   React.useEffect(() => {
     if (isDarkMode) {
-      document.documentElement.classList.add("dark")
+      document.documentElement.classList.add("dark");
     } else {
-      document.documentElement.classList.remove("dark")
+      document.documentElement.classList.remove("dark");
     }
-  }, [isDarkMode])
-
-  return (
-    <footer className="relative z-10 border-t border-white/10 bg-findom-dark/95 backdrop-blur-md text-white transition-colors duration-300">
-      <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8">
+  }, [isDarkMode]);
+  return <footer className="relative z-10 border-t border-white/10 bg-findom-dark/95 backdrop-blur-md text-white transition-colors duration-300">
+      <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8 bg-zinc-950">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
             <h2 className="mb-4 text-3xl font-bold tracking-tight text-white">
@@ -38,16 +28,8 @@ function Footerdemo() {
               Join our newsletter for the latest updates and exclusive offers.
             </p>
             <form className="relative">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="pr-12 bg-findom-dark/80 border-white/10 text-white placeholder:text-findom-gray/80"
-              />
-              <Button
-                type="submit"
-                size="icon"
-                className="absolute right-1 top-1 h-8 w-8 rounded-full bg-findom-purple text-white transition-transform hover:scale-105"
-              >
+              <Input type="email" placeholder="Enter your email" className="pr-12 bg-findom-dark/80 border-white/10 text-white placeholder:text-findom-gray/80" />
+              <Button type="submit" size="icon" className="absolute right-1 top-1 h-8 w-8 rounded-full transition-transform hover:scale-105 bg-slate-50 text-gray-950 font-bold">
                 <Send className="h-4 w-4" />
                 <span className="sr-only">Subscribe</span>
               </Button>
@@ -141,11 +123,7 @@ function Footerdemo() {
             </div>
             <div className="flex items-center space-x-2 text-findom-gray">
               <Sun className="h-4 w-4" />
-              <Switch
-                id="dark-mode"
-                checked={isDarkMode}
-                onCheckedChange={setIsDarkMode}
-              />
+              <Switch id="dark-mode" checked={isDarkMode} onCheckedChange={setIsDarkMode} />
               <Moon className="h-4 w-4" />
               <Label htmlFor="dark-mode" className="sr-only">
                 Toggle dark mode
@@ -170,8 +148,6 @@ function Footerdemo() {
           </nav>
         </div>
       </div>
-    </footer>
-  )
+    </footer>;
 }
-
-export { Footerdemo }
+export { Footerdemo };
