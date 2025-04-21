@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -11,6 +12,7 @@ import Listings from '@/components/admin/Listings';
 import Submissions from '@/components/admin/Submissions';
 import NotionSync from '@/components/admin/NotionSync';
 import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/hooks/use-auth';
 
 // Admin dashboard statistics data
 const statsData: StatsData[] = [
@@ -23,6 +25,7 @@ const statsData: StatsData[] = [
 ];
 
 const AdminPage = () => {
+  const { requireAuth } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [pendingSubmissions, setPendingSubmissions] = useState<PendingSubmission[]>([
     { 
@@ -56,12 +59,18 @@ const AdminPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 800);
+    // First check authentication
+    const isAuthenticated = requireAuth();
     
-    return () => clearTimeout(timer);
-  }, []);
+    // If authenticated, continue loading the admin page
+    if (isAuthenticated) {
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 800);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [requireAuth]);
   
   const handleApprove = (id: string) => {
     setPendingSubmissions(prev => prev.filter(item => item.id !== id));

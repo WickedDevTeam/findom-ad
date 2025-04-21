@@ -46,7 +46,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
+import { useForm, FormProvider } from "react-hook-form";
 
 const NotionSync = () => {
   const { requireAuth } = useAuth();
@@ -121,12 +121,10 @@ const NotionSync = () => {
       
       if (result.success) {
         toast.success(result.message);
-        // Update last synced time in the UI immediately
         setConfig((prev) => ({
           ...prev,
           lastSyncedAt: new Date().toISOString()
         }));
-        // Reload sync history after a short delay to allow the backend to update
         setTimeout(loadSyncHistory, 2000);
       } else {
         toast.error(result.message);
@@ -162,8 +160,6 @@ const NotionSync = () => {
     );
   }
 
-  // --- FORMS PATCH: use react-hook-form FormProvider properly ---
-  // instead of <Form ... onSubmit={form.handleSubmit}> place <FormProvider> + explicitly add <form ... onSubmit=...>
   return (
     <div className="space-y-6">
       <div>
@@ -184,7 +180,7 @@ const NotionSync = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form}>
+            <FormProvider {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <div className="space-y-4">
                   <FormField
@@ -283,61 +279,62 @@ const NotionSync = () => {
                             <SelectItem value="720">Every 12 hours</SelectItem>
                             <SelectItem value="1440">Every day</SelectItem>
                           </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        How often should the automatic sync run
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="autoSync"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Auto Sync</FormLabel>
+                        </Select>
                         <FormDescription>
-                          Automatically sync based on the interval
+                          How often should the automatic sync run
                         </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch 
-                          checked={field.value} 
-                          onCheckedChange={field.onChange} 
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-              </div>
-              
-              <div className="mt-6 flex gap-2">
-                <Button 
-                  type="submit" 
-                  className="bg-findom-purple hover:bg-findom-purple/80"
-                >
-                  Save Configuration
-                </Button>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleTestConnection}
-                  disabled={isTesting || !form.getValues().notionApiKey || !form.getValues().notionDatabaseId}
-                >
-                  {isTesting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Testing...
-                    </>
-                  ) : (
-                    'Test Connection'
-                  )}
-                </Button>
-              </div>
-            </form>
+                  <FormField
+                    control={form.control}
+                    name="autoSync"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Auto Sync</FormLabel>
+                          <FormDescription>
+                            Automatically sync based on the interval
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                
+                <div className="mt-6 flex gap-2">
+                  <Button 
+                    type="submit" 
+                    className="bg-findom-purple hover:bg-findom-purple/80"
+                  >
+                    Save Configuration
+                  </Button>
+                  
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleTestConnection}
+                    disabled={isTesting || !form.getValues().notionApiKey || !form.getValues().notionDatabaseId}
+                  >
+                    {isTesting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Testing...
+                      </>
+                    ) : (
+                      'Test Connection'
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </FormProvider>
           </CardContent>
         </Card>
 
@@ -412,7 +409,6 @@ const NotionSync = () => {
         </Card>
       </div>
 
-      {/* Sync History */}
       <Card className="bg-black/30 backdrop-blur-sm border border-white/10">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
