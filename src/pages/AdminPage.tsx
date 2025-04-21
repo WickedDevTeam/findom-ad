@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { creators } from '@/data/creators';
-import { Search, ShieldAlert } from 'lucide-react';
+import { Search, ShieldAlert, Plus } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { Creator } from '@/types';
 import { PendingSubmission, StatsData } from '@/types/admin';
@@ -15,6 +15,9 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
 import { supabase } from '@/integrations/supabase/client';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import ListingEditor from '@/components/admin/ListingEditor';
 
 // Admin dashboard statistics data
 const statsData: StatsData[] = [
@@ -29,38 +32,13 @@ const statsData: StatsData[] = [
 const AdminPage = () => {
   const { requireAuth, user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
-  const [pendingSubmissions, setPendingSubmissions] = useState<PendingSubmission[]>([
-    { 
-      id: 'p1', 
-      name: 'Emma Watson', 
-      username: 'emma-watson', 
-      category: 'Celebrities', 
-      type: 'Premium', 
-      submittedAt: '2024-04-15T10:30:00Z'
-    },
-    { 
-      id: 'p2', 
-      name: 'Ryan Reynolds', 
-      username: 'ryan-reynolds', 
-      category: 'Celebrities', 
-      type: 'Free', 
-      submittedAt: '2024-04-14T08:15:00Z'
-    },
-    { 
-      id: 'p3', 
-      name: 'Jessica Smith', 
-      username: 'jessica-findom', 
-      category: 'Findoms', 
-      type: 'Premium', 
-      submittedAt: '2024-04-16T12:30:00Z'
-    },
-  ]);
-  
+  const [pendingSubmissions, setPendingSubmissions] = useState<PendingSubmission[]>([]);
   const [activeCreators, setActiveCreators] = useState<Creator[]>(creators);
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminCheckComplete, setAdminCheckComplete] = useState(false);
+  const [isCreatorDialogOpen, setIsCreatorDialogOpen] = useState(false);
   
   useEffect(() => {
     // First check authentication
@@ -74,6 +52,13 @@ const AdminPage = () => {
       setAdminCheckComplete(true);
     }
   }, [requireAuth, user]);
+  
+  // Fetch pending submissions
+  useEffect(() => {
+    if (user && isAdmin) {
+      fetchPendingSubmissions();
+    }
+  }, [user, isAdmin]);
   
   const checkAdminStatus = async () => {
     try {
@@ -96,6 +81,38 @@ const AdminPage = () => {
     } finally {
       setIsLoading(false);
       setAdminCheckComplete(true);
+    }
+  };
+  
+  const fetchPendingSubmissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('listings')
+        .select('*')
+        .eq('status', 'pending');
+        
+      if (error) throw error;
+      
+      if (data) {
+        const submissions: PendingSubmission[] = data.map(item => ({
+          id: item.id,
+          name: item.name,
+          username: item.username,
+          category: item.category,
+          type: item.type || 'Free',
+          submittedAt: item.submitted_at,
+          email: item.email,
+          bio: item.bio || '',
+          twitter: item.twitter || '',
+          cashapp: item.cashapp || '',
+          onlyfans: item.onlyfans || '',
+          throne: item.throne || '',
+        }));
+        
+        setPendingSubmissions(submissions);
+      }
+    } catch (error) {
+      console.error('Error fetching pending submissions:', error);
     }
   };
   
@@ -137,6 +154,12 @@ const AdminPage = () => {
     });
   };
   
+  const handleNewCreator = (id: string, isNew: boolean) => {
+    setIsCreatorDialogOpen(false);
+    toast.success(`Listing ${isNew ? 'created' : 'updated'} successfully`);
+    // Would refresh the creators list here in a real implementation
+  };
+  
   if (isLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -168,7 +191,7 @@ const AdminPage = () => {
           <p className="text-white/70">Manage listings, submissions, and site content</p>
         </div>
         
-        <div className="flex items-center w-full md:w-auto">
+        <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-64">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/50 h-4 w-4" />
             <Input
@@ -178,6 +201,27 @@ const AdminPage = () => {
               className="pl-9"
             />
           </div>
+          
+          <Dialog open={isCreatorDialogOpen} onOpenChange={setIsCreatorDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-findom-purple hover:bg-findom-purple/80">
+                <Plus className="h-4 w-4 mr-2" />
+                New Listing
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl">
+              <DialogHeader>
+                <DialogTitle>Create New Listing</DialogTitle>
+              </DialogHeader>
+              <div className="mt-4">
+                <ListingEditor 
+                  onSuccess={handleNewCreator}
+                  onCancel={() => setIsCreatorDialogOpen(false)}
+                  isAdmin={true}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
       
