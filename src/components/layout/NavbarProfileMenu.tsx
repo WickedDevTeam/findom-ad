@@ -3,36 +3,63 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/use-auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const NavbarProfileMenu = () => {
-  const toast = useToast();
   const navigate = useNavigate();
+  const { isAuthenticated, user, signOut } = useAuth();
 
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.toast({
-        title: 'Logout failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-      return;
-    }
-    // redirect to login page or home
-    navigate('/');
-  };
+  if (!isAuthenticated) {
+    return (
+      <Button 
+        variant="outline" 
+        onClick={() => navigate('/signup')}
+        className="text-white"
+      >
+        Sign In
+      </Button>
+    );
+  }
 
   return (
-    <div className="flex items-center gap-4">
-      <Button variant="ghost" size="icon" onClick={() => navigate('/profile')} aria-label="Profile">
-        <User className="w-5 h-5" />
-      </Button>
-      <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Logout">
-        <LogOut className="w-5 h-5" />
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon" className="rounded-full" aria-label="User menu">
+          <Avatar className="w-8 h-8">
+            <AvatarImage src={user?.user_metadata?.avatar_url} />
+            <AvatarFallback className="bg-findom-purple/40">
+              {user?.email?.charAt(0).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => navigate('/profile')}>
+          <User className="mr-2 h-4 w-4" />
+          <span>Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => navigate('/favorites')}>
+          <span className="mr-2">❤️</span>
+          <span>Favorites</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={signOut}>
+          <LogOut className="mr-2 h-4 w-4" />
+          <span>Log out</span>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 

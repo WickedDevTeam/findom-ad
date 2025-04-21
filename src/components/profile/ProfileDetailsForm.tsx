@@ -7,6 +7,7 @@ interface ProfileDetailsFormProps {
   displayName: string;
   setDisplayName: (value: string) => void;
   username: string;
+  setUsername: (value: string) => void;
   email: string;
   bio: string;
   setBio: (value: string) => void;
@@ -17,6 +18,7 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
   displayName,
   setDisplayName,
   username,
+  setUsername,
   email,
   bio,
   setBio,
@@ -35,16 +37,38 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="Your display name"
           disabled={loading}
+          maxLength={50}
         />
       </div>
 
-      {/* Username (non-editable) */}
+      {/* Username (now editable) */}
       <div>
         <Label htmlFor="username" className="block font-semibold text-white mb-1">
           Username
         </Label>
-        <Input id="username" value={username} disabled placeholder="Your username" />
+        <Input 
+          id="username" 
+          value={username} 
+          onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+          placeholder="Your username"
+          disabled={loading}
+          maxLength={30}
+        />
+        <p className="text-xs text-white/70 mt-1">
+          Only lowercase letters, numbers, and underscores
+        </p>
       </div>
+    </div>
+
+    {/* Email (read-only) */}
+    <div>
+      <Label htmlFor="email" className="block font-semibold text-white mb-1">
+        Email
+      </Label>
+      <Input id="email" value={email} disabled placeholder="Your email" />
+      <p className="text-xs text-white/70 mt-1">
+        Email address cannot be changed here
+      </p>
     </div>
 
     {/* Bio */}
@@ -59,8 +83,12 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
         onChange={(e) => setBio(e.target.value)}
         placeholder="Tell us about yourself"
         disabled={loading}
+        maxLength={500}
         className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
       />
+      <p className="text-xs text-white/70 mt-1">
+        {bio.length}/500 characters
+      </p>
     </div>
   </>
 );

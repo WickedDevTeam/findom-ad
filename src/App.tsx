@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +15,8 @@ import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
 import CategoryPage from "./pages/CategoryPage";
 import MyFavoritesPage from "./pages/MyFavoritesPage";
+import ProfilePage from "./pages/ProfilePage";
+import AuthProvider from "./components/auth/AuthProvider";
 
 const queryClient = new QueryClient();
 
@@ -23,32 +26,35 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route element={<RootLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/creator/:username" element={<CreatorDetailPage />} />
-            <Route path="/promotion" element={<PromotionPage />} />
-            <Route path="/create-listing" element={<CreateListingPage />} />
-            <Route path="/notifications" element={<NotificationsPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/admin" element={<AdminPage />} />
+        <AuthProvider>
+          <Routes>
+            <Route element={<RootLayout />}>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/creator/:username" element={<CreatorDetailPage />} />
+              <Route path="/promotion" element={<PromotionPage />} />
+              <Route path="/create-listing" element={<CreateListingPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
+              <Route path="/signup" element={<SignupPage />} />
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
 
-            {/* CATEGORY ROUTES */}
-            <Route path="/findoms" element={<CategoryPage />} />
-            <Route path="/catfish" element={<CategoryPage />} />
-            <Route path="/ai-bots" element={<CategoryPage />} />
-            <Route path="/celebrities" element={<CategoryPage />} />
-            <Route path="/twitter" element={<CategoryPage />} />
-            <Route path="/blackmail" element={<CategoryPage />} />
-            <Route path="/pay-pigs" element={<CategoryPage />} />
-            <Route path="/bots" element={<CategoryPage />} />
+              {/* CATEGORY ROUTES */}
+              <Route path="/findoms" element={<CategoryPage />} />
+              <Route path="/catfish" element={<CategoryPage />} />
+              <Route path="/ai-bots" element={<CategoryPage />} />
+              <Route path="/celebrities" element={<CategoryPage />} />
+              <Route path="/twitter" element={<CategoryPage />} />
+              <Route path="/blackmail" element={<CategoryPage />} />
+              <Route path="/pay-pigs" element={<CategoryPage />} />
+              <Route path="/bots" element={<CategoryPage />} />
 
-            {/* Favorites Page */}
-            <Route path="/favorites" element={<MyFavoritesPage />} />
+              {/* Favorites Page */}
+              <Route path="/favorites" element={<MyFavoritesPage />} />
 
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
+              <Route path="*" element={<NotFound />} />
+            </Route>
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
