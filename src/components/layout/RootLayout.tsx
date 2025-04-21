@@ -11,7 +11,7 @@ const RootLayout = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  return <div className="min-h-screen text-white bg-findom-dark">
+  return <div className="min-h-screen text-white bg-gray-950">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />}
       
