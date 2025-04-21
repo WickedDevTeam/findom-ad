@@ -5,19 +5,20 @@ import AppBadge from '@/components/shared/AppBadge';
 import { Twitter, Link as LinkIcon, DollarSign, Heart } from 'lucide-react';
 import FavoriteButton from './FavoriteButton';
 
+// Real woman/instagram model profile placeholder
+const getProfileModelPlaceholder = () =>
+  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=facearea&facepad=2';
+
 interface CreatorDetailHeroProps {
   creator: Creator;
 }
 
-const getDicebearSrc = (name: string) =>
-  `https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=400&h=400&fit=facearea&facepad=2`;
-
 const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   const [imageError, setImageError] = useState(false);
-  // Use the provided profile image, or the unsplash woman placeholder, or fallback on dicebear for legacy
+  // Use the provided profile image, or the stylish real-woman placeholder (not dicebear)
   const imageSrc =
     !creator.profileImage || imageError
-      ? getDicebearSrc(creator.name)
+      ? getProfileModelPlaceholder()
       : creator.profileImage;
   return (
     <div className="space-y-6">
@@ -31,19 +32,15 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
               onError={() => setImageError(true)}
             />
           </div>
-          <div className="absolute -right-3 bottom-1">
-            <FavoriteButton creatorId={creator.id} className="scale-[0.90]" />
+          <div className="absolute -right-2 bottom-2">
+            {/* FavoriteButton, now 10% smaller */}
+            <FavoriteButton creatorId={creator.id} className="scale-90" />
           </div>
         </div>
         
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
           <div className="flex items-center gap-2">
             <h1 className="text-4xl font-extrabold text-white mb-1">{creator.name}</h1>
-            {creator.isFeatured && (
-              <AppBadge variant="featured" className="shadow-xl mt-0.5 mb-0.5">
-                Featured
-              </AppBadge>
-            )}
           </div>
           <p className="text-lg text-white/80 mb-3">@{creator.username}</p>
           <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
@@ -109,6 +106,19 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
             )}
           </div>
         </div>
+      </div>
+
+      {/* Moved "Featured" pill and bio together as a tidy section */}
+      <div className="space-y-3 sm:space-y-4 flex flex-col">
+        <div className="flex items-center gap-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-white mb-0">Bio</h2>
+          {creator.isFeatured && (
+            <AppBadge variant="featured" className="shadow-sm ml-2">
+              Featured
+            </AppBadge>
+          )}
+        </div>
+        <p className="text-white/80 text-base sm:text-lg">{creator.bio}</p>
       </div>
     </div>
   );
