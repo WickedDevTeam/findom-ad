@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
 import { Twitter, Link as LinkIcon, DollarSign, Heart } from 'lucide-react';
+import FavoriteButton from './FavoriteButton';
 
 interface CreatorDetailHeroProps {
   creator: Creator;
@@ -21,9 +22,17 @@ const CATEGORY_EMOJIS: Record<string, string> = {
   Other: '🔗'
 };
 
+const getDicebearSrc = (name: string) =>
+  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+    name.trim().substring(0, 20)
+  )}&backgroundColor=transparent`;
+
 const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   const [imageError, setImageError] = useState(false);
-  const fallbackImage = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158";
+  const imageSrc =
+    !creator.profileImage || imageError
+      ? getDicebearSrc(creator.name)
+      : creator.profileImage;
   const mainCategory = creator.categories[0];
   const categoryEmoji = CATEGORY_EMOJIS[mainCategory] || CATEGORY_EMOJIS["Other"];
 
@@ -33,11 +42,14 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
         <div className="relative">
           <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-findom-purple shadow-lg">
             <img 
-              src={imageError ? fallbackImage : creator.profileImage} 
-              alt={creator.name} 
+              src={imageSrc}
+              alt={creator.name}
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
             />
+          </div>
+          <div className="absolute left-0 -bottom-8 w-full flex justify-center">
+            <FavoriteButton creatorId={creator.id} className="mt-2 z-20" />
           </div>
           {creator.isFeatured && (
             <div className="absolute -top-2 -right-2">

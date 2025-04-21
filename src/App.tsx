@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 import NotificationsPage from "./pages/NotificationsPage";
 import CategoryPage from "./pages/CategoryPage";
+import MyFavoritesPage from "./pages/MyFavoritesPage";
 
 const queryClient = new QueryClient();
 
@@ -32,8 +32,8 @@ const App = () => (
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/admin" element={<AdminPage />} />
-            
-            {/* Category Routes */}
+
+            {/* CATEGORY ROUTES */}
             <Route path="/findoms" element={<CategoryPage />} />
             <Route path="/catfish" element={<CategoryPage />} />
             <Route path="/ai-bots" element={<CategoryPage />} />
@@ -42,7 +42,10 @@ const App = () => (
             <Route path="/blackmail" element={<CategoryPage />} />
             <Route path="/pay-pigs" element={<CategoryPage />} />
             <Route path="/bots" element={<CategoryPage />} />
-            
+
+            {/* Favorites Page */}
+            <Route path="/favorites" element={<MyFavoritesPage />} />
+
             <Route path="*" element={<NotFound />} />
           </Route>
         </Routes>

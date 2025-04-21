@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
+import FavoriteButton from './FavoriteButton';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   Findoms: '👑',
@@ -20,15 +21,18 @@ interface CreatorCardProps {
   creator: Creator;
 }
 
+const getDicebearSrc = (name: string) =>
+  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+    name.trim().substring(0, 20)
+  )}&backgroundColor=transparent`;
+
 const CreatorCard = ({ creator }: CreatorCardProps) => {
   const [imageError, setImageError] = useState(false);
 
-  const fallbackImages = [
-    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158',
-    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
-    'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b'
-  ];
-  const fallbackImage = fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
+  const imageSrc =
+    !creator.profileImage || imageError
+      ? getDicebearSrc(creator.name)
+      : creator.profileImage;
 
   // Category emoji
   const emoji = CATEGORY_EMOJIS[creator.categories[0]] || CATEGORY_EMOJIS["Other"];
@@ -40,7 +44,7 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-findom-gray/20">
         <img
-          src={imageError ? fallbackImage : creator.profileImage}
+          src={imageSrc}
           alt={creator.name}
           className="w-full h-full object-cover transition duration-200 group-hover:scale-105"
           onError={() => setImageError(true)}
@@ -49,6 +53,7 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
           {emoji}
         </span>
         <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
+          <FavoriteButton creatorId={creator.id} />
           {creator.isFeatured && (
             <AppBadge variant="featured" className="shadow-lg">
               Featured
