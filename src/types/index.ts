@@ -1,3 +1,4 @@
+
 export interface Creator {
   id: string;
   name: string;
@@ -5,13 +6,7 @@ export interface Creator {
   profileImage: string;
   coverImage?: string;
   bio: string;
-  socialLinks: {
-    twitter?: string;
-    throne?: string;
-    cashapp?: string;
-    onlyfans?: string;
-    other?: string;
-  };
+  socialLinks: SocialLinks;
   isVerified: boolean;
   isFeatured: boolean;
   isNew: boolean;
@@ -32,9 +27,9 @@ export interface PromotionPackage {
 }
 
 export interface SocialLinks {
-  twitter?: string;
-  throne?: string;
-  cashapp?: string;
-  onlyfans?: string;
-  other?: string;
+  twitter?: string | null;
+  throne?: string | null;
+  cashapp?: string | null;
+  onlyfans?: string | null;
+  other?: string | null;
 }

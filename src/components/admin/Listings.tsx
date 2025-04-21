@@ -167,6 +167,7 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
               console.error('Error parsing social_links JSON:', e);
             }
           } else if (item.social_links && typeof item.social_links === 'object') {
+            // Handle direct object format
             const links = item.social_links as Record<string, any>;
             socialLinks = {
               twitter: links.twitter || undefined,

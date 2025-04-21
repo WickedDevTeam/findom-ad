@@ -120,16 +120,36 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               
             if (creatorData) {
               // Parse social_links from JSON if it's a string
-              let socialLinks: SocialLinks = {};
+              let socialLinks: SocialLinks = {
+                twitter: null,
+                throne: null,
+                cashapp: null,
+                onlyfans: null,
+                other: null
+              };
+              
               if (typeof creatorData.social_links === 'string') {
                 try {
-                  socialLinks = JSON.parse(creatorData.social_links);
+                  const parsedLinks = JSON.parse(creatorData.social_links);
+                  socialLinks = {
+                    twitter: parsedLinks.twitter || null,
+                    throne: parsedLinks.throne || null,
+                    cashapp: parsedLinks.cashapp || null,
+                    onlyfans: parsedLinks.onlyfans || null,
+                    other: parsedLinks.other || null
+                  };
                 } catch (e) {
                   console.error('Error parsing social_links JSON:', e);
-                  socialLinks = {};
                 }
               } else if (creatorData.social_links && typeof creatorData.social_links === 'object') {
-                socialLinks = creatorData.social_links as SocialLinks;
+                const links = creatorData.social_links as Record<string, any>;
+                socialLinks = {
+                  twitter: links.twitter || null,
+                  throne: links.throne || null,
+                  cashapp: links.cashapp || null,
+                  onlyfans: links.onlyfans || null,
+                  other: links.other || null
+                };
               }
 
               data = {
@@ -293,7 +313,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
       
       if (isAdmin) {
         // Admin workflow - directly update or create in the creators table
-        const socialLinks = {
+        const socialLinks: SocialLinks = {
           twitter: values.twitter || null,
           cashapp: values.cashapp || null,
           onlyfans: values.onlyfans || null,
