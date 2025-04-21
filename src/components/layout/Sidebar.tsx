@@ -43,7 +43,7 @@ const FindomSidebar = () => {
         <div className="px-2 pt-3 pb-3">
           <Logo forSidebar hideInHeader={false} />
         </div>
-        <SidebarGroup>
+        <SidebarGroup className="py-0 my-0">
           <SidebarGroupLabel>Categories</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
