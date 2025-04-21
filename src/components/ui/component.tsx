@@ -1,3 +1,4 @@
+
 "use client"
 import * as React from "react"
 import { Button } from "@/components/ui/button"
@@ -15,14 +16,8 @@ import { Facebook, Instagram, Linkedin, Moon, Send, Sun, Twitter } from "lucide-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Calendar } from "@/components/ui/calendar"
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Checkbox } from "@/components/ui/checkbox"
+  Checkbox,
+} from "@/components/ui/checkbox"
 import {
   Command,
   CommandDialog,
@@ -68,7 +63,6 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
-import { Listbox, ListboxContent, ListboxItem, ListboxTrigger } from "@/components/ui/listbox"
 import {
   Menubar,
   MenubarCheckboxItem,
@@ -97,6 +91,10 @@ import { Separator } from "@/components/ui/separator"
 import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Toggle } from "@/components/ui/toggle"
+
+import { cn } from "@/lib/utils"  // Fix missing cn import
+
+// NOTE: Removed import of Card and related components to avoid conflict with local declarations
 
 function Footerdemo() {
   const [isDarkMode, setIsDarkMode] = React.useState(true)
@@ -334,3 +332,4 @@ const CardFooter = React.forwardRef<
 CardFooter.displayName = "CardFooter"
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent }
+
