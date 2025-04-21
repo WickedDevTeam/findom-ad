@@ -8,7 +8,7 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { Footer } from '@/components/ui/footer'; // <-- already imported
+import { Footer } from '@/components/ui/footer'; 
 
 const RootLayout = () => {
   const location = useLocation();
@@ -16,7 +16,7 @@ const RootLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex flex-col w-full bg-gray-950 text-white">
+      <div className="min-h-screen flex flex-col w-full bg-gray-950 text-white overflow-x-hidden">
         <Navbar>
           <Button 
             variant="ghost" 
@@ -27,9 +27,9 @@ const RootLayout = () => {
             <Menu className="h-5 w-5" />
           </Button>
         </Navbar>
-        <div className="flex flex-1 w-full relative z-0">
+        <div className="flex flex-1 w-full relative">
           <Sidebar />
-          <main className="flex-1 w-full pt-[72px] transition-all duration-300 flex flex-col z-0">
+          <main className="flex-1 w-full pt-[72px] transition-all duration-300 flex flex-col min-h-screen">
             <AnimatePresence mode="wait">
               <motion.div 
                 key={location.pathname} 
@@ -42,9 +42,9 @@ const RootLayout = () => {
                 <Outlet />
               </motion.div>
             </AnimatePresence>
+            <Footer />
           </main>
         </div>
-        <Footer /> {/* Always sits below sidebar/content */}
       </div>
     </SidebarProvider>
   );
