@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types";
+import { Json } from "@/integrations/supabase/types";
 
 export interface NotionSyncConfig {
   enabled: boolean;
@@ -72,18 +73,16 @@ export async function getSyncConfig(): Promise<NotionSyncConfig> {
 
 export async function updateSyncConfig(config: NotionSyncConfig): Promise<boolean> {
   try {
+    // Fix: Cast the config to Json type to satisfy TypeScript and match Supabase's expected structure
+    const configAsJson = config as unknown as Json;
+    
     const { error } = await supabase
       .from("site_config")
-      .upsert(
-        [
-          { 
-            key: "notion_sync_config", 
-            value: config,
-            updated_at: new Date().toISOString()
-          }
-        ],
-        { onConflict: "key" }
-      );
+      .upsert({
+        key: "notion_sync_config",
+        value: configAsJson,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "key" });
 
     if (error) {
       console.error("Error updating Notion sync configuration:", error);
