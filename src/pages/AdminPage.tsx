@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { creators } from '@/data/creators';
-import { Search } from 'lucide-react';
+import { Search, ShieldAlert } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { Creator } from '@/types';
 import { PendingSubmission, StatsData } from '@/types/admin';
@@ -13,6 +13,8 @@ import Submissions from '@/components/admin/Submissions';
 import NotionSync from '@/components/admin/NotionSync';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/hooks/use-auth';
+import { supabase } from '@/integrations/supabase/client';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 // Admin dashboard statistics data
 const statsData: StatsData[] = [
@@ -25,7 +27,7 @@ const statsData: StatsData[] = [
 ];
 
 const AdminPage = () => {
-  const { requireAuth } = useAuth();
+  const { requireAuth, user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [pendingSubmissions, setPendingSubmissions] = useState<PendingSubmission[]>([
     { 
@@ -57,20 +59,45 @@ const AdminPage = () => {
   const [activeCreators, setActiveCreators] = useState<Creator[]>(creators);
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminCheckComplete, setAdminCheckComplete] = useState(false);
   
   useEffect(() => {
     // First check authentication
     const isAuthenticated = requireAuth();
     
-    // If authenticated, continue loading the admin page
-    if (isAuthenticated) {
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 800);
-      
-      return () => clearTimeout(timer);
+    // If authenticated, check if user is admin
+    if (isAuthenticated && user) {
+      checkAdminStatus();
+    } else {
+      setIsLoading(false);
+      setAdminCheckComplete(true);
     }
-  }, [requireAuth]);
+  }, [requireAuth, user]);
+  
+  const checkAdminStatus = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('id', user?.id)
+        .maybeSingle();
+      
+      if (error) {
+        console.error('Error checking admin status:', error);
+        toast.error('Failed to verify admin status');
+        setIsAdmin(false);
+      } else {
+        setIsAdmin(data?.is_admin || false);
+      }
+    } catch (error) {
+      console.error('Error in checkAdminStatus:', error);
+      setIsAdmin(false);
+    } finally {
+      setIsLoading(false);
+      setAdminCheckComplete(true);
+    }
+  };
   
   const handleApprove = (id: string) => {
     setPendingSubmissions(prev => prev.filter(item => item.id !== id));
@@ -114,6 +141,21 @@ const AdminPage = () => {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="h-12 w-12 border-4 border-findom-purple/30 border-t-findom-purple rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Show access denied if not admin
+  if (adminCheckComplete && !isAdmin) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <Alert variant="destructive" className="max-w-md">
+          <ShieldAlert className="h-5 w-5" />
+          <AlertTitle>Access Denied</AlertTitle>
+          <AlertDescription>
+            You do not have permission to access the admin area. Please contact an administrator if you believe this is an error.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }

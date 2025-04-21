@@ -73,14 +73,12 @@ export async function getSyncConfig(): Promise<NotionSyncConfig> {
 
 export async function updateSyncConfig(config: NotionSyncConfig): Promise<boolean> {
   try {
-    // Fix: Cast the config to Json type to satisfy TypeScript and match Supabase's expected structure
-    const configAsJson = config as unknown as Json;
-    
+    // Fix: Use proper type casting for Supabase JSON column
     const { error } = await supabase
       .from("site_config")
       .upsert({
         key: "notion_sync_config",
-        value: configAsJson,
+        value: config as unknown as Json,
         updated_at: new Date().toISOString()
       }, { onConflict: "key" });
 
@@ -95,25 +93,32 @@ export async function updateSyncConfig(config: NotionSyncConfig): Promise<boolea
   }
 }
 
-export async function initiateSync(): Promise<{ success: boolean; message: string }> {
+export async function initiateSync(): Promise<{ success: boolean; message: string; stats?: SyncStats }> {
   try {
     const { data, error } = await supabase.functions.invoke("notion-sync", {
       body: { action: "sync" }
     });
 
     if (error) {
+      console.error("Error initiating sync:", error);
       return { success: false, message: `Sync failed: ${error.message}` };
     }
 
+    // Improve type safety by adding specific return type
     return data || { success: true, message: "Sync initiated successfully" };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error initiating sync:", error);
     return { success: false, message: "Failed to initiate sync due to an unexpected error" };
   }
 }
 
-export async function testNotionConnection(config: NotionSyncConfig): Promise<{ success: boolean; message: string }> {
+export async function testNotionConnection(config: NotionSyncConfig): Promise<{ success: boolean; message: string; databaseTitle?: string }> {
   try {
+    // Add a validation check before making the API call
+    if (!config.notionApiKey || !config.notionDatabaseId) {
+      return { success: false, message: "API key and database ID are required" };
+    }
+
     const { data, error } = await supabase.functions.invoke("notion-sync", {
       body: { 
         action: "test-connection",
@@ -125,11 +130,13 @@ export async function testNotionConnection(config: NotionSyncConfig): Promise<{ 
     });
 
     if (error) {
+      console.error("Error testing connection:", error);
       return { success: false, message: `Connection test failed: ${error.message}` };
     }
 
+    // Improve type safety by adding specific return type
     return data || { success: true, message: "Connection to Notion successful" };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error testing Notion connection:", error);
     return { success: false, message: "Failed to test connection due to an unexpected error" };
   }
@@ -137,7 +144,6 @@ export async function testNotionConnection(config: NotionSyncConfig): Promise<{ 
 
 export async function getSyncHistory(limit: number = 10): Promise<any[]> {
   try {
-    // Use generic .from since sync_history is a tracked table now
     const { data, error } = await supabase
       .from("sync_history")
       .select("*")
@@ -153,5 +159,24 @@ export async function getSyncHistory(limit: number = 10): Promise<any[]> {
   } catch (error) {
     console.error("Error in getSyncHistory:", error);
     return [];
+  }
+}
+
+// New function to check if sync is due
+export async function isSyncDue(): Promise<boolean> {
+  try {
+    const config = await getSyncConfig();
+    
+    if (!config.enabled || !config.autoSync || !config.lastSyncedAt) {
+      return config.enabled && config.autoSync; // Due if enabled and autoSync but never synced
+    }
+    
+    const lastSyncDate = new Date(config.lastSyncedAt);
+    const nextSyncDate = new Date(lastSyncDate.getTime() + (config.syncInterval * 60 * 1000));
+    
+    return new Date() >= nextSyncDate;
+  } catch (error) {
+    console.error("Error checking if sync is due:", error);
+    return false;
   }
 }

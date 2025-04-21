@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -23,13 +24,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Badge } from '@/components/ui/badge';
-import { Loader2, RefreshCw, Database, ExternalLink, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Loader2, RefreshCw, Database, ExternalLink, Clock, CheckCircle, AlertTriangle, Eye, EyeOff, Info } from 'lucide-react';
 import { 
   getSyncConfig, 
   updateSyncConfig, 
   initiateSync, 
   testNotionConnection,
   getSyncHistory,
+  isSyncDue,
   NotionSyncConfig,
   SyncStats,
   defaultSyncConfig
@@ -46,7 +48,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm } from "react-hook-form";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const NotionSync = () => {
   const { requireAuth } = useAuth();
@@ -56,6 +59,9 @@ const NotionSync = () => {
   const [isTesting, setIsTesting] = useState(false);
   const [syncHistory, setSyncHistory] = useState<any[]>([]);
   const [showApiKey, setShowApiKey] = useState(false);
+  const [autoSyncChecked, setAutoSyncChecked] = useState(false);
+  const [nextSyncDate, setNextSyncDate] = useState<Date | null>(null);
+  const [connectionStatus, setConnectionStatus] = useState<'unknown' | 'connected' | 'failed'>('unknown');
 
   const form = useForm<NotionSyncConfig>({
     defaultValues: defaultSyncConfig
@@ -70,14 +76,55 @@ const NotionSync = () => {
   useEffect(() => {
     if (config) {
       form.reset(config);
+      setAutoSyncChecked(config.autoSync);
+      
+      // Calculate next sync date
+      if (config.enabled && config.autoSync && config.lastSyncedAt) {
+        const lastSyncDate = new Date(config.lastSyncedAt);
+        const next = new Date(lastSyncDate.getTime() + (config.syncInterval * 60 * 1000));
+        setNextSyncDate(next);
+      } else {
+        setNextSyncDate(null);
+      }
     }
   }, [config, form]);
+
+  // Auto sync check effect
+  useEffect(() => {
+    let intervalId: number | null = null;
+    
+    if (config.enabled && config.autoSync) {
+      // Check every minute if sync is due
+      intervalId = window.setInterval(async () => {
+        try {
+          const syncDue = await isSyncDue();
+          if (syncDue) {
+            handleSyncNow(true);
+          }
+        } catch (error) {
+          console.error("Error checking if sync is due:", error);
+        }
+      }, 60000); // Check every minute
+    }
+    
+    return () => {
+      if (intervalId !== null) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [config.enabled, config.autoSync, config.lastSyncedAt, config.syncInterval]);
 
   const loadSyncConfig = async () => {
     setIsLoading(true);
     try {
       const configData = await getSyncConfig();
       setConfig(configData);
+      
+      // If API key and database ID are set, test the connection
+      if (configData.notionApiKey && configData.notionDatabaseId) {
+        const result = await testNotionConnection(configData);
+        setConnectionStatus(result.success ? 'connected' : 'failed');
+      }
     } catch (error) {
       console.error("Error loading sync config:", error);
       toast.error("Failed to load Notion sync configuration");
@@ -101,30 +148,50 @@ const NotionSync = () => {
       const formValues = form.getValues();
       const result = await testNotionConnection(formValues);
       
+      setConnectionStatus(result.success ? 'connected' : 'failed');
+      
       if (result.success) {
-        toast.success(result.message);
+        toast.success(result.message, {
+          description: result.databaseTitle ? `Database: ${result.databaseTitle}` : undefined
+        });
       } else {
         toast.error(result.message);
       }
     } catch (error) {
       console.error("Connection test error:", error);
+      setConnectionStatus('failed');
       toast.error("Failed to test connection to Notion");
     } finally {
       setIsTesting(false);
     }
   };
 
-  const handleSyncNow = async () => {
+  const handleSyncNow = async (isAutoSync = false) => {
+    if (isSyncing) return; // Prevent multiple syncs at once
+    
     setIsSyncing(true);
     try {
       const result = await initiateSync();
       
       if (result.success) {
-        toast.success(result.message);
+        toast.success(
+          isAutoSync ? "Auto-sync completed" : result.message,
+          { description: result.stats ? `Added: ${result.stats.added}, Updated: ${result.stats.updated}` : undefined }
+        );
+        
+        // Update config with new lastSyncedAt
         setConfig((prev) => ({
           ...prev,
           lastSyncedAt: new Date().toISOString()
         }));
+        
+        // Calculate next sync date
+        if (config.autoSync) {
+          const next = new Date(Date.now() + (config.syncInterval * 60 * 1000));
+          setNextSyncDate(next);
+        }
+        
+        // Refresh sync history after a short delay
         setTimeout(loadSyncHistory, 2000);
       } else {
         toast.error(result.message);
@@ -139,10 +206,26 @@ const NotionSync = () => {
 
   const onSubmit = async (data: NotionSyncConfig) => {
     try {
+      // Check if autoSync was enabled and API key + database ID are provided
+      if (data.autoSync && (!data.notionApiKey || !data.notionDatabaseId)) {
+        toast.error("Cannot enable auto-sync without API key and database ID");
+        return;
+      }
+      
       const success = await updateSyncConfig(data);
       if (success) {
         toast.success("Notion sync configuration saved successfully");
         setConfig(data);
+        
+        // If the key or database ID changed, update the connection status
+        if (data.notionApiKey !== config.notionApiKey || data.notionDatabaseId !== config.notionDatabaseId) {
+          setConnectionStatus('unknown');
+          
+          // Test connection if both are provided
+          if (data.notionApiKey && data.notionDatabaseId) {
+            handleTestConnection();
+          }
+        }
       } else {
         toast.error("Failed to save Notion sync configuration");
       }
@@ -150,6 +233,26 @@ const NotionSync = () => {
       console.error("Save config error:", error);
       toast.error("An error occurred while saving the configuration");
     }
+  };
+
+  const getTimeFromNow = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = date.getTime() - now.getTime();
+    
+    if (diffMs < 0) return "Overdue";
+    
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return `${diffSec} seconds`;
+    
+    const diffMin = Math.floor(diffSec / 60);
+    if (diffMin < 60) return `${diffMin} minute${diffMin !== 1 ? 's' : ''}`;
+    
+    const diffHour = Math.floor(diffMin / 60);
+    if (diffHour < 24) return `${diffHour} hour${diffHour !== 1 ? 's' : ''}`;
+    
+    const diffDay = Math.floor(diffHour / 24);
+    return `${diffDay} day${diffDay !== 1 ? 's' : ''}`;
   };
 
   if (isLoading) {
@@ -180,135 +283,168 @@ const NotionSync = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <FormProvider {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)}>
-                <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="enabled"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">Enable Notion Sync</FormLabel>
-                          <FormDescription>
-                            Turn the Notion sync feature on or off
-                          </FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange} 
-                          />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="notionApiKey"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notion API Key</FormLabel>
-                        <div className="relative">
-                          <FormControl>
-                            <Input 
-                              type={showApiKey ? "text" : "password"}
-                              placeholder="Enter your Notion API secret token" 
-                              {...field} 
-                            />
-                          </FormControl>
-                          <Button 
-                            type="button" 
-                            variant="ghost" 
-                            size="sm" 
-                            className="absolute right-2 top-1/2 -translate-y-1/2"
-                            onClick={() => setShowApiKey(!showApiKey)}
-                          >
-                            {showApiKey ? "Hide" : "Show"}
-                          </Button>
-                        </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="enabled"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Enable Notion Sync</FormLabel>
                         <FormDescription>
-                          Create an integration in Notion and paste the secret token here
+                          Turn the Notion sync feature on or off
                         </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="notionDatabaseId"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Notion Database ID</FormLabel>
+                      </div>
+                      <FormControl>
+                        <Switch 
+                          checked={field.value} 
+                          onCheckedChange={field.onChange} 
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="notionApiKey"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1">
+                        Notion API Key
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 text-white/50 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="w-[200px] text-xs">
+                                Create an integration in the Notion developer portal and connect it to your database
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </FormLabel>
+                      <div className="relative">
                         <FormControl>
                           <Input 
-                            placeholder="Enter your Notion database ID" 
+                            type={showApiKey ? "text" : "password"}
+                            placeholder="Enter your Notion API secret token" 
                             {...field} 
+                            className={connectionStatus === 'failed' ? "border-red-500" : ""}
                           />
                         </FormControl>
-                        <FormDescription>
-                          The ID of your Notion database (found in the URL)
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  
-                  <FormField
-                    control={form.control}
-                    name="syncInterval"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Sync Interval</FormLabel>
-                        <Select 
-                          onValueChange={(value) => field.onChange(parseInt(value))}
-                          defaultValue={field.value.toString()}
+                        <Button 
+                          type="button" 
+                          variant="ghost" 
+                          size="sm" 
+                          className="absolute right-2 top-1/2 -translate-y-1/2"
+                          onClick={() => setShowApiKey(!showApiKey)}
                         >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select sync frequency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="15">Every 15 minutes</SelectItem>
-                            <SelectItem value="30">Every 30 minutes</SelectItem>
-                            <SelectItem value="60">Every hour</SelectItem>
-                            <SelectItem value="360">Every 6 hours</SelectItem>
-                            <SelectItem value="720">Every 12 hours</SelectItem>
-                            <SelectItem value="1440">Every day</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormDescription>
-                          How often should the automatic sync run
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                      <FormDescription>
+                        Create an integration in Notion and paste the secret token here
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 
-                  <FormField
-                    control={form.control}
-                    name="autoSync"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">Auto Sync</FormLabel>
-                          <FormDescription>
-                            Automatically sync based on the interval
-                          </FormDescription>
-                        </div>
+                <FormField
+                  control={form.control}
+                  name="notionDatabaseId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="flex items-center gap-1">
+                        Notion Database ID
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 text-white/50 cursor-help" />
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="w-[200px] text-xs">
+                                Found in the URL of your Notion database, after the domain and before the query parameters
+                              </p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Enter your Notion database ID" 
+                          {...field} 
+                          className={connectionStatus === 'failed' ? "border-red-500" : ""}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        The ID of your Notion database (found in the URL)
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="syncInterval"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Sync Interval</FormLabel>
+                      <Select 
+                        onValueChange={(value) => field.onChange(parseInt(value))}
+                        defaultValue={field.value.toString()}
+                        value={field.value.toString()}
+                      >
                         <FormControl>
-                          <Switch 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange} 
-                          />
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select sync frequency" />
+                          </SelectTrigger>
                         </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                        <SelectContent>
+                          <SelectItem value="15">Every 15 minutes</SelectItem>
+                          <SelectItem value="30">Every 30 minutes</SelectItem>
+                          <SelectItem value="60">Every hour</SelectItem>
+                          <SelectItem value="360">Every 6 hours</SelectItem>
+                          <SelectItem value="720">Every 12 hours</SelectItem>
+                          <SelectItem value="1440">Every day</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        How often should the automatic sync run
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              
+                <FormField
+                  control={form.control}
+                  name="autoSync"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
+                      <div className="space-y-0.5">
+                        <FormLabel className="text-base">Auto Sync</FormLabel>
+                        <FormDescription>
+                          Automatically sync based on the interval
+                        </FormDescription>
+                      </div>
+                      <FormControl>
+                        <Switch 
+                          checked={field.value} 
+                          onCheckedChange={(checked) => {
+                            field.onChange(checked);
+                            setAutoSyncChecked(checked);
+                          }}
+                          disabled={!form.getValues().notionApiKey || !form.getValues().notionDatabaseId}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                 
                 <div className="mt-6 flex gap-2">
                   <Button 
@@ -334,7 +470,7 @@ const NotionSync = () => {
                   </Button>
                 </div>
               </form>
-            </FormProvider>
+            </Form>
           </CardContent>
         </Card>
 
@@ -374,13 +510,34 @@ const NotionSync = () => {
                       {config.lastSyncedAt ? new Date(config.lastSyncedAt).toLocaleString() : "Never"}
                     </span>
                   </div>
+                  {nextSyncDate && config.autoSync && (
+                    <div className="flex justify-between">
+                      <span className="text-white/70">Next Sync:</span>
+                      <span className="text-white">
+                        {nextSyncDate.toLocaleString()} ({getTimeFromNow(nextSyncDate.toISOString())})
+                      </span>
+                    </div>
+                  )}
+                  <div className="flex justify-between">
+                    <span className="text-white/70">Connection Status:</span>
+                    <Badge 
+                      variant={connectionStatus === 'unknown' ? "outline" : "default"} 
+                      className={
+                        connectionStatus === 'connected' ? "bg-findom-green" : 
+                        connectionStatus === 'failed' ? "bg-findom-orange" : ""
+                      }
+                    >
+                      {connectionStatus === 'connected' ? "Connected" : 
+                       connectionStatus === 'failed' ? "Failed" : "Unknown"}
+                    </Badge>
+                  </div>
                 </div>
               </div>
               
               <div className="flex justify-between">
                 <Button
-                  onClick={handleSyncNow}
-                  disabled={!config.enabled || isSyncing}
+                  onClick={() => handleSyncNow()}
+                  disabled={!config.enabled || isSyncing || !config.notionApiKey || !config.notionDatabaseId}
                   className="bg-findom-purple hover:bg-findom-purple/80"
                 >
                   {isSyncing ? (
@@ -394,15 +551,17 @@ const NotionSync = () => {
                   )}
                 </Button>
                 
-                <a 
-                  href={`https://notion.so/${config.notionDatabaseId}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                >
-                  <Button variant="outline" disabled={!config.notionDatabaseId}>
-                    <ExternalLink className="mr-2 h-4 w-4" /> Open Notion
-                  </Button>
-                </a>
+                {config.notionDatabaseId && (
+                  <a 
+                    href={`https://notion.so/${config.notionDatabaseId}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                  >
+                    <Button variant="outline">
+                      <ExternalLink className="mr-2 h-4 w-4" /> Open Notion
+                    </Button>
+                  </a>
+                )}
               </div>
             </div>
           </CardContent>
@@ -439,7 +598,7 @@ const NotionSync = () => {
                       </h4>
                     </div>
                     <Badge variant="outline" className="text-xs">
-                      {new Date(sync.created_at).toLocaleString()}
+                      {new Date(sync.created_at || sync.started_at).toLocaleString()}
                     </Badge>
                   </div>
                   
