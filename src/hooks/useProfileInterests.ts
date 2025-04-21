@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -27,9 +27,14 @@ export function useProfileInterests() {
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [error, setError] = useState(false);
   const [retryCount, setRetryCount] = useState(0);
-
+  const fetchAttempted = useRef(false);
+  
   // Fetch interest categories with useCallback to prevent recreation on each render
   const fetchCategories = useCallback(async () => {
+    // Prevent multiple fetch attempts in development with React strict mode
+    if (fetchAttempted.current && retryCount === 0) return;
+    fetchAttempted.current = true;
+    
     try {
       setCategoriesLoading(true);
       setError(false);
@@ -56,8 +61,8 @@ export function useProfileInterests() {
       // Use fallback categories to prevent UI from breaking
       setCategories(FALLBACK_CATEGORIES);
       
-      // Show toast only on first error
-      if (retryCount === 0) {
+      // Show toast only on first error or manual retry
+      if (retryCount > 0) {
         toast.toast({
           title: 'Error',
           description: 'Failed to load categories, using default categories instead',
@@ -72,11 +77,17 @@ export function useProfileInterests() {
   // Allow manual retry
   const retryFetchCategories = useCallback(() => {
     setRetryCount(prev => prev + 1);
+    fetchAttempted.current = false;
   }, []);
 
   // Use memoized fetchCategories function in useEffect with retry count dependency
   useEffect(() => {
     fetchCategories();
+    
+    // Cleanup function
+    return () => {
+      // No cleanup needed
+    };
   }, [fetchCategories, retryCount]);
 
   // Toggle interest with useCallback
