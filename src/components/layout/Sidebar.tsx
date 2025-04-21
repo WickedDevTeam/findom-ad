@@ -55,7 +55,7 @@ const FindomSidebar = () => {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              {CATEGORY_LINKS.map(link => <SidebarMenuItem key={link.to}>
+              {CATEGORY_LINKS.map(link => <SidebarMenuItem key={link.to} className="py-px">
                   <SidebarMenuButton asChild isActive={location.pathname === link.to}>
                     <Link to={link.to}>
                       <span className="text-xl">{link.emoji}</span>
