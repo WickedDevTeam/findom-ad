@@ -7,11 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { useProfileAvatar } from './useProfileAvatar';
 import { useProfileValidation } from './useProfileValidation';
 import { useProfileInterests } from './useProfileInterests';
+import { useAuth } from '@/hooks/use-auth';
 
 export function useProfile() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // Composite hooks
   const { avatarUrl, setAvatarUrl, avatarFile, onAvatarChange, uploadAvatar, uploadLoading } = useProfileAvatar();
@@ -26,71 +28,67 @@ export function useProfile() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [profileFetched, setProfileFetched] = useState(false);
 
   // Fetch user profile
   useEffect(() => {
-    const fetchUserProfile = async () => {
-      try {
-        const {
-          data: { session },
-        } = await supabase.auth.getSession();
+    // Only attempt to fetch the profile if we have a user
+    if (user && !profileFetched) {
+      const fetchUserProfile = async () => {
+        try {
+          setLoading(true);
+          
+          const userId = user.id;
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('display_name, username, email, bio, avatar_url, interests')
+            .eq('id', userId)
+            .single();
 
-        if (!session?.user) {
-          toast.toast({
-            title: 'Not logged in',
-            description: 'You must be logged in to edit your profile',
-            variant: 'destructive',
-          });
-          navigate('/');
-          return;
-        }
+          if (error && error.code !== 'PGRST116') throw error;
 
-        const userId = session.user.id;
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('display_name, username, email, bio, avatar_url, interests')
-          .eq('id', userId)
-          .single();
+          if (data) {
+            setDisplayName(data.display_name ?? '');
+            setUsername(data.username ?? '');
+            setEmail(user.email ?? '');
+            setBio(data.bio ?? '');
+            setAvatarUrl(data.avatar_url);
 
-        if (error && error.code !== 'PGRST116') throw error;
-
-        if (data) {
-          setDisplayName(data.display_name ?? '');
-          setUsername(data.username ?? '');
-          setEmail(session.user.email ?? '');
-          setBio(data.bio ?? '');
-          setAvatarUrl(data.avatar_url);
-
-          // interests: ensure array of strings
-          if (data.interests && Array.isArray(data.interests)) {
-            setInterests((data.interests as any[]).map(String));
+            // interests: ensure array of strings
+            if (data.interests && Array.isArray(data.interests)) {
+              setInterests((data.interests as any[]).map(String));
+            } else {
+              setInterests([]);
+            }
           } else {
+            setDisplayName('');
+            setUsername('');
+            setEmail(user.email ?? '');
+            setBio('');
+            setAvatarUrl(null);
             setInterests([]);
           }
-        } else {
-          setDisplayName('');
-          setUsername('');
-          setEmail(session.user.email ?? '');
-          setBio('');
-          setAvatarUrl(null);
-          setInterests([]);
+          
+          setProfileFetched(true);
+        } catch (err: any) {
+          console.error('Error fetching profile:', err);
+          toast.toast({
+            title: 'Error',
+            description: err.message || 'Failed to load profile info',
+            variant: 'destructive',
+          });
+        } finally {
+          setLoading(false);
+          setInitialLoading(false);
         }
-      } catch (err: any) {
-        console.error('Error fetching profile:', err);
-        toast.toast({
-          title: 'Error',
-          description: err.message || 'Failed to load profile info',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-        setInitialLoading(false);
-      }
-    };
+      };
 
-    fetchUserProfile();
-  }, [navigate, setAvatarUrl, setInterests, toast]);
+      fetchUserProfile();
+    } else if (!user) {
+      // Set initialLoading to false if there's no user
+      setInitialLoading(false);
+    }
+  }, [user, navigate, setAvatarUrl, setInterests, toast, profileFetched]);
 
   // Save profile to supabase
   const handleSave = async () => {
@@ -111,22 +109,18 @@ export function useProfile() {
 
     setSavingProfile(true);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.user) {
+      if (!user) {
         toast.toast({
           title: 'Not logged in',
           description: 'You must be logged in to update your profile',
           variant: 'destructive',
         });
         setSavingProfile(false);
-        navigate('/');
+        navigate('/signin');
         return;
       }
 
-      const userId = session.user.id;
+      const userId = user.id;
 
       let finalAvatarUrl = avatarUrl;
       if (avatarFile) {

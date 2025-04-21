@@ -1,101 +1,36 @@
 
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useCallback } from 'react';
+import { AuthContext } from '@/components/auth/AuthProvider';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { AuthContext } from '@/components/auth/AuthProvider';
 
 export function useAuth() {
-  const { user, session, loading } = useContext(AuthContext);
+  const authContext = useContext(AuthContext);
   const navigate = useNavigate();
   const toast = useToast();
-  const [authError, setAuthError] = useState<string | null>(null);
 
-  const signOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      navigate('/');
-      toast.toast({
-        title: 'Logged out successfully',
-        description: 'You have been logged out of your account',
-      });
-    } catch (error: any) {
-      toast.toast({
-        title: 'Error logging out',
-        description: error.message || 'There was a problem logging out',
-        variant: 'destructive',
-      });
+  const requireAuth = useCallback(() => {
+    if (authContext.loading) {
+      // Still checking authentication status, return true to avoid redirects during loading
+      return true;
     }
-  };
 
-  const signIn = async (email: string, password: string) => {
-    setAuthError(null);
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setAuthError(error.message);
-        return { success: false, error: error.message };
-      }
-
-      return { success: true, data };
-    } catch (error: any) {
-      setAuthError(error.message);
-      return { success: false, error: error.message };
-    }
-  };
-
-  const signUp = async (email: string, password: string, metadata?: Record<string, any>) => {
-    setAuthError(null);
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata,
-        },
-      });
-
-      if (error) {
-        setAuthError(error.message);
-        return { success: false, error: error.message };
-      }
-
-      return { success: true, data };
-    } catch (error: any) {
-      setAuthError(error.message);
-      return { success: false, error: error.message };
-    }
-  };
-
-  const requireAuth = (callback?: () => void) => {
-    if (!loading && !user) {
+    if (!authContext.user) {
+      console.log('User not authenticated, redirecting to signin');
       toast.toast({
         title: 'Authentication required',
-        description: 'You must be logged in to access this page',
+        description: 'Please sign in to view this page',
         variant: 'destructive',
       });
       navigate('/signin');
       return false;
     }
-    if (callback && user) {
-      callback();
-    }
+    
     return true;
-  };
+  }, [authContext.loading, authContext.user, navigate, toast]);
 
   return {
-    user,
-    session,
-    loading,
-    authError,
-    signOut,
-    signIn,
-    signUp,
+    ...authContext,
     requireAuth,
-    isAuthenticated: !!user,
   };
 }
