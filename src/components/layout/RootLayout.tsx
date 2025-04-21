@@ -38,6 +38,20 @@ const RootLayout = () => {
     };
   }, [isMobile, sidebarOpen]);
 
+  // Handle ESC key to close sidebar
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [sidebarOpen]);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };

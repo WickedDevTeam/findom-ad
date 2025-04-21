@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Logo from '../shared/Logo';
@@ -16,6 +16,7 @@ const Navbar = ({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const navigate = useNavigate();
+  const searchInputRef = useRef<HTMLInputElement>(null);
   
   const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,6 +26,13 @@ const Navbar = ({
       setSearchValue('');
     }
   };
+  
+  // Focus the search input when it's opened
+  useEffect(() => {
+    if (searchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [searchOpen]);
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
@@ -91,14 +99,14 @@ const Navbar = ({
       {/* Mobile searchbox when active - better positioned */}
       {searchOpen && (
         <div className="sm:hidden px-3 pb-3 bg-black/80 backdrop-blur-md">
-          <form onSubmit={onSearch} className="w-full">
+          <form onSubmit={onSearch} className="w-full relative">
             <Input 
+              ref={searchInputRef}
               className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all rounded-xl h-12" 
               type="text" 
               placeholder="Search creators..." 
               value={searchValue} 
-              onChange={e => setSearchValue(e.target.value)} 
-              autoFocus 
+              onChange={e => setSearchValue(e.target.value)}
             />
           </form>
         </div>
