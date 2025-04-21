@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { AnimatedGroup } from '@/components/ui/animated-group';
 
 // All instagram model style placeholders (horizontal/gallery size)
 const getRealModelPlaceholder = (idx: number) => {
@@ -18,7 +19,7 @@ interface CreatorGalleryProps {
 }
 
 /**
- * Horizontal infinite carousel, snappy and with modern slideshow UI.
+ * Modern gallery with animated elements using AnimatedGroup
  */
 const CreatorGallery = ({ images }: CreatorGalleryProps) => {
   // For gallery, always at least 5 actual (or placeholder) model images
@@ -30,11 +31,11 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const total = allImages.length;
 
-  // Infinite carousel navigation (horizontal only)
+  // Carousel navigation
   const prevImage = () => setActiveIdx((prev) => (prev - 1 + total) % total);
   const nextImage = () => setActiveIdx((prev) => (prev + 1) % total);
 
-  // Keyboard navigation (left/right)
+  // Keyboard navigation
   React.useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prevImage();
@@ -42,10 +43,8 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-    // eslint-disable-next-line
   }, [total]);
 
-  // Final, modern, snappy gallery UI
   return (
     <div className="relative max-w-2xl mx-auto select-none bg-black/30 rounded-xl p-2 shadow-lg">
       <div className="flex items-center justify-center gap-1">
@@ -58,41 +57,27 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
         >
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </button>
-        {/* Carousel track */}
-        <div className="w-full flex items-center justify-center overflow-hidden h-80 relative mx-12">
+        
+        {/* Carousel track with AnimatedGroup */}
+        <AnimatedGroup 
+          className="w-full flex items-center justify-center overflow-hidden h-80 relative mx-12"
+          preset="fade"
+        >
           {allImages.map((img, idx) => {
-            // Only show nearby images, fade others
-            const dist = Math.abs(activeIdx - idx);
-            let show = false;
-            let z = 1;
-            if (idx === activeIdx) { show = true; z = 20; }
-            else if ((idx === (activeIdx + 1) % total) || (idx === (activeIdx - 1 + total) % total)) { show = true; z = 10; }
-            else { show = false; z = 0; }
-            return (
+            // Only show active image with animation
+            const isActive = idx === activeIdx;
+            return isActive ? (
               <img
                 key={idx}
                 src={img}
                 loading="eager"
                 alt="Gallery"
-                className={`
-                  absolute top-0 left-1/2 -translate-x-1/2 w-[88%] h-80 duration-300
-                  rounded-2xl object-cover border-2 border-white/10 shadow-md transition-all
-                  ${idx === activeIdx
-                    ? "scale-100 opacity-100 z-20"
-                    : show
-                      ? "scale-90 opacity-70 z-10"
-                      : "scale-75 opacity-0 pointer-events-none z-0"
-                  }
-                `}
-                style={{
-                  filter: idx === activeIdx ? "brightness(1)" : "brightness(0.72)",
-                  transition: "all 0.333s cubic-bezier(.63,.21,.27,1.01)",
-                }}
-                onClick={() => setActiveIdx(idx)}
+                className="absolute top-0 left-1/2 -translate-x-1/2 w-[88%] h-80 rounded-2xl object-cover border-2 border-white/10 shadow-md"
               />
-            );
+            ) : null;
           })}
-        </div>
+        </AnimatedGroup>
+        
         {/* Next Arrow */}
         <button
           aria-label="Next"
@@ -103,6 +88,7 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </button>
       </div>
+      
       {/* Dots indicator */}
       <div className="flex gap-2 justify-center mt-6 mb-2">
         {allImages.map((_, idx) => (

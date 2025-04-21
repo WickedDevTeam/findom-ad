@@ -41,6 +41,11 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
           <div className="flex items-center gap-2">
             <h1 className="text-4xl font-extrabold text-white mb-1">{creator.name}</h1>
+            {creator.isFeatured && (
+              <AppBadge variant="featured" className="shadow-sm">
+                Featured
+              </AppBadge>
+            )}
           </div>
           <p className="text-lg text-white/80 mb-3">@{creator.username}</p>
           <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
@@ -108,16 +113,8 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
         </div>
       </div>
 
-      {/* Moved "Featured" pill and bio together as a tidy section */}
-      <div className="space-y-3 sm:space-y-4 flex flex-col">
-        <div className="flex items-center gap-2">
-          <h2 className="text-xl sm:text-2xl font-bold text-white mb-0">Bio</h2>
-          {creator.isFeatured && (
-            <AppBadge variant="featured" className="shadow-sm ml-2">
-              Featured
-            </AppBadge>
-          )}
-        </div>
+      {/* Bio section */}
+      <div className="space-y-2">
         <p className="text-white/80 text-base sm:text-lg">{creator.bio}</p>
       </div>
     </div>

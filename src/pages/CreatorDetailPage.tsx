@@ -23,11 +23,6 @@ const CreatorDetailPage = () => {
     <div className="space-y-6 sm:space-y-8">
       <CreatorDetailHero creator={creator} />
       
-      <div className="space-y-3 sm:space-y-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">Bio</h2>
-        <p className="text-white/80 text-base sm:text-lg">{creator.bio}</p>
-      </div>
-      
       {creator.gallery && creator.gallery.length > 0 && (
         <div className="space-y-3 sm:space-y-4">
           <h2 className="text-xl sm:text-2xl font-bold text-white">Gallery</h2>
