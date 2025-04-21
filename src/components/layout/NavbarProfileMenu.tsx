@@ -22,7 +22,7 @@ const NavbarProfileMenu = () => {
     return (
       <Button 
         variant="outline" 
-        onClick={() => navigate('/signup')}
+        onClick={() => navigate('/signin')}
         className="text-white"
       >
         Sign In

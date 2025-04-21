@@ -15,6 +15,7 @@ const CreatorDetailPage = lazy(() => import("./pages/CreatorDetailPage"));
 const PromotionPage = lazy(() => import("./pages/PromotionPage"));
 const CreateListingPage = lazy(() => import("./pages/CreateListingPage"));
 const SignupPage = lazy(() => import("./pages/SignupPage"));
+const SigninPage = lazy(() => import("./pages/SigninPage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
@@ -84,6 +85,11 @@ const App = () => (
               <Route path="/signup" element={
                 <Suspense fallback={<PageSkeleton />}>
                   <SignupPage />
+                </Suspense>
+              } />
+              <Route path="/signin" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <SigninPage />
                 </Suspense>
               } />
               <Route path="/admin" element={
