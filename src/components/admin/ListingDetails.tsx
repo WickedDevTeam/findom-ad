@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Creator } from '@/types';
+import { Creator, SocialLinks } from '@/types';
 import { PendingSubmission } from '@/types/admin';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -302,7 +302,7 @@ export default function ListingDetails({
             <div className="space-y-3">
               {isCreator(listing) && (
                 <>
-                  {listing.socialLinks.twitter && (
+                  {listing.socialLinks && listing.socialLinks.twitter && (
                     <div className="flex items-center justify-between">
                       <span className="font-medium">Twitter</span>
                       <a 
@@ -317,14 +317,14 @@ export default function ListingDetails({
                     </div>
                   )}
                   
-                  {listing.socialLinks.cashapp && (
+                  {listing.socialLinks && listing.socialLinks.cashapp && (
                     <div className="flex items-center justify-between">
                       <span className="font-medium">CashApp</span>
                       <span className="text-findom-purple">{listing.socialLinks.cashapp}</span>
                     </div>
                   )}
                   
-                  {listing.socialLinks.onlyfans && (
+                  {listing.socialLinks && listing.socialLinks.onlyfans && (
                     <div className="flex items-center justify-between">
                       <span className="font-medium">OnlyFans</span>
                       <a 
@@ -339,7 +339,7 @@ export default function ListingDetails({
                     </div>
                   )}
                   
-                  {listing.socialLinks.throne && (
+                  {listing.socialLinks && listing.socialLinks.throne && (
                     <div className="flex items-center justify-between">
                       <span className="font-medium">Amazon/Throne</span>
                       <a 
@@ -356,7 +356,7 @@ export default function ListingDetails({
                 </>
               )}
               
-              {(!isCreator(listing) || Object.values(listing.socialLinks).filter(Boolean).length === 0) && (
+              {(!isCreator(listing) || !listing.socialLinks || Object.values(isCreator(listing) ? listing.socialLinks : {}).filter(Boolean).length === 0) && (
                 <div className="text-center py-8 text-white/60">
                   No social links available
                 </div>

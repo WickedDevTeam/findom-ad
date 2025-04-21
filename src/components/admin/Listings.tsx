@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Creator } from '@/types';
+import { Creator, SocialLinks } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -145,7 +145,7 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
         // Need to format the data to match Creator type
         const formattedCreators: Creator[] = data.map(item => {
           // Parse social_links from JSON if it's a string
-          let socialLinks = {
+          let socialLinks: SocialLinks = {
             twitter: undefined,
             throne: undefined,
             cashapp: undefined,
@@ -167,12 +167,13 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
               console.error('Error parsing social_links JSON:', e);
             }
           } else if (item.social_links && typeof item.social_links === 'object') {
+            const links = item.social_links as Record<string, any>;
             socialLinks = {
-              twitter: item.social_links.twitter || undefined,
-              throne: item.social_links.throne || undefined,
-              cashapp: item.social_links.cashapp || undefined,
-              onlyfans: item.social_links.onlyfans || undefined,
-              other: item.social_links.other || undefined
+              twitter: links.twitter || undefined,
+              throne: links.throne || undefined,
+              cashapp: links.cashapp || undefined,
+              onlyfans: links.onlyfans || undefined,
+              other: links.other || undefined
             };
           }
           

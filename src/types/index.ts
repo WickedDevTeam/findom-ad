@@ -1,4 +1,3 @@
-
 export interface Creator {
   id: string;
   name: string;
@@ -30,4 +29,12 @@ export interface PromotionPackage {
   duration: string;
   limited?: boolean;
   remaining?: number;
+}
+
+export interface SocialLinks {
+  twitter?: string;
+  throne?: string;
+  cashapp?: string;
+  onlyfans?: string;
+  other?: string;
 }

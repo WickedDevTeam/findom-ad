@@ -28,6 +28,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { supabase } from '@/integrations/supabase/client';
 import { AlertCircle, Check, Image, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { SocialLinks } from '@/types';
 
 // Form schema validation
 const listingFormSchema = z.object({
@@ -119,7 +120,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               
             if (creatorData) {
               // Parse social_links from JSON if it's a string
-              let socialLinks = {};
+              let socialLinks: SocialLinks = {};
               if (typeof creatorData.social_links === 'string') {
                 try {
                   socialLinks = JSON.parse(creatorData.social_links);
@@ -128,7 +129,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                   socialLinks = {};
                 }
               } else if (creatorData.social_links && typeof creatorData.social_links === 'object') {
-                socialLinks = creatorData.social_links;
+                socialLinks = creatorData.social_links as SocialLinks;
               }
 
               data = {
@@ -137,10 +138,10 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                 bio: creatorData.bio,
                 type: creatorData.type,
                 // Map the social links
-                twitter: socialLinks?.twitter || '',
-                cashapp: socialLinks?.cashapp || '',
-                onlyfans: socialLinks?.onlyfans || '',
-                throne: socialLinks?.throne || '',
+                twitter: socialLinks.twitter || '',
+                cashapp: socialLinks.cashapp || '',
+                onlyfans: socialLinks.onlyfans || '',
+                throne: socialLinks.throne || '',
                 email: '', // Email isn't stored in creators table
                 category: '', // Categories are in a separate table for creators
               };
