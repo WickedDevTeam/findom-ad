@@ -50,26 +50,38 @@ export function useProfileAvatar() {
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
       
-      // Check if avatars bucket exists, create if not
-      const { data: buckets } = await supabase.storage.listBuckets();
-      if (!buckets?.find(bucket => bucket.name === 'avatars')) {
-        const { error: bucketError } = await supabase.storage.createBucket('avatars', {
-          public: true,
-          fileSizeLimit: 5242880 // 5MB in bytes
-        });
-        
-        if (bucketError) throw bucketError;
+      console.log('Uploading avatar:', { fileName, filePath, size: file.size });
+
+      // First check if the bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        console.error('Error fetching buckets:', bucketsError);
+        throw bucketsError;
       }
       
-      const { error: uploadError } = await supabase.storage
+      console.log('Available buckets:', buckets);
+      
+      // Try to upload directly (the bucket should exist based on our SQL migration)
+      const { data, error: uploadError } = await supabase.storage
         .from('avatars')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, file, { 
+          upsert: true,
+          cacheControl: '3600'
+        });
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Error uploading avatar:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful, data:', data);
 
       // Get public URL
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      return data.publicUrl;
+      const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      console.log('Public URL:', publicUrlData.publicUrl);
+      
+      return publicUrlData.publicUrl;
     } catch (error) {
       console.error('Error uploading avatar:', error);
       throw error;
