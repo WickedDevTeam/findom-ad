@@ -1,8 +1,8 @@
 
-import React from 'react';
-import CreatorCard from './CreatorCard';
-import { Creator } from '@/types';
-import { motion } from 'framer-motion';
+import React from "react";
+import CreatorCard from "./CreatorCard";
+import { Creator } from "@/types";
+import { motion } from "framer-motion";
 
 interface CreatorGridProps {
   creators: Creator[];
@@ -20,13 +20,13 @@ const CreatorGrid = ({ creators, title, subtitle }: CreatorGridProps) => {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: 0.08
       }
     }
   };
 
   const item = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 18 },
     show: { opacity: 1, y: 0 }
   };
 
@@ -38,9 +38,9 @@ const CreatorGrid = ({ creators, title, subtitle }: CreatorGridProps) => {
           {subtitle && <p className="text-white/60 mt-1">{subtitle}</p>}
         </div>
       )}
-      
-      <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6"
+
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8"
         variants={container}
         initial="hidden"
         animate="show"
