@@ -1,142 +1,117 @@
 
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Creator } from "@/types";
-import PillLabel from "@/components/ui/PillLabel";
-import { Check, Info, AlertTriangle } from "lucide-react";
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Creator } from '@/types';
+import { Badge } from '@/components/ui/badge';
+import { Twitter, Link as LinkIcon, DollarSign, Heart } from 'lucide-react';
 
 interface CreatorDetailHeroProps {
   creator: Creator;
 }
 
-const BG_BOX = "bg-black/50 border border-white/15 rounded-2xl p-6 md:p-10 shadow-lg backdrop-blur-xl";
-const STAT_LABELS = [
-  { key: "isFeatured", label: "VIP", variant: "vip" },
-  { key: "isNew", label: "New", variant: "info" },
-  { key: "isVerified", label: "Verified", variant: "success" }
-];
-// For categories navigation quick links
-const makeCategoryHref = (category: string) => `/${category.toLowerCase()}`;
-
 const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   const [imageError, setImageError] = useState(false);
   const fallbackImage = "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158";
-  const nameInitial = creator.name.charAt(0).toUpperCase();
-
-  // Stat chips: featured/new/verified and main type
-  const stats = [
-    ...STAT_LABELS.filter((s) => (creator as any)[s.key]),
-    { label: creator.type, variant: "primary" }
-  ];
 
   return (
-    <section className="w-full pt-4">
-      <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-        {/* Avatar */}
-        <div className="flex flex-shrink-0 flex-col items-center gap-2">
-          <div className="relative">
-            <div className="w-32 h-32 md:w-44 md:h-44 rounded-full overflow-hidden border-4 border-findom-purple/70 shadow-2xl bg-findom-dark/60">
-              <img
-                src={imageError ? fallbackImage : creator.profileImage}
-                alt={creator.name}
-                className="object-cover w-full h-full"
-                onError={() => setImageError(true)}
-              />
-            </div>
-            <div className="absolute -bottom-3 right-2 flex gap-2">
-              {creator.isVerified && (
-                <PillLabel variant="success" small bold>
-                  Verified
-                </PillLabel>
-              )}
-            </div>
+    <div className="space-y-6">
+      <div className="flex flex-col md:flex-row gap-6 items-center md:items-start">
+        <div className="relative">
+          <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-findom-purple">
+            <img 
+              src={imageError ? fallbackImage : creator.profileImage} 
+              alt={creator.name} 
+              className="w-full h-full object-cover"
+              onError={() => setImageError(true)}
+            />
           </div>
-          {/* Name and handle */}
-          <h1 className="text-3xl md:text-4xl font-bold text-white mt-5 text-center md:text-left">{creator.name}</h1>
-          <div className="text-findom-purple/80 text-base font-mono text-center md:text-left">@{creator.username}</div>
-        </div>
-
-        {/* Details Glass Box */}
-        <div className={`flex-1 flex flex-col gap-4 mt-2 ${BG_BOX}`}>
-          {/* Row of category badges/stats */}
-          <div className="flex flex-wrap gap-2">
-            {creator.categories.map((cat, idx) => (
-              <Link key={cat} to={makeCategoryHref(cat)}>
-                <PillLabel variant="category" small>
-                  {cat}
-                </PillLabel>
-              </Link>
-            ))}
-            {creator.isFeatured && (
-              <PillLabel variant="vip" small bold>
-                VIP
-              </PillLabel>
-            )}
-            {creator.isNew && (
-              <PillLabel variant="info" small bold>
-                New
-              </PillLabel>
-            )}
-          </div>
-          {/* Bio */}
-          {creator.bio && (
-            <div className="text-base md:text-lg text-white/80 leading-relaxed mt-2">{creator.bio}</div>
+          {creator.isFeatured && (
+            <div className="absolute -top-2 -right-2">
+              <Badge className="bg-findom-purple text-white border-0">Featured</Badge>
+            </div>
           )}
-          {/* Key stats */}
-          <div className="flex gap-3 mt-4 flex-wrap">
-            {stats.map((stat, i) => (
-              <PillLabel key={i} variant={stat.variant as any} small>
-                {stat.label}
-              </PillLabel>
-            ))}
-          </div>
-          {/* Social links */}
-          <div className="flex flex-wrap gap-3 mt-6">
+        </div>
+        
+        <div className="text-center md:text-left">
+          <h1 className="text-4xl font-bold text-white mb-2">{creator.name}</h1>
+          <p className="text-lg text-white/70 mb-4">{creator.username}</p>
+          
+          <div className="flex flex-wrap gap-3 justify-center md:justify-start">
             {creator.socialLinks.twitter && (
-              <a href={creator.socialLinks.twitter} target="_blank" rel="noopener noreferrer"
-                className="hover:bg-findom-purple/20 transition-colors rounded-full px-3 py-2 text-findom-purple/90 bg-white/5 backdrop-blur"
-                aria-label="Twitter"
-              >
-                Twitter
+              <a href={creator.socialLinks.twitter} target="_blank" rel="noopener noreferrer" 
+                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors">
+                <Twitter className="w-5 h-5" />
               </a>
             )}
             {creator.socialLinks.throne && (
-              <a href={creator.socialLinks.throne} target="_blank" rel="noopener noreferrer"
-                className="hover:bg-findom-purple/20 transition-colors rounded-full px-3 py-2 text-findom-purple/90 bg-white/5 backdrop-blur"
-                aria-label="Throne"
-              >
-                Throne
+              <a href={creator.socialLinks.throne} target="_blank" rel="noopener noreferrer" 
+                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors">
+                <Crown className="w-5 h-5" />
               </a>
             )}
             {creator.socialLinks.cashapp && (
-              <a href={creator.socialLinks.cashapp} target="_blank" rel="noopener noreferrer"
-                className="hover:bg-findom-purple/20 transition-colors rounded-full px-3 py-2 text-findom-purple/90 bg-white/5 backdrop-blur"
-                aria-label="CashApp"
-              >
-                CashApp
+              <a href={creator.socialLinks.cashapp} target="_blank" rel="noopener noreferrer" 
+                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors">
+                <DollarSign className="w-5 h-5" />
               </a>
             )}
             {creator.socialLinks.onlyfans && (
-              <a href={creator.socialLinks.onlyfans} target="_blank" rel="noopener noreferrer"
-                className="hover:bg-findom-purple/20 transition-colors rounded-full px-3 py-2 text-findom-purple/90 bg-white/5 backdrop-blur"
-                aria-label="OnlyFans"
-              >
-                OnlyFans
+              <a href={creator.socialLinks.onlyfans} target="_blank" rel="noopener noreferrer" 
+                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors">
+                <Heart className="w-5 h-5" />
               </a>
             )}
             {creator.socialLinks.other && (
-              <a href={creator.socialLinks.other} target="_blank" rel="noopener noreferrer"
-                className="hover:bg-findom-purple/20 transition-colors rounded-full px-3 py-2 text-findom-purple/90 bg-white/5 backdrop-blur"
-                aria-label="Other"
-              >
-                Website
+              <a href={creator.socialLinks.other} target="_blank" rel="noopener noreferrer" 
+                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors">
+                <LinkIcon className="w-5 h-5" />
               </a>
             )}
           </div>
         </div>
       </div>
-    </section>
+      
+      <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <p className="text-white/70 mb-1">Categories:</p>
+            <div className="flex flex-wrap gap-2">
+              {creator.categories.map((category) => (
+                <Link key={category} to={`/${category.toLowerCase()}`}>
+                  <Badge variant="outline" className="hover:bg-findom-purple/20 transition-colors">
+                    {category}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          </div>
+          <div>
+            <p className="text-white/70 mb-1">Type:</p>
+            <Badge variant="outline" className="bg-black/50">
+              {creator.type}
+            </Badge>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
+
+// Add this import to fix the error
+const Crown = ({ className }: { className?: string }) => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="none" 
+    stroke="currentColor" 
+    strokeWidth="2" 
+    strokeLinecap="round" 
+    strokeLinejoin="round" 
+    className={className}
+  >
+    <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
+    <path d="M4 22h16" />
+  </svg>
+);
 
 export default CreatorDetailHero;
