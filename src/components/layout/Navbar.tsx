@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -29,7 +28,6 @@ const Navbar = ({
     }
   };
 
-  // Focus the search input when it's opened
   useEffect(() => {
     if (searchOpen && searchInputRef.current) {
       searchInputRef.current.focus();
@@ -51,14 +49,12 @@ const Navbar = ({
           <Logo hideInHeader={false} />
         </div>
         
-        {/* Center-aligned search form - hidden on mobile */}
         <div className="hidden sm:flex flex-1 justify-center px-4 max-w-md mx-auto">
           <form onSubmit={onSearch} className="w-full">
             <Input className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all" type="text" placeholder="Search creators..." value={searchValue} onChange={e => setSearchValue(e.target.value)} />
           </form>
         </div>
         
-        {/* Mobile search icon */}
         <div className="sm:hidden flex-1 flex justify-center">
           <button aria-label={searchOpen ? "Close search" : "Open search"} className={clsx("rounded-full p-2 hover:bg-black/30 transition focus:outline-none", searchOpen && "bg-black/40")} onClick={() => setSearchOpen(o => !o)}>
             {searchOpen ? <X className="w-5 h-5 text-white" /> : <SearchIcon className="w-5 h-5 text-white" />}
@@ -69,11 +65,11 @@ const Navbar = ({
           <Link to="/notifications" className="relative">
             <Button variant="ghost" size="icon" className="text-white/80 hover:text-white p-1 sm:p-2">
               <Bell className="h-5 w-5" />
-              <span 
-                className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-[#ea384c] text-white text-xs font-medium"
+              <div 
+                className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-medium aspect-square"
               >
                 3
-              </span>
+              </div>
             </Button>
           </Link>
           <Button variant="ghost" asChild className="hidden sm:flex">
@@ -99,4 +95,5 @@ const Navbar = ({
         </div>}
     </header>;
 };
+
 export default Navbar;

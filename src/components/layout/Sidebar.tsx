@@ -1,50 +1,63 @@
 import React from 'react';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import Logo from '@/components/shared/Logo';
-import NavbarProfileMenu from '@/components/layout/NavbarProfileMenu';
 import { Link, useLocation } from 'react-router-dom';
-const CATEGORY_LINKS = [{
-  to: '/findoms',
-  emoji: '👑',
-  label: 'Findoms'
-}, {
-  to: '/pay-pigs',
-  emoji: '🐷',
-  label: 'Pay Pigs'
-}, {
-  to: '/catfish',
-  emoji: '🐟',
-  label: 'Catfish'
-}, {
-  to: '/ai-bots',
-  emoji: '🤖',
-  label: 'AI Bots'
-}, {
-  to: '/twitter',
-  emoji: '🐦',
-  label: '(X) Twitter'
-}, {
-  to: '/celebrities',
-  emoji: '🌟',
-  label: 'Celebrities'
-}, {
-  to: '/blackmail',
-  emoji: '💸',
-  label: 'Blackmail'
-}, {
-  to: '/bots',
-  emoji: '⚡️',
-  label: 'Bots'
-}];
+import SidebarUserProfile from './SidebarUserProfile';
+
+const CATEGORY_LINKS = [
+  {
+    to: '/findoms',
+    emoji: '👑',
+    label: 'Findoms'
+  },
+  {
+    to: '/pay-pigs',
+    emoji: '🐷',
+    label: 'Pay Pigs'
+  },
+  {
+    to: '/catfish',
+    emoji: '🐟',
+    label: 'Catfish'
+  },
+  {
+    to: '/ai-bots',
+    emoji: '🤖',
+    label: 'AI Bots'
+  },
+  {
+    to: '/twitter',
+    emoji: '🐦',
+    label: '(X) Twitter'
+  },
+  {
+    to: '/celebrities',
+    emoji: '🌟',
+    label: 'Celebrities'
+  },
+  {
+    to: '/blackmail',
+    emoji: '💸',
+    label: 'Blackmail'
+  },
+  {
+    to: '/bots',
+    emoji: '⚡️',
+    label: 'Bots'
+  }
+];
+
 const FindomSidebar = () => {
   const location = useLocation();
-  return <Sidebar className="z-20">
+  
+  return (
+    <Sidebar className="z-20">
       <SidebarContent>
         <div className="px-2 pt-3 pb-3">
           <Logo forSidebar hideInHeader={false} />
         </div>
         <SidebarGroup className="py-0 my-0">
-          <SidebarGroupLabel>Categories</SidebarGroupLabel>
+          <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
@@ -69,9 +82,11 @@ const FindomSidebar = () => {
       </SidebarContent>
       <SidebarFooter>
         <SidebarGroup>
-          <NavbarProfileMenu />
+          <SidebarUserProfile />
         </SidebarGroup>
       </SidebarFooter>
-    </Sidebar>;
+    </Sidebar>
+  );
 };
+
 export default FindomSidebar;
