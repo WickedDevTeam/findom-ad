@@ -143,22 +143,56 @@ const Listings = ({ creators: initialCreators, onDelete, onFeature, searchTerm }
       
       if (data) {
         // Need to format the data to match Creator type
-        const formattedCreators: Creator[] = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          username: item.username,
-          profileImage: item.profile_image,
-          coverImage: item.cover_image || '',
-          bio: item.bio,
-          socialLinks: item.social_links,
-          isVerified: item.is_verified,
-          isFeatured: item.is_featured,
-          isNew: item.is_new,
-          type: item.type,
-          categories: [], // Will be populated below
-          gallery: [],    // Would need a separate query
-          createdAt: item.created_at,
-        }));
+        const formattedCreators: Creator[] = data.map(item => {
+          // Parse social_links from JSON if it's a string
+          let socialLinks = {
+            twitter: undefined,
+            throne: undefined,
+            cashapp: undefined,
+            onlyfans: undefined,
+            other: undefined
+          };
+          
+          if (typeof item.social_links === 'string') {
+            try {
+              const parsedLinks = JSON.parse(item.social_links);
+              socialLinks = {
+                twitter: parsedLinks.twitter || undefined,
+                throne: parsedLinks.throne || undefined,
+                cashapp: parsedLinks.cashapp || undefined,
+                onlyfans: parsedLinks.onlyfans || undefined,
+                other: parsedLinks.other || undefined
+              };
+            } catch (e) {
+              console.error('Error parsing social_links JSON:', e);
+            }
+          } else if (item.social_links && typeof item.social_links === 'object') {
+            socialLinks = {
+              twitter: item.social_links.twitter || undefined,
+              throne: item.social_links.throne || undefined,
+              cashapp: item.social_links.cashapp || undefined,
+              onlyfans: item.social_links.onlyfans || undefined,
+              other: item.social_links.other || undefined
+            };
+          }
+          
+          return {
+            id: item.id,
+            name: item.name,
+            username: item.username,
+            profileImage: item.profile_image,
+            coverImage: item.cover_image || '',
+            bio: item.bio,
+            socialLinks: socialLinks,
+            isVerified: item.is_verified,
+            isFeatured: item.is_featured,
+            isNew: item.is_new,
+            type: item.type,
+            categories: [], // Will be populated below
+            gallery: [],    // Would need a separate query
+            createdAt: item.created_at,
+          };
+        });
         
         // For each creator, get their categories
         for (const creator of formattedCreators) {

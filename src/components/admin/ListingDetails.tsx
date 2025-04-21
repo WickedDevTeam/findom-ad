@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Creator } from '@/types';
 import { PendingSubmission } from '@/types/admin';
@@ -44,12 +43,10 @@ export default function ListingDetails({
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('details');
 
-  // Helper to check if listing is a Creator
   const isCreator = (listing: ListingType): listing is Creator => {
     return 'profileImage' in listing;
   };
 
-  // Get profile image
   const getProfileImage = () => {
     if (isCreator(listing)) {
       return listing.profileImage;
@@ -58,7 +55,6 @@ export default function ListingDetails({
     return 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&fit=crop';
   };
   
-  // Get listing type badge
   const getListingTypeBadge = () => {
     if (isCreator(listing)) {
       if (listing.isFeatured) {
@@ -92,7 +88,6 @@ export default function ListingDetails({
       setLoading(true);
       
       if (isCreator(listing)) {
-        // Delete from creators table
         const { error } = await supabase
           .from('creators')
           .delete()
@@ -100,7 +95,6 @@ export default function ListingDetails({
           
         if (error) throw error;
       } else {
-        // Delete from listings table
         const { error } = await supabase
           .from('listings')
           .delete()

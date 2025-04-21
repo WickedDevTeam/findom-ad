@@ -118,16 +118,29 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               .single();
               
             if (creatorData) {
+              // Parse social_links from JSON if it's a string
+              let socialLinks = {};
+              if (typeof creatorData.social_links === 'string') {
+                try {
+                  socialLinks = JSON.parse(creatorData.social_links);
+                } catch (e) {
+                  console.error('Error parsing social_links JSON:', e);
+                  socialLinks = {};
+                }
+              } else if (creatorData.social_links && typeof creatorData.social_links === 'object') {
+                socialLinks = creatorData.social_links;
+              }
+
               data = {
                 name: creatorData.name,
                 username: creatorData.username,
                 bio: creatorData.bio,
                 type: creatorData.type,
                 // Map the social links
-                twitter: creatorData.social_links?.twitter || '',
-                cashapp: creatorData.social_links?.cashapp || '',
-                onlyfans: creatorData.social_links?.onlyfans || '',
-                throne: creatorData.social_links?.throne || '',
+                twitter: socialLinks?.twitter || '',
+                cashapp: socialLinks?.cashapp || '',
+                onlyfans: socialLinks?.onlyfans || '',
+                throne: socialLinks?.throne || '',
                 email: '', // Email isn't stored in creators table
                 category: '', // Categories are in a separate table for creators
               };
