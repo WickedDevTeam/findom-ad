@@ -30,30 +30,45 @@ const fetchMyFavorites = async (): Promise<Creator[]> => {
   if (!creators) return [];
 
   // Map database creators to frontend Creator type
-  return creators.map((c) => ({
-    id: c.id,
-    name: c.name,
-    username: c.username,
-    profileImage: c.profile_image,
-    coverImage: c.cover_image || undefined,
-    bio: c.bio,
-    socialLinks: typeof c.social_links === 'object' ? 
-      {
-        twitter: c.social_links?.twitter as string | undefined,
-        throne: c.social_links?.throne as string | undefined,
-        cashapp: c.social_links?.cashapp as string | undefined,
-        onlyfans: c.social_links?.onlyfans as string | undefined,
-        other: c.social_links?.other as string | undefined
-      } : 
-      {},
-    isVerified: c.is_verified,
-    isFeatured: c.is_featured,
-    isNew: c.is_new,
-    type: c.type,
-    categories: [], // We'll populate these if needed in the future
-    gallery: [], // We'll populate these if needed in the future
-    createdAt: c.created_at
-  }));
+  return creators.map((c) => {
+    // Safely extract social links
+    let socialLinks = {
+      twitter: undefined,
+      throne: undefined,
+      cashapp: undefined,
+      onlyfans: undefined,
+      other: undefined
+    };
+    
+    // Only try to access properties if social_links is an object and not an array
+    if (c.social_links && typeof c.social_links === 'object' && !Array.isArray(c.social_links)) {
+      const links = c.social_links as Record<string, string>;
+      socialLinks = {
+        twitter: links.twitter,
+        throne: links.throne,
+        cashapp: links.cashapp,
+        onlyfans: links.onlyfans,
+        other: links.other
+      };
+    }
+
+    return {
+      id: c.id,
+      name: c.name,
+      username: c.username,
+      profileImage: c.profile_image,
+      coverImage: c.cover_image || undefined,
+      bio: c.bio,
+      socialLinks: socialLinks,
+      isVerified: c.is_verified,
+      isFeatured: c.is_featured,
+      isNew: c.is_new,
+      type: c.type,
+      categories: [], // We'll populate these if needed in the future
+      gallery: [], // We'll populate these if needed in the future
+      createdAt: c.created_at
+    };
+  });
 };
 
 const MyFavoritesPage = () => {
