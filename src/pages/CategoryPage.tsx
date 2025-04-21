@@ -17,6 +17,8 @@ const CategoryPage = () => {
     setLoading(true);
     
     if (category) {
+      console.log('Loading category:', category); // Debug log
+      
       // Convert URL format to proper category name
       let formattedCategory = category
         .split('-')
@@ -27,12 +29,16 @@ const CategoryPage = () => {
       if (category === 'findoms') formattedCategory = 'Findoms';
       if (category === 'ai-bots') formattedCategory = 'AI Bots';
       if (category === 'pay-pigs') formattedCategory = 'Pay Pigs';
+      if (category === 'bots') formattedCategory = 'Bots';
       
       setCategoryName(formattedCategory);
       const filteredCreators = getCreatorsByCategory(formattedCategory);
+      console.log('Found creators:', filteredCreators.length); // Debug log
       setCreators(filteredCreators);
-      setLoading(false);
     }
+    
+    // Make sure to set loading to false regardless of outcome
+    setLoading(false);
   }, [category]);
   
   if (loading) {

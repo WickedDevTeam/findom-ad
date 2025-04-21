@@ -126,18 +126,24 @@ export const getNewCreators = (): Creator[] => {
 };
 
 export const getCreatorsByCategory = (category: string): Creator[] => {
+  console.log('Searching for category:', category); // Debug log
+  
   // Handle specific route mappings
   const categoryMapping: Record<string, string> = {
-    'bots': 'AI Bots',
+    'bots': 'Bots',
     'ai-bots': 'AI Bots',
     'pay-pigs': 'Pay Pigs'
   };
   
   const normalizedCategory = categoryMapping[category.toLowerCase()] || category;
+  console.log('Normalized category:', normalizedCategory); // Debug log
   
-  return creators.filter(creator => 
+  const result = creators.filter(creator => 
     creator.categories.some(c => 
       c.toLowerCase() === normalizedCategory.toLowerCase()
     )
   );
+  
+  console.log('Found creators:', result.length, result.map(c => c.name)); // Debug log
+  return result;
 };
