@@ -37,7 +37,15 @@ const fetchMyFavorites = async (): Promise<Creator[]> => {
     profileImage: c.profile_image,
     coverImage: c.cover_image || undefined,
     bio: c.bio,
-    socialLinks: c.social_links || {},
+    socialLinks: typeof c.social_links === 'object' ? 
+      {
+        twitter: c.social_links?.twitter as string | undefined,
+        throne: c.social_links?.throne as string | undefined,
+        cashapp: c.social_links?.cashapp as string | undefined,
+        onlyfans: c.social_links?.onlyfans as string | undefined,
+        other: c.social_links?.other as string | undefined
+      } : 
+      {},
     isVerified: c.is_verified,
     isFeatured: c.is_featured,
     isNew: c.is_new,
