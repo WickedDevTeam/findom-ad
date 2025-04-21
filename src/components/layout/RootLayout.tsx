@@ -8,15 +8,15 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider } from '@/components/ui/sidebar';
-import { Footer } from '@/components/ui/footer'; // <-- added import
+import { Footer } from '@/components/ui/footer'; // <-- already imported
 
 const RootLayout = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
-  
+
   return (
     <SidebarProvider>
-      <div className="min-h-screen text-white bg-gray-950 w-full flex flex-col">
+      <div className="min-h-screen flex flex-col w-full bg-gray-950 text-white">
         <Navbar>
           <Button 
             variant="ghost" 
@@ -27,11 +27,9 @@ const RootLayout = () => {
             <Menu className="h-5 w-5" />
           </Button>
         </Navbar>
-        
-        <div className="flex flex-1">
+        <div className="flex flex-1 w-full relative z-0">
           <Sidebar />
-          
-          <main className="flex-1 w-full pt-[72px] transition-all duration-300">
+          <main className="flex-1 w-full pt-[72px] transition-all duration-300 flex flex-col z-0">
             <AnimatePresence mode="wait">
               <motion.div 
                 key={location.pathname} 
@@ -39,14 +37,14 @@ const RootLayout = () => {
                 animate={{ opacity: 1, y: 0 }} 
                 exit={{ opacity: 0, y: -10 }} 
                 transition={{ duration: 0.3 }} 
-                className="container mx-auto px-3 sm:px-6 py-4 sm:py-8"
+                className="flex-1 flex flex-col justify-start px-3 sm:px-6 py-4 sm:py-8"
               >
                 <Outlet />
               </motion.div>
             </AnimatePresence>
           </main>
         </div>
-        <Footer /> {/* Footer appears on all pages */}
+        <Footer /> {/* Always sits below sidebar/content */}
       </div>
     </SidebarProvider>
   );

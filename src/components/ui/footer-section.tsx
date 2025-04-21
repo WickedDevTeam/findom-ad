@@ -17,7 +17,6 @@ import { Facebook, Instagram, Linkedin, Moon, Send, Sun, Twitter } from "lucide-
 
 function Footerdemo() {
   const [isDarkMode, setIsDarkMode] = React.useState(true)
-  const [isChatOpen, setIsChatOpen] = React.useState(false)
 
   React.useEffect(() => {
     if (isDarkMode) {
@@ -28,54 +27,56 @@ function Footerdemo() {
   }, [isDarkMode])
 
   return (
-    <footer className="relative border-t bg-background text-foreground transition-colors duration-300">
+    <footer className="relative z-10 border-t border-white/10 bg-findom-dark/95 backdrop-blur-md text-white transition-colors duration-300">
       <div className="container mx-auto px-4 py-12 md:px-6 lg:px-8">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-4">
           <div className="relative">
-            <h2 className="mb-4 text-3xl font-bold tracking-tight">Stay Connected</h2>
-            <p className="mb-6 text-muted-foreground">
+            <h2 className="mb-4 text-3xl font-bold tracking-tight text-white">
+              Stay Connected
+            </h2>
+            <p className="mb-6 text-findom-gray">
               Join our newsletter for the latest updates and exclusive offers.
             </p>
             <form className="relative">
               <Input
                 type="email"
                 placeholder="Enter your email"
-                className="pr-12 backdrop-blur-sm"
+                className="pr-12 bg-findom-dark/80 border-white/10 text-white placeholder:text-findom-gray/80"
               />
               <Button
                 type="submit"
                 size="icon"
-                className="absolute right-1 top-1 h-8 w-8 rounded-full bg-primary text-primary-foreground transition-transform hover:scale-105"
+                className="absolute right-1 top-1 h-8 w-8 rounded-full bg-findom-purple text-white transition-transform hover:scale-105"
               >
                 <Send className="h-4 w-4" />
                 <span className="sr-only">Subscribe</span>
               </Button>
             </form>
-            <div className="absolute -right-4 top-0 h-24 w-24 rounded-full bg-primary/10 blur-2xl" />
+            <div className="absolute -right-4 top-0 h-24 w-24 rounded-full bg-findom-purple/5 blur-2xl pointer-events-none" />
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Quick Links</h3>
+            <h3 className="mb-4 text-lg font-semibold text-white">Quick Links</h3>
             <nav className="space-y-2 text-sm">
-              <a href="#" className="block transition-colors hover:text-primary">
+              <a href="#" className="block text-findom-gray hover:text-findom-purple transition-colors">
                 Home
               </a>
-              <a href="#" className="block transition-colors hover:text-primary">
+              <a href="#" className="block text-findom-gray hover:text-findom-purple transition-colors">
                 About Us
               </a>
-              <a href="#" className="block transition-colors hover:text-primary">
+              <a href="#" className="block text-findom-gray hover:text-findom-purple transition-colors">
                 Services
               </a>
-              <a href="#" className="block transition-colors hover:text-primary">
+              <a href="#" className="block text-findom-gray hover:text-findom-purple transition-colors">
                 Products
               </a>
-              <a href="#" className="block transition-colors hover:text-primary">
+              <a href="#" className="block text-findom-gray hover:text-findom-purple transition-colors">
                 Contact
               </a>
             </nav>
           </div>
           <div>
-            <h3 className="mb-4 text-lg font-semibold">Contact Us</h3>
-            <address className="space-y-2 text-sm not-italic">
+            <h3 className="mb-4 text-lg font-semibold text-white">Contact Us</h3>
+            <address className="space-y-2 text-sm not-italic text-findom-gray">
               <p>123 Innovation Street</p>
               <p>Tech City, TC 12345</p>
               <p>Phone: (123) 456-7890</p>
@@ -83,12 +84,12 @@ function Footerdemo() {
             </address>
           </div>
           <div className="relative">
-            <h3 className="mb-4 text-lg font-semibold">Follow Us</h3>
+            <h3 className="mb-4 text-lg font-semibold text-white">Follow Us</h3>
             <div className="mb-6 flex space-x-4">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button variant="outline" size="icon" className="rounded-full border-white/20 hover:bg-findom-purple hover:text-white transition">
                       <Facebook className="h-4 w-4" />
                       <span className="sr-only">Facebook</span>
                     </Button>
@@ -101,7 +102,7 @@ function Footerdemo() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button variant="outline" size="icon" className="rounded-full border-white/20 hover:bg-findom-purple hover:text-white transition">
                       <Twitter className="h-4 w-4" />
                       <span className="sr-only">Twitter</span>
                     </Button>
@@ -114,7 +115,7 @@ function Footerdemo() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button variant="outline" size="icon" className="rounded-full border-white/20 hover:bg-findom-purple hover:text-white transition">
                       <Instagram className="h-4 w-4" />
                       <span className="sr-only">Instagram</span>
                     </Button>
@@ -127,7 +128,7 @@ function Footerdemo() {
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button variant="outline" size="icon" className="rounded-full">
+                    <Button variant="outline" size="icon" className="rounded-full border-white/20 hover:bg-findom-purple hover:text-white transition">
                       <Linkedin className="h-4 w-4" />
                       <span className="sr-only">LinkedIn</span>
                     </Button>
@@ -138,7 +139,7 @@ function Footerdemo() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 text-findom-gray">
               <Sun className="h-4 w-4" />
               <Switch
                 id="dark-mode"
@@ -152,18 +153,18 @@ function Footerdemo() {
             </div>
           </div>
         </div>
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-center md:flex-row">
-          <p className="text-sm text-muted-foreground">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-white/10 pt-8 text-center md:flex-row">
+          <p className="text-sm text-findom-gray">
             © 2024 Your Company. All rights reserved.
           </p>
           <nav className="flex gap-4 text-sm">
-            <a href="#" className="transition-colors hover:text-primary">
+            <a href="#" className="text-findom-gray hover:text-findom-purple transition-colors">
               Privacy Policy
             </a>
-            <a href="#" className="transition-colors hover:text-primary">
+            <a href="#" className="text-findom-gray hover:text-findom-purple transition-colors">
               Terms of Service
             </a>
-            <a href="#" className="transition-colors hover:text-primary">
+            <a href="#" className="text-findom-gray hover:text-findom-purple transition-colors">
               Cookie Settings
             </a>
           </nav>
