@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
 import FavoriteButton from './FavoriteButton';
+import { Tag } from 'lucide-react';
 
 const CATEGORY_EMOJIS: Record<string, string> = {
   Findoms: '👑',
@@ -51,12 +52,12 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
         <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
           <FavoriteButton creatorId={creator.id} />
           {creator.isFeatured && (
-            <AppBadge variant="featured" className="shadow-lg">
+            <AppBadge variant="featured" className="shadow-sm">
               Featured
             </AppBadge>
           )}
           {creator.isNew && (
-            <AppBadge variant="default" className="shadow-lg">
+            <AppBadge variant="success" className="shadow-sm">
               New
             </AppBadge>
           )}
@@ -74,6 +75,7 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
           <AppBadge
             variant="type"
             className="text-xs py-0.5 px-2"
+            icon={<Tag size={12} className="mr-1 opacity-70" />}
           >
             {creator.type}
           </AppBadge>
@@ -81,7 +83,7 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
             <AppBadge
               variant="category"
               className="text-xs py-0.5 px-2"
-              categoryName={mainCategory}
+              icon={<Tag size={12} className="mr-1 opacity-70" />}
             >
               {mainCategory}
             </AppBadge>

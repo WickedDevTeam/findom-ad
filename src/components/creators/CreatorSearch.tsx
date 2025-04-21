@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import { Tag } from 'lucide-react';
 
 interface CreatorSearchProps {
   onSearch: (query: string) => void;
@@ -25,12 +27,13 @@ const CreatorSearch = ({ onSearch, onFilterChange, selectedFilter }: CreatorSear
             className={`
               cursor-pointer transition-all duration-200
               ${selectedFilter === filter 
-                ? 'bg-findom-purple hover:bg-findom-purple/90' 
-                : 'hover:bg-white/10'
+                ? 'bg-black/80 border-[#8B5CF6]/80 text-[#E5DEFF]' 
+                : 'hover:bg-black/90 border-white/20'
               }
             `}
             onClick={() => onFilterChange(filter)}
           >
+            {selectedFilter === filter && <Tag size={12} className="mr-1 opacity-80" />}
             {filter}
           </Badge>
         </motion.div>

@@ -1,9 +1,9 @@
+
 import React from "react";
 import { Heart, HeartOff } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import AppBadge from "@/components/shared/AppBadge";
 
 interface FavoriteButtonProps {
   creatorId: string;
@@ -63,7 +63,7 @@ const useToggleFavorite = (creatorId: string) => {
   });
 };
 
-// Refactor AppBadge to not use onClick (as type does not allow it), wrap with a <button>
+// Updated to match mockup screenshot style
 export const FavoriteButton = ({
   creatorId,
   className = "",
@@ -87,21 +87,22 @@ export const FavoriteButton = ({
       style={{ minWidth: 0 }}
     >
       <span className={cn(
-        "flex items-center gap-1 px-2 py-1 rounded-full border text-xs font-semibold select-none shadow bg-black/60 hover:bg-black/80 transition-all",
+        "flex items-center gap-1 px-3 py-1 rounded-full border text-sm font-medium select-none bg-black/80 backdrop-blur-sm transition-all",
         isFavorite
-          ? "border-rose-400 text-rose-400"
-          : "border-findom-green text-findom-green"
+          ? "border-[#18d28f]/80 text-[#18d28f]"
+          : "border-[#18d28f]/80 text-[#18d28f]"
       )}>
         {isFavorite ? (
-          <svg className="w-4 h-4 fill-rose-400 text-rose-400" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+          <svg className="w-4 h-4 fill-[#18d28f] text-[#18d28f]" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41 0.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
         ) : (
-          <svg className="w-4 h-4 stroke-findom-green" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19.76 5.67C18.95 4.09 17.14 3 15 3c-1.5 0-2.91.66-3.85 1.97C9.91 3.66 8.5 3 7 3 4.86 3 3.05 4.09 2.24 5.67c-.46.83-.7 1.76-.69 2.71.02 2.33 1.47 4.55 4.11 7.12a31.969 31.969 0 0 0 5.19 4.21c.27.17.61.17.89 0a31.969 31.969 0 0 0 5.19-4.21c2.64-2.57 4.09-4.79 4.11-7.12.01-.95-.23-1.88-.69-2.71z"/></svg>
+          <svg className="w-4 h-4 stroke-[#18d28f]" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M19.76 5.67C18.95 4.09 17.14 3 15 3c-1.5 0-2.91.66-3.85 1.97C9.91 3.66 8.5 3 7 3 4.86 3 3.05 4.09 2.24 5.67c-.46.83-.7 1.76-.69 2.71.02 2.33 1.47 4.55 4.11 7.12a31.969 31.969 0 0 0 5.19 4.21c.27.17.61.17.89 0a31.969 31.969 0 0 0 5.19-4.21c2.64-2.57 4.09-4.79 4.11-7.12.01-.95-.23-1.88-.69-2.71z"/></svg>
         )}
-        <span className="ml-0.5 truncate">
+        <span className="truncate">
           {isFavorite ? "Favorited" : "Favorite"}
         </span>
       </span>
     </button>
   );
 };
+
 export default FavoriteButton;

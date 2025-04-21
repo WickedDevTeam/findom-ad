@@ -3,48 +3,47 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
-// Exact palette & style from mockup:
+// Refined badge styles from the mockup screenshot
 const badgeVariants = cva(
   [
     "inline-flex items-center justify-center",
     "rounded-full",
-    "px-4 py-1.5",
-    "min-h-[36px]",
+    "px-3 py-1", // More compact size
+    "min-h-[28px]", // Smaller height
     "font-medium",
-    "text-base",
-    "border-2",
-    "gap-1.5",
-    "bg-black/70",
-    "transition-colors duration-150",
-    "backdrop-blur",
-    "select-none",
-    "tracking-wide"
+    "text-sm", // Smaller text
+    "border",
+    "gap-1",
+    "bg-black/80", // Darker background
+    "transition-colors",
+    "backdrop-blur-sm",
+    "select-none"
   ].join(" "),
   {
     variants: {
       variant: {
         success:
-          "border-[#18d28f] text-[#18d28f] [&_svg]:text-[#18d28f]",
+          "border-[#18d28f]/80 text-[#18d28f] [&_svg]:text-[#18d28f]",
         pending:
-          "border-[#ffc527] text-[#ffc527] [&_svg]:text-[#ffc527]",
+          "border-[#ffc527]/80 text-[#ffc527] [&_svg]:text-[#ffc527]",
         submitted:
-          "border-[#5d64d9] text-[#A8B6FC] [&_svg]:text-[#A8B6FC]",
-        failed: // custom failed status
-          "border-[#A23B7C] text-[#ffb3e1] [&_svg]:text-[#ffb3e1]",
-        destructive: // alias to failed so old components still work
-          "border-[#A23B7C] text-[#ffb3e1] [&_svg]:text-[#ffb3e1]",
+          "border-[#5d64d9]/80 text-[#A8B6FC] [&_svg]:text-[#A8B6FC]",
+        failed:
+          "border-[#A23B7C]/80 text-[#ffb3e1] [&_svg]:text-[#ffb3e1]",
+        destructive: // alias to failed
+          "border-[#A23B7C]/80 text-[#ffb3e1] [&_svg]:text-[#ffb3e1]",
         outline:
-          "border-[#4b5563] text-white/80",
+          "border-white/20 text-white/90",
         default:
-          "border-[#8B5CF6] text-[#E5DEFF]",
-        category:
-          "border-[#5d64d9] text-[#A8B6FC]",
-        type:
-          "border-[#9b87f5] text-[#E5DEFF]",
+          "border-[#8B5CF6]/80 text-[#E5DEFF]",
+        category: // Match the CATFISH/FINDOM style from screenshot
+          "border-white/20 text-white bg-black/80 uppercase text-xs tracking-wider font-semibold",
+        type: // Match the BLACKMAIL style from screenshot
+          "border-white/20 text-white bg-black/80 uppercase text-xs tracking-wider font-semibold",
         featured:
-          "border-[#D946EF] text-[#D946EF]",
+          "border-[#D946EF]/80 text-[#D946EF]",
         new:
-          "border-[#18d28f] text-[#18d28f]",
+          "border-[#18d28f]/80 text-[#18d28f]",
       },
     },
     defaultVariants: {
@@ -64,9 +63,9 @@ function Badge({ className, variant, children, ...props }: BadgeProps) {
       {...props}
       style={{
         fontWeight: 500,
-        fontSize: 17,
+        fontSize: 14, // Smaller font size
         letterSpacing: "0.02em",
-        borderWidth: 2,
+        borderWidth: 1, // Thinner border
         WebkitTapHighlightColor: "transparent",
       }}
     >
