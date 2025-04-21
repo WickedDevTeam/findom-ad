@@ -22,14 +22,17 @@ const Navbar = ({ children }: { children?: React.ReactNode }) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-40 border-b border-white/10">
-      <div className="container mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
-        <div className="flex items-center gap-2 md:gap-6">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-white/10">
+      <div className="container mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 relative">
+        {/* Left: Logo */}
+        <div className="flex items-center gap-2 md:gap-6 min-w-0 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-start">
           <Logo />
-          {/* On desktop, always show search input to the right of logo.
-              On mobile, show a search icon: toggle input on click. */}
-          <div className="hidden sm:flex w-72">
-            <form onSubmit={onSearch} className="w-full">
+        </div>
+        
+        {/* Center: Search (desktop) */}
+        <div className="flex-1 flex justify-center w-full order-2 sm:order-none">
+          <div className="hidden sm:block w-80">
+            <form onSubmit={onSearch}>
               <Input
                 className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all"
                 type="text"
@@ -39,6 +42,7 @@ const Navbar = ({ children }: { children?: React.ReactNode }) => {
               />
             </form>
           </div>
+          {/* Mobile: collapsed search icon */}
           <div className="sm:hidden">
             <button
               aria-label="Open search"
@@ -63,9 +67,10 @@ const Navbar = ({ children }: { children?: React.ReactNode }) => {
               </form>
             )}
           </div>
-          {children}
         </div>
-        <div className="flex items-center gap-2 md:gap-4">
+
+        {/* Right: Navigation buttons */}
+        <div className="flex items-center gap-2 md:gap-4 min-w-0 flex-shrink-0 w-full sm:w-auto justify-center sm:justify-end">
           <Link to="/notifications" className="relative">
             <Button variant="ghost" size="icon" className="text-white/80 hover:text-white">
               <Bell className="h-5 w-5" />
@@ -85,6 +90,7 @@ const Navbar = ({ children }: { children?: React.ReactNode }) => {
           <Button variant="outline" asChild>
             <Link to="/admin">Admin</Link>
           </Button>
+          {children}
         </div>
       </div>
     </header>

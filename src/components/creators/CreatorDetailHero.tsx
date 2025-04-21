@@ -5,22 +5,11 @@ import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
 import { Twitter, Link as LinkIcon, DollarSign, Heart } from 'lucide-react';
 import FavoriteButton from './FavoriteButton';
+import { Badge } from '@/components/ui/badge';
 
 interface CreatorDetailHeroProps {
   creator: Creator;
 }
-
-const CATEGORY_EMOJIS: Record<string, string> = {
-  Findoms: '👑',
-  Catfish: '🐟',
-  'AI Bots': '🤖',
-  'Pay Pigs': '🐷',
-  Celebrities: '🌟',
-  Blackmail: '💸',
-  Twitter: '🐦',
-  Bots: '⚡️',
-  Other: '🔗'
-};
 
 const getDicebearSrc = (name: string) =>
   `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
@@ -33,23 +22,22 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
     !creator.profileImage || imageError
       ? getDicebearSrc(creator.name)
       : creator.profileImage;
-  const mainCategory = creator.categories[0];
-  const categoryEmoji = CATEGORY_EMOJIS[mainCategory] || CATEGORY_EMOJIS["Other"];
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
         <div className="relative">
-          <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-findom-purple shadow-lg">
+          <div className="w-36 h-36 rounded-full overflow-hidden border-4 border-findom-purple shadow-lg bg-findom-dark flex items-center justify-center text-center">
             <img 
               src={imageSrc}
               alt={creator.name}
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
+              style={{ background: 'transparent' }}
             />
           </div>
           <div className="absolute left-0 -bottom-8 w-full flex justify-center">
-            <FavoriteButton creatorId={creator.id} className="mt-2 z-20" />
+            <FavoriteButton creatorId={creator.id} className="mt-3 z-20" />
           </div>
           {creator.isFeatured && (
             <div className="absolute -top-2 -right-2">
@@ -65,18 +53,18 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
           <p className="text-lg text-white/80 mb-3">@{creator.username}</p>
           <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
             {creator.categories.map((category) => (
-              <AppBadge
+              <Badge
                 key={category}
                 variant="category"
-                className="flex items-center gap-1 text-sm font-semibold"
+                categoryName={category}
+                className="text-sm font-semibold"
               >
-                <span>{CATEGORY_EMOJIS[category] || ''}</span>
                 {category}
-              </AppBadge>
+              </Badge>
             ))}
-            <AppBadge variant="type" className="text-sm font-semibold">
+            <Badge variant="outline" className="text-sm font-semibold border-findom-green text-findom-green">
               {creator.type}
-            </AppBadge>
+            </Badge>
           </div>
           <div className="flex flex-wrap gap-2 justify-center md:justify-start">
             {creator.socialLinks.twitter && (
@@ -118,21 +106,21 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
             <p className="text-white/70 mb-1 font-medium">Categories</p>
             <div className="flex flex-wrap gap-2">
               {creator.categories.map((category) => (
-                <AppBadge
+                <Badge
                   key={category}
                   variant="category"
-                  className="flex items-center gap-1"
+                  categoryName={category}
                 >
-                  <span>{CATEGORY_EMOJIS[category] || ''}</span>{category}
-                </AppBadge>
+                  {category}
+                </Badge>
               ))}
             </div>
           </div>
           <div>
             <p className="text-white/70 mb-1 font-medium">Type</p>
-            <AppBadge variant="type" className="capitalize">
+            <Badge variant="outline" className="capitalize border-findom-green text-findom-green">
               {creator.type}
-            </AppBadge>
+            </Badge>
           </div>
         </div>
         {creator.bio && (
