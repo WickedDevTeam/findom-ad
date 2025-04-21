@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -43,7 +44,6 @@
   
   body {
     @apply bg-findom-dark text-foreground antialiased;
-    z-index: 0;
   }
 
   html {
@@ -75,11 +75,5 @@
   
   .promo-card {
     @apply relative overflow-hidden rounded-lg bg-black/50 backdrop-blur-sm border border-findom-orange/30 transition-all duration-300;
-  }
-
-  .favorite-btn {
-    @apply px-4 py-2 rounded-full border-2 border-findom-green text-findom-green bg-transparent transition-colors font-semibold text-base flex items-center gap-2 hover:bg-findom-green/10 focus:outline-none;
-    min-width: 110px;
-    min-height: 44px;
   }
 }
