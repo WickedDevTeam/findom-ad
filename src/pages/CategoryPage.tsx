@@ -33,53 +33,55 @@ const categoryDescriptions: Record<string, string> = {
   'bots': 'Automated companions for various purposes.',
 };
 
+// Formatted display names for categories
+const categoryDisplayNames: Record<string, string> = {
+  'findoms': 'Findoms',
+  'catfish': 'Catfish',
+  'ai-bots': 'AI Bots',
+  'celebrities': 'Celebrities',
+  'twitter': 'Twitter',
+  'blackmail': 'Blackmail', 
+  'pay-pigs': 'Pay Pigs',
+  'bots': 'Bots',
+};
+
 const CategoryPage = () => {
   const { category } = useParams<{ category: string }>();
   const [loading, setLoading] = useState(true);
   const [creators, setCreators] = useState<Creator[]>([]);
   const [categoryName, setCategoryName] = useState('');
   const [categorySlug, setCategorySlug] = useState('');
+  const [error, setError] = useState(false);
   
   useEffect(() => {
+    if (!category) {
+      setError(true);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
+    setError(false);
+    setCategorySlug(category);
     
-    if (category) {
-      console.log('Loading category:', category); // Debug log
-      setCategorySlug(category);
-      
-      // Convert URL format to proper category name
-      let formattedCategory = category
-        .split('-')
+    // Get the display name from our mapping or generate it from the slug
+    const displayName = categoryDisplayNames[category] || 
+      category.split('-')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
-      
-      // Special handling for specific categories
-      if (category === 'findoms') formattedCategory = 'Findoms';
-      if (category === 'ai-bots') formattedCategory = 'AI Bots';
-      if (category === 'pay-pigs') formattedCategory = 'Pay Pigs';
-      if (category === 'bots') formattedCategory = 'Bots';
-      
-      setCategoryName(formattedCategory);
-      const filteredCreators = getCreatorsByCategory(formattedCategory);
-      console.log('Found creators:', filteredCreators.length); // Debug log
-      setCreators(filteredCreators);
-    }
     
-    // Make sure to set loading to false regardless of outcome
+    setCategoryName(displayName);
+    
+    // Get creators for this category
+    console.log(`Getting creators for category: ${displayName} (slug: ${category})`);
+    const filteredCreators = getCreatorsByCategory(category);
+    console.log(`Found ${filteredCreators.length} creators for ${category}`);
+    setCreators(filteredCreators);
     setLoading(false);
   }, [category]);
   
-  // Return loading state if still loading
-  if (loading) {
-    return (
-      <div className="w-full h-64 flex items-center justify-center">
-        <div className="h-8 w-8 border-4 border-findom-purple/30 border-t-findom-purple rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-  
-  // If the category parameter is missing, show error
-  if (!category) {
+  // Return error state if category parameter is missing
+  if (error || !category) {
     return (
       <div className="text-center py-12">
         <AlertCircle className="w-16 h-16 mx-auto text-findom-orange mb-4" />
@@ -90,6 +92,15 @@ const CategoryPage = () => {
         <Button asChild className="mt-6">
           <Link to="/">Back to Home</Link>
         </Button>
+      </div>
+    );
+  }
+  
+  // Return loading state if still loading
+  if (loading) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-findom-purple/30 border-t-findom-purple rounded-full animate-spin"></div>
       </div>
     );
   }

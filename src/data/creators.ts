@@ -125,18 +125,27 @@ export const getNewCreators = (): Creator[] => {
   return creators.filter(creator => creator.isNew);
 };
 
-export const getCreatorsByCategory = (category: string): Creator[] => {
-  console.log('Searching for category:', category); // Debug log
+export const getCreatorsByCategory = (categorySlug: string): Creator[] => {
+  console.log('Searching for category slug:', categorySlug); // Debug log
   
-  // Handle specific route mappings
+  // Convert slug to display name format
   const categoryMapping: Record<string, string> = {
-    'bots': 'Bots',
+    'findoms': 'Findom',
+    'catfish': 'Catfish',
     'ai-bots': 'AI Bots',
-    'pay-pigs': 'Pay Pigs'
+    'celebrities': 'Celebrities',
+    'twitter': 'Twitter',
+    'blackmail': 'Blackmail',
+    'pay-pigs': 'Pay Pigs',
+    'bots': 'Bots'
   };
   
-  const normalizedCategory = categoryMapping[category.toLowerCase()] || category;
-  console.log('Normalized category:', normalizedCategory); // Debug log
+  const normalizedCategory = categoryMapping[categorySlug] || 
+    categorySlug.split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  
+  console.log('Normalized category name:', normalizedCategory); // Debug log
   
   const result = creators.filter(creator => 
     creator.categories.some(c => 
