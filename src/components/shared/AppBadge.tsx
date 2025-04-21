@@ -4,19 +4,18 @@ import { X, Check, Info, AlertTriangle } from "lucide-react";
 import clsx from "clsx";
 
 /**
- * Slightly more vibrant, harmonious category badge colors.
- * Each is a custom pastel+vibrant hue chosen for pleasing contrast per user.
+ * Revamped modern, highly-readable category badge colors using glassmorphism and clear, pleasing palettes.
  */
 const CATEGORY_COLORS: Record<string, string> = {
-  Findoms:    "border-[#A88BFE] text-[#A88BFE] bg-[#F5F2FF]/50 hover:bg-[#A88BFE]/10",     // Violet
-  Catfish:    "border-[#4FC3EA] text-[#4FC3EA] bg-[#E8F7FB]/40 hover:bg-[#4FC3EA]/10",     // Blue-cyan
-  "AI Bots":  "border-[#51CD9B] text-[#51CD9B] bg-[#E3FCEF]/40 hover:bg-[#51CD9B]/10",     // Mint green
-  "Pay Pigs": "border-[#FEAC70] text-[#FEAC70] bg-[#FFF5E6]/50 hover:bg-[#FEAC70]/10",     // Peach
-  Celebrities: "border-[#F97EA1] text-[#F97EA1] bg-[#FFF0F6]/50 hover:bg-[#F97EA1]/10",    // Soft pink
-  Blackmail:  "border-[#EAADBC] text-[#EAADBC] bg-[#FAF1F4]/60 hover:bg-[#EAADBC]/10",     // Muted rose
-  Twitter:    "border-[#85A9F9] text-[#85A9F9] bg-[#EEF4FE]/50 hover:bg-[#85A9F9]/10",     // Blue
-  Bots:       "border-[#B6A3E4] text-[#B6A3E4] bg-[#F2EEFB]/45 hover:bg-[#B6A3E4]/10",     // Soft violet
-  Other:      "border-[#E1E1E1] text-[#CCCCCC] bg-[#30313C]/30 hover:bg-[#363647]/10"
+  Findoms:    "bg-[#865DDA]/80 border-[#BE9EFF] text-white/90",
+  Catfish:    "bg-[#41C8E9]/20 border-[#41C8E9] text-[#35B6D7]",
+  "AI Bots":  "bg-[#95F6E6]/20 border-[#2BE3C3] text-[#38BCAA]",
+  "Pay Pigs": "bg-[#FFDDA2]/40 border-[#FFB860] text-[#D8931A]",
+  Celebrities: "bg-[#FFCEF5]/25 border-[#FF70BE] text-[#CE1E7F]",
+  Blackmail:  "bg-[#EAADBC]/40 border-[#EAADBC] text-[#8B4257]",
+  Twitter:    "bg-[#B0D2FC]/25 border-[#498AE2] text-[#1564C0]",
+  Bots:       "bg-[#9e94ee]/15 border-[#7E69AB] text-[#705AA0]",
+  Other:      "bg-white/5 border-white/20 text-white/70"
 };
 
 type AppBadgeVariant =
@@ -49,16 +48,15 @@ interface AppBadgeProps {
 }
 
 const badgeStyles = {
-  // Slightly upped vibrancy for non-category badges
-  success: "border-[#5CCC91] text-[#5CCC91] bg-[#EDF9F3]/60 hover:bg-[#5CCC91]/10",
-  warning: "border-[#FFD180] text-[#FFD180] bg-[#FFF6E3]/60 hover:bg-[#FFD180]/10",
-  info:    "border-[#62A6F7] text-[#62A6F7] bg-[#ECF4FB]/70 hover:bg-[#62A6F7]/10",
-  danger:  "border-[#FF7A85] text-[#FF7A85] bg-[#FFF1F2]/60 hover:bg-[#FF7A85]/10",
+  success: "bg-[#3ed098]/20 border-[#42c88b] text-[#3ed098]",
+  warning: "bg-[#ffe1af]/30 border-[#FFD180] text-[#D5A348]",
+  info:    "bg-[#b0d2fc]/20 border-[#62A6F7] text-[#2471C7]",
+  danger:  "bg-[#fff0f0]/40 border-[#FF7A85] text-[#D43645]",
   category: "", // set below with CATEGORY_COLORS
-  type: "border-[#A085F9] text-[#A085F9] bg-[#F5F2FF]/60 hover:bg-[#A085F9]/10", // purple
-  featured: "border-[#B49DF9] text-[#B49DF9] bg-[#F1EDFF]/60 hover:bg-[#B49DF9]/10",
-  vip: "border-[#FEDE89] text-[#FEDE89] bg-[#FFF7DE]/50 hover:bg-[#FEDE89]/10",
-  default: "border-white/15 text-white/80 bg-black/10 hover:bg-white/5",
+  type: "bg-[#c8bafe]/18 border-[#A085F9] text-[#7C57D4]",
+  featured: "bg-[#B49DF9]/25 border-[#A085F9] text-[#57419E]",
+  vip: "bg-[#FEDE89]/40 border-[#FEDE89] text-[#B19646]",
+  default: "bg-black/30 border-white/10 text-white/80",
 };
 
 export function AppBadge({
@@ -69,8 +67,9 @@ export function AppBadge({
   onClick,
   categoryName,
 }: AppBadgeProps) {
-  // Use vibrant color for category variant if categoryName is provided
+  // Use polished glass style for category variant if categoryName is provided
   const isCategory = variant === "category";
+  const isType = variant === "type";
   const customClass =
     isCategory && categoryName && CATEGORY_COLORS[categoryName]
       ? CATEGORY_COLORS[categoryName]
@@ -88,15 +87,24 @@ export function AppBadge({
     <span
       className={clsx(
         // Universal badge look: pill, smooth font, subtle border+bg, spacing, some hover
-        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 min-h-[32px] min-w-0 text-sm font-semibold shadow-none ring-0 select-none transition-all duration-150",
+        "inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1 min-h-[28px] min-w-0 text-xs font-semibold shadow-sm ring-0 select-none transition-all duration-150",
         "focus:outline-none focus-visible:ring-2 focus-visible:ring-findom-purple/30",
-        "hover:shadow-md hover:scale-[1.04]", // slight interactive feedback
+        "hover:shadow-md hover:scale-[1.04]",
+        // subtle glass effect + shadow for dark backgrounds
+        "backdrop-blur-md",
+        isType ? "capitalize tracking-wide" : "",
         customClass,
         onClick && "cursor-pointer",
         className
       )}
       onClick={onClick}
-      style={{ lineHeight: "1.2" }}
+      style={{
+        lineHeight: "1.18",
+        boxShadow: isCategory
+          ? "0 2px 8px 0 rgba(40,35,80,0.18)"
+          : "none",
+        letterSpacing: ".01em",
+      }}
     >
       {/* Never show any icon for categories! */}
       {!isCategory && IconComponent && (
@@ -108,3 +116,4 @@ export function AppBadge({
 }
 
 export default AppBadge;
+
