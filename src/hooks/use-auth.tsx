@@ -1,41 +1,23 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Session, User } from '@supabase/supabase-js';
+import { AuthContext } from '@/components/auth/AuthProvider';
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const toast = useToast();
+  const context = useContext(AuthContext);
 
-  useEffect(() => {
-    // First set up the auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user ?? null);
-        setLoading(false);
-      }
-    );
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
 
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+  const { user, session, loading } = context;
 
   const signOut = async () => {
     try {
+      const { supabase } = await import('@/integrations/supabase/client');
       await supabase.auth.signOut();
       navigate('/');
       toast.toast({
