@@ -11,4 +11,3 @@ const PromotionPage = () => {
 };
 
 export default PromotionPage;
-
