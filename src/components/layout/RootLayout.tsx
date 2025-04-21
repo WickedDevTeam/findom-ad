@@ -7,52 +7,78 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 
-// Mobile sidebar toggle component
-const MobileSidebarToggle = () => {
-  const { toggleSidebar } = useSidebar();
-  
-  return (
-    <Button 
-      variant="ghost" 
-      size="icon" 
-      className="md:hidden" 
-      onClick={toggleSidebar}
-      data-sidebar-trigger="true"
-    >
-      <Menu className="h-5 w-5" />
-    </Button>
-  );
-};
-
-const RootLayoutContent = () => {
+const RootLayout = () => {
   const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const isMobile = useIsMobile();
-  const { openMobile, setOpenMobile } = useSidebar();
   
   // Close sidebar when changing routes on mobile
   useEffect(() => {
-    if (isMobile && openMobile) {
-      setOpenMobile(false);
+    if (isMobile && sidebarOpen) {
+      setSidebarOpen(false);
     }
-  }, [location.pathname, isMobile, openMobile, setOpenMobile]);
+  }, [location.pathname, isMobile]);
+
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.querySelector('[data-sidebar="sidebar"]');
+      const sidebarTrigger = document.querySelector('[data-sidebar-trigger="true"]');
+      
+      if (isMobile && sidebarOpen && sidebar && !sidebar.contains(event.target as Node) && 
+          sidebarTrigger && !sidebarTrigger.contains(event.target as Node)) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isMobile, sidebarOpen]);
+
+  // Handle ESC key to close sidebar
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [sidebarOpen]);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
 
   return (
     <div className="min-h-screen text-white bg-gray-950">
       {/* Mobile sidebar backdrop */}
-      {openMobile && (
+      {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-40 md:hidden" 
-          onClick={() => setOpenMobile(false)} 
+          onClick={() => setSidebarOpen(false)} 
         />
       )}
       
       <Navbar>
-        <MobileSidebarToggle />
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="md:hidden" 
+          onClick={toggleSidebar}
+          data-sidebar-trigger="true"
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
       </Navbar>
       
-      <Sidebar />
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <main className="md:pl-[208px] pt-[72px] min-h-screen transition-all duration-300">
         <AnimatePresence mode="wait">
@@ -69,14 +95,6 @@ const RootLayoutContent = () => {
         </AnimatePresence>
       </main>
     </div>
-  );
-};
-
-const RootLayout = () => {
-  return (
-    <SidebarProvider>
-      <RootLayoutContent />
-    </SidebarProvider>
   );
 };
 
