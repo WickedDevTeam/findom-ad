@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,41 +16,42 @@ export function useProfileInterests() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
 
-  // Fetch interest categories
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setCategoriesLoading(true);
-        const { data, error } = await supabase
-          .from('categories')
-          .select('id, name, slug, emoji')
-          .order('name');
-          
-        if (error) throw error;
-        setCategories(data || []);
-      } catch (err) {
-        console.error('Error loading categories:', err);
-        toast.toast({
-          title: 'Error',
-          description: 'Failed to load categories',
-          variant: 'destructive',
-        });
-      } finally {
-        setCategoriesLoading(false);
-      }
-    };
-
-    fetchCategories();
+  // Fetch interest categories with useCallback to prevent recreation on each render
+  const fetchCategories = useCallback(async () => {
+    try {
+      setCategoriesLoading(true);
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name, slug, emoji')
+        .order('name');
+        
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (err) {
+      console.error('Error loading categories:', err);
+      toast.toast({
+        title: 'Error',
+        description: 'Failed to load categories',
+        variant: 'destructive',
+      });
+    } finally {
+      setCategoriesLoading(false);
+    }
   }, [toast]);
 
-  // Toggle interest
-  const toggleInterest = (categoryId: string) => {
+  // Use memoized fetchCategories function in useEffect
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  // Toggle interest with useCallback
+  const toggleInterest = useCallback((categoryId: string) => {
     setInterests((prev) =>
       prev.includes(categoryId)
         ? prev.filter((id) => id !== categoryId)
         : [...prev, categoryId]
     );
-  };
+  }, []);
 
   return {
     interests,

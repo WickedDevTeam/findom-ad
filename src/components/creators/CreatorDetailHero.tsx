@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
 import { Twitter, Link as LinkIcon, DollarSign, Heart } from 'lucide-react';
@@ -13,23 +13,59 @@ interface CreatorDetailHeroProps {
   creator: Creator;
 }
 
+// Memoize social link component to prevent unnecessary re-renders
+const SocialLink = memo(({ href, icon, label }: { href: string; icon: React.ReactNode; label: string }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={label}
+    className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors"
+  >
+    {icon}
+  </a>
+));
+
+SocialLink.displayName = 'SocialLink';
+
+// Optimize Crown component by memoizing it
+const Crown = memo(({
+  className
+}: {
+  className?: string;
+}) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
+    <path d="M4 22h16" />
+  </svg>
+));
+
+Crown.displayName = 'Crown';
+
 const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   const [imageError, setImageError] = useState(false);
+  
+  // Memoize the image error handler
+  const handleImageError = useCallback(() => setImageError(true), []);
+  
   // Use the provided profile image, or the stylish real-woman placeholder (not dicebear)
   const imageSrc =
     !creator.profileImage || imageError
       ? getProfileModelPlaceholder()
       : creator.profileImage;
+      
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
         <div className="relative">
           <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-findom-purple shadow-lg">
             <img
-              src={imageSrc}
+              src={`${imageSrc}${imageSrc.includes('?') ? '&' : '?'}w=128&h=128&fit=crop&auto=format&q=90`}
               alt={creator.name}
+              width={128}
+              height={128}
               className="w-full h-full object-cover"
-              onError={() => setImageError(true)}
+              onError={handleImageError}
             />
           </div>
           <div className="absolute -right-2 bottom-2">
@@ -60,54 +96,39 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
           </div>
           <div className="flex flex-wrap gap-2 justify-center md:justify-start">
             {creator.socialLinks.twitter && (
-              <a
+              <SocialLink 
                 href={creator.socialLinks.twitter}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors"
-              >
-                <Twitter className="w-5 h-5" />
-              </a>
+                icon={<Twitter className="w-5 h-5" />}
+                label="Twitter"
+              />
             )}
             {creator.socialLinks.throne && (
-              <a
+              <SocialLink 
                 href={creator.socialLinks.throne}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors"
-              >
-                <Crown className="w-5 h-5" />
-              </a>
+                icon={<Crown className="w-5 h-5" />}
+                label="Throne"
+              />
             )}
             {creator.socialLinks.cashapp && (
-              <a
+              <SocialLink 
                 href={creator.socialLinks.cashapp}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors"
-              >
-                <DollarSign className="w-5 h-5" />
-              </a>
+                icon={<DollarSign className="w-5 h-5" />}
+                label="CashApp"
+              />
             )}
             {creator.socialLinks.onlyfans && (
-              <a
+              <SocialLink 
                 href={creator.socialLinks.onlyfans}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors"
-              >
-                <Heart className="w-5 h-5" />
-              </a>
+                icon={<Heart className="w-5 h-5" />}
+                label="OnlyFans"
+              />
             )}
             {creator.socialLinks.other && (
-              <a
+              <SocialLink 
                 href={creator.socialLinks.other}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full bg-white/10 hover:bg-findom-purple/20 transition-colors"
-              >
-                <LinkIcon className="w-5 h-5" />
-              </a>
+                icon={<LinkIcon className="w-5 h-5" />}
+                label="Other link"
+              />
             )}
           </div>
         </div>
@@ -121,13 +142,4 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   );
 };
 
-const Crown = ({
-  className
-}: {
-  className?: string;
-}) => <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-    <path d="m2 4 3 12h14l3-12-6 7-4-7-4 7-6-7z" />
-    <path d="M4 22h16" />
-  </svg>;
-
-export default CreatorDetailHero;
+export default memo(CreatorDetailHero);

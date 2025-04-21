@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
 import AppBadge from '@/components/shared/AppBadge';
@@ -22,8 +22,11 @@ interface CreatorCardProps {
   creator: Creator;
 }
 
-const CreatorCard = ({ creator }: CreatorCardProps) => {
+const CreatorCard = memo(({ creator }: CreatorCardProps) => {
   const [imageError, setImageError] = useState(false);
+  
+  // Memoize the error handler to prevent recreating on re-renders
+  const handleImageError = useCallback(() => setImageError(true), []);
 
   // Use only placeholder if missing or error (rotating young model images)
   const imageSrc =
@@ -40,10 +43,13 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-findom-gray/20">
         <img
-          src={imageSrc}
+          src={`${imageSrc}${imageSrc.includes('?') ? '&' : '?'}w=400&h=300&fit=crop&auto=format&q=80`}
           alt={creator.name}
+          width={400}
+          height={300}
+          loading="lazy"
           className="w-full h-full object-cover transition duration-200 group-hover:scale-105 bg-findom-dark"
-          onError={() => setImageError(true)}
+          onError={handleImageError}
         />
         {/* Removed overlapping featured badge from here */}
       </div>
@@ -76,6 +82,8 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
       </div>
     </Link>
   );
-};
+});
+
+CreatorCard.displayName = 'CreatorCard';
 
 export default CreatorCard;

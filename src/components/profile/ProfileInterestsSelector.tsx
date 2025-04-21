@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { Loader } from 'lucide-react';
@@ -18,7 +18,7 @@ interface ProfileInterestsSelectorProps {
   loading: boolean;
 }
 
-const ProfileInterestsSelector: React.FC<ProfileInterestsSelectorProps> = ({
+const ProfileInterestsSelector: React.FC<ProfileInterestsSelectorProps> = memo(({
   categories,
   interests,
   toggleInterest,
@@ -67,6 +67,8 @@ const ProfileInterestsSelector: React.FC<ProfileInterestsSelectorProps> = ({
       </>
     )}
   </div>
-);
+));
+
+ProfileInterestsSelector.displayName = 'ProfileInterestsSelector';
 
 export default ProfileInterestsSelector;

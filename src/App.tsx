@@ -3,22 +3,48 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { Suspense, lazy } from "react";
 import RootLayout from "./components/layout/RootLayout";
-import HomePage from "./pages/HomePage";
-import CreatorDetailPage from "./pages/CreatorDetailPage";
-import PromotionPage from "./pages/PromotionPage";
-import CreateListingPage from "./pages/CreateListingPage";
-import SignupPage from "./pages/SignupPage";
-import AdminPage from "./pages/AdminPage";
-import NotFound from "./pages/NotFound";
-import NotificationsPage from "./pages/NotificationsPage";
-import CategoryPage from "./pages/CategoryPage";
-import MyFavoritesPage from "./pages/MyFavoritesPage";
-import ProfilePage from "./pages/ProfilePage";
-import AuthProvider from "./components/auth/AuthProvider";
+import { Skeleton } from "./components/ui/skeleton";
 
-const queryClient = new QueryClient();
+// Lazy load pages to reduce initial bundle size
+const HomePage = lazy(() => import("./pages/HomePage"));
+const CreatorDetailPage = lazy(() => import("./pages/CreatorDetailPage"));
+const PromotionPage = lazy(() => import("./pages/PromotionPage"));
+const CreateListingPage = lazy(() => import("./pages/CreateListingPage"));
+const SignupPage = lazy(() => import("./pages/SignupPage"));
+const AdminPage = lazy(() => import("./pages/AdminPage"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const NotificationsPage = lazy(() => import("./pages/NotificationsPage"));
+const CategoryPage = lazy(() => import("./pages/CategoryPage"));
+const MyFavoritesPage = lazy(() => import("./pages/MyFavoritesPage"));
+const ProfilePage = lazy(() => import("./pages/ProfilePage"));
+
+// Create a loading fallback component
+const PageSkeleton = () => (
+  <div className="w-full space-y-4 p-4">
+    <Skeleton className="h-40 w-full rounded-lg" />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <Skeleton className="h-20 rounded-lg" />
+      <Skeleton className="h-20 rounded-lg" />
+      <Skeleton className="h-20 rounded-lg" />
+    </div>
+    <Skeleton className="h-screen w-full rounded-lg" />
+  </div>
+);
+
+// Configure React Query with performance optimizations
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // Prevents unnecessary refetches when window regains focus
+      staleTime: 60000, // Data considered fresh for 1 minute
+      cacheTime: 5 * 60 * 1000, // Cache data for 5 minutes
+      retry: 1, // Only retry failed requests once
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,29 +55,101 @@ const App = () => (
         <AuthProvider>
           <Routes>
             <Route element={<RootLayout />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/creator/:username" element={<CreatorDetailPage />} />
-              <Route path="/promotion" element={<PromotionPage />} />
-              <Route path="/create-listing" element={<CreateListingPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/signup" element={<SignupPage />} />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <HomePage />
+                </Suspense>
+              } />
+              <Route path="/creator/:username" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CreatorDetailPage />
+                </Suspense>
+              } />
+              <Route path="/promotion" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <PromotionPage />
+                </Suspense>
+              } />
+              <Route path="/create-listing" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CreateListingPage />
+                </Suspense>
+              } />
+              <Route path="/notifications" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <NotificationsPage />
+                </Suspense>
+              } />
+              <Route path="/signup" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <SignupPage />
+                </Suspense>
+              } />
+              <Route path="/admin" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <AdminPage />
+                </Suspense>
+              } />
+              <Route path="/profile" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <ProfilePage />
+                </Suspense>
+              } />
 
               {/* CATEGORY ROUTES */}
-              <Route path="/findoms" element={<CategoryPage />} />
-              <Route path="/catfish" element={<CategoryPage />} />
-              <Route path="/ai-bots" element={<CategoryPage />} />
-              <Route path="/celebrities" element={<CategoryPage />} />
-              <Route path="/twitter" element={<CategoryPage />} />
-              <Route path="/blackmail" element={<CategoryPage />} />
-              <Route path="/pay-pigs" element={<CategoryPage />} />
-              <Route path="/bots" element={<CategoryPage />} />
+              <Route path="/findoms" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
+              <Route path="/catfish" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
+              <Route path="/ai-bots" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
+              <Route path="/celebrities" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
+              <Route path="/twitter" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
+              <Route path="/blackmail" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
+              <Route path="/pay-pigs" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
+              <Route path="/bots" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <CategoryPage />
+                </Suspense>
+              } />
 
               {/* Favorites Page */}
-              <Route path="/favorites" element={<MyFavoritesPage />} />
+              <Route path="/favorites" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <MyFavoritesPage />
+                </Suspense>
+              } />
 
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={
+                <Suspense fallback={<PageSkeleton />}>
+                  <NotFound />
+                </Suspense>
+              } />
             </Route>
           </Routes>
         </AuthProvider>

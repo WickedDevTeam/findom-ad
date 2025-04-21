@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { getCreatorByUsername, creators } from '@/data/creators';
 import CreatorDetailHero from '@/components/creators/CreatorDetailHero';
@@ -8,12 +8,33 @@ import SimilarCreators from '@/components/creators/SimilarCreators';
 
 const CreatorDetailPage = () => {
   const { username } = useParams<{ username: string }>();
-  const creator = username ? getCreatorByUsername(username) : undefined;
   
-  // Scroll to top when the page loads
-  useEffect(() => {
-    window.scrollTo(0, 0);
+  // Memoize creator lookup to minimize expensive operations on re-renders
+  const creator = React.useMemo(() => 
+    username ? getCreatorByUsername(username) : undefined
+  , [username]);
+  
+  // Scroll to top when the page loads - optimized with useCallback
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'auto' // Using 'auto' instead of 'smooth' for better performance
+    });
   }, []);
+  
+  useEffect(() => {
+    scrollToTop();
+    
+    // Add preloaded title for better SEO and UX
+    if (creator) {
+      document.title = `${creator.name} (@${creator.username}) | Findom.ad`;
+    }
+    
+    // Cleanup function to reset title
+    return () => {
+      document.title = 'Findom.ad - Financial Domination Directory';
+    };
+  }, [creator, scrollToTop]);
   
   if (!creator) {
     return <Navigate to="/not-found" />;

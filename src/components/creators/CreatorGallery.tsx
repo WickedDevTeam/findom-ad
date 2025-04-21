@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AnimatedGroup } from '@/components/ui/animated-group';
 
 // Real woman/instagram model style gallery placeholders
@@ -21,11 +21,14 @@ interface CreatorGalleryProps {
 /**
  * Gallery as animated grid using AnimatedGroup
  */
-const CreatorGallery = ({ images }: CreatorGalleryProps) => {
-  const imageCount = images && images.length ? images.length : 0;
-  const allImages = imageCount > 0
-    ? images.map((img, idx) => img && img.length > 8 ? img : getRealModelPlaceholder(idx))
-    : Array.from({ length: 5 }, (_, i) => getRealModelPlaceholder(i));
+const CreatorGallery = React.memo(({ images }: CreatorGalleryProps) => {
+  // Memoize the image processing to prevent recalculation on re-renders
+  const allImages = useMemo(() => {
+    const imageCount = images && images.length ? images.length : 0;
+    return imageCount > 0
+      ? images.map((img, idx) => img && img.length > 8 ? img : getRealModelPlaceholder(idx))
+      : Array.from({ length: 5 }, (_, i) => getRealModelPlaceholder(i));
+  }, [images]);
 
   return (
     <div className="w-full max-w-3xl mx-auto">
@@ -36,16 +39,19 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
         {allImages.map((img, idx) => (
           <img
             key={idx}
-            src={img}
+            src={`${img}${img.includes('?') ? '&' : '?'}w=400&h=400&fit=crop&auto=format&q=80`}
             alt={`Gallery ${idx + 1}`}
             loading="lazy"
+            width={400}
+            height={400}
             className="w-full aspect-square object-cover rounded-2xl border-2 border-white/10 shadow"
           />
         ))}
       </AnimatedGroup>
     </div>
   );
-};
+});
+
+CreatorGallery.displayName = 'CreatorGallery';
 
 export default CreatorGallery;
-

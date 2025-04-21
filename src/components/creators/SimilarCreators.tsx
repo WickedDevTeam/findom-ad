@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Creator } from '@/types';
 import CreatorCard from './CreatorCard';
 
@@ -8,15 +8,18 @@ interface SimilarCreatorsProps {
   allCreators: Creator[];
 }
 
-const SimilarCreators = ({
+const SimilarCreators = React.memo(({
   currentCreator,
   allCreators
 }: SimilarCreatorsProps) => {
-  // Filter out the current creator and find similar ones based on categories
-  const similarCreators = allCreators
-    .filter(creator => creator.id !== currentCreator.id)
-    .filter(creator => creator.categories.some(category => currentCreator.categories.includes(category)))
-    .slice(0, 3); // Show at most 3 similar creators
+  // Memoize similar creators calculation to avoid recalculating on each render
+  const similarCreators = useMemo(() => {
+    return allCreators
+      .filter(creator => creator.id !== currentCreator.id)
+      .filter(creator => creator.categories.some(category => 
+        currentCreator.categories.includes(category)))
+      .slice(0, 3); // Show at most 3 similar creators
+  }, [currentCreator.id, currentCreator.categories, allCreators]);
 
   if (similarCreators.length === 0) {
     return null;
@@ -30,6 +33,8 @@ const SimilarCreators = ({
       </div>
     </div>
   );
-};
+});
+
+SimilarCreators.displayName = 'SimilarCreators';
 
 export default SimilarCreators;

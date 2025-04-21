@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, memo } from 'react';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -10,9 +10,9 @@ interface ProfileAvatarUploadProps {
   onAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
-const ProfileAvatarUpload: React.FC<ProfileAvatarUploadProps> = ({ avatarUrl, onAvatarChange }) => {
+const ProfileAvatarUpload: React.FC<ProfileAvatarUploadProps> = memo(({ avatarUrl, onAvatarChange }) => {
   const [hovering, setHovering] = useState(false);
-  const inputRef = React.useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleButtonClick = () => {
     if (inputRef.current) {
@@ -90,6 +90,8 @@ const ProfileAvatarUpload: React.FC<ProfileAvatarUploadProps> = ({ avatarUrl, on
       </div>
     </div>
   );
-};
+});
+
+ProfileAvatarUpload.displayName = 'ProfileAvatarUpload';
 
 export default ProfileAvatarUpload;

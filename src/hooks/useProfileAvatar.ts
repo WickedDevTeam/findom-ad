@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -9,8 +9,8 @@ export function useProfileAvatar() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
 
-  // Avatar change handler
-  const onAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Avatar change handler - memoized to prevent recreation on re-renders
+  const onAvatarChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       // Validate image type
@@ -40,10 +40,10 @@ export function useProfileAvatar() {
       setAvatarFile(null);
       setAvatarUrl(null);
     }
-  };
+  }, [toast]);
 
-  // Upload avatar to storage
-  const uploadAvatar = async (file: File) => {
+  // Upload avatar to storage - memoized with useCallback
+  const uploadAvatar = useCallback(async (file: File) => {
     try {
       setUploadLoading(true);
       const fileExt = file.name.split('.').pop();
@@ -65,7 +65,7 @@ export function useProfileAvatar() {
     } finally {
       setUploadLoading(false);
     }
-  };
+  }, []);
 
   return {
     avatarUrl,
