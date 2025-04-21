@@ -6,7 +6,7 @@ export const creators: Creator[] = [
     id: '1',
     name: 'Billie Eillish',
     username: 'billie-eillish',
-    profileImage: '/lovable-uploads/84460d5a-ebc0-4179-a324-10b2b46f5af5.png',
+    profileImage: 'https://images.unsplash.com/photo-1516920061176-591c5f0b21e8?auto=format&fit=facearea&w=400&h=400', // Stock close-up of a woman
     bio: 'Call me daddy and beg hurt you. Boot lickers and pay pigs to the front. Send me your money and worship my ScamAss.',
     socialLinks: {
       twitter: 'https://twitter.com/',
@@ -51,7 +51,7 @@ export const creators: Creator[] = [
     id: '3',
     name: 'Selena Gomez',
     username: 'selena-gomez',
-    profileImage: '/lovable-uploads/ec09b0c9-a0cd-44f6-b310-fa7345a2ff44.png',
+    profileImage: 'https://images.unsplash.com/photo-1519648023493-d82b5f8d7d3b?auto=format&fit=facearea&w=400&h=400', // Stock close-up of a woman
     bio: 'Streaming and sync your podcast guest\'s audio in one place, with one click.',
     socialLinks: {
       twitter: 'https://twitter.com/',
