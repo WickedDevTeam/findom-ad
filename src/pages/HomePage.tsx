@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import CreatorGrid from '@/components/creators/CreatorGrid';

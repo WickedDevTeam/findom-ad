@@ -1,10 +1,13 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Mail } from 'lucide-react';
+
 const HeroSection = () => {
-  return <div className="py-12 flex flex-col md:flex-row gap-12">
+  return (
+    <div className="py-12 flex flex-col md:flex-row gap-12">
       <div className="flex-1 space-y-6 my-0 py-[7px]">
         <div className="space-y-4">
           <h1 className="text-4xl md:text-5xl font-bold text-white">
@@ -32,7 +35,7 @@ const HeroSection = () => {
       </div>
       
       <div className="flex-1">
-        <div className="promo-card p-6">
+        <div className="promo-card p-6 bg-black/30 border border-white/10 rounded-xl">
           <div className="mb-4">
             <Badge className="bg-findom-green text-white font-semibold px-4 py-1">
               Free $100 Ad Credit
@@ -52,6 +55,8 @@ const HeroSection = () => {
           </Button>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default HeroSection;
