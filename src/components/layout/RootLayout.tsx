@@ -30,7 +30,7 @@ const RootLayout = () => {
         <div className="flex flex-1">
           <Sidebar />
           
-          <main className="md:pl-[208px] pt-[72px] flex-1 w-full transition-all duration-300">
+          <main className="flex-1 w-full pt-[72px] transition-all duration-300">
             <AnimatePresence mode="wait">
               <motion.div 
                 key={location.pathname} 

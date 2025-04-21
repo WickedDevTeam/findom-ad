@@ -53,10 +53,10 @@ const FindomSidebar = () => {
   const location = useLocation();
 
   return (
-    <Sidebar>
+    <Sidebar className="z-20">
       <SidebarContent>
         <div className="px-2 pt-3 pb-3">
-          <Logo forSidebar />
+          <Logo forSidebar hideInHeader={false} />
         </div>
         <SidebarGroup>
           <SidebarGroupLabel>Categories</SidebarGroupLabel>
