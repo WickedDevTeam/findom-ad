@@ -2,7 +2,7 @@
 "use client"
 
 import { Check, ChevronRight, CreditCard, Crown, ExternalLink, Heart, Shield, ShoppingCart, Stars } from "lucide-react"
-import { SinglePricingCard, type Testimonial } from "@/components/ui/component"
+import { SinglePricingCard, type Testimonial } from "@/components/ui/single-pricing-card"
 
 export function PricingSectionDemo() {
   const features = [
@@ -85,11 +85,11 @@ export function PricingSectionDemo() {
 
   return (
     <section
-      className="py-16 relative overflow-hidden flex justify-center"
+      className="py-10 md:py-12 relative overflow-hidden flex justify-center"
       id="pricing"
     >
       <div className="container px-4 md:px-6 relative z-10 max-w-5xl">
-        <div className="flex flex-col items-center mb-10 text-center">
+        <div className="flex flex-col items-center mb-8 text-center">
           <div className="inline-flex items-center gap-1 px-3 py-1 mb-3 rounded-full border border-primary/30 shadow-sm bg-primary/5">
             <CreditCard className="mr-1 h-3.5 w-3.5 text-primary" />
             <span className="text-xs font-medium">Simple Pricing</span>

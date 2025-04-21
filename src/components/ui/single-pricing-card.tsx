@@ -108,7 +108,7 @@ export function SinglePricingCard({
   }, [testimonials.length, testimonialRotationSpeed])
 
   return (
-    <div ref={sectionRef} className={`py-12 relative overflow-hidden ${className || ""}`}>
+    <div ref={sectionRef} className={`py-6 md:py-8 relative overflow-hidden ${className || ""}`}>
       <div className={`container px-4 md:px-6 relative z-10 mx-auto ${maxWidth}`}>
         {animationEnabled ? (
           <motion.div
@@ -193,7 +193,7 @@ function SinglePricingCardContent({
   const SecondaryButtonIcon = secondaryButton?.icon
 
   return (
-    <Card className={`overflow-hidden border border-primary/10 relative group bg-findom-dark text-white ${cardClassName || ""}`}>
+    <Card className={`overflow-hidden border border-primary/10 relative group ${cardClassName || ""}`}>
       {animationEnabled && (
         <motion.div
           className="absolute inset-0 pointer-events-none"
@@ -201,45 +201,45 @@ function SinglePricingCardContent({
           animate={isInView ? { opacity: 1 } : { opacity: 0 }}
           transition={{ delay: 0.3, duration: 0.6 }}
         >
-          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-r from-findom-orange/5 via-findom-purple/10 to-transparent" />
+          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 bg-gradient-to-r from-primary/5 via-primary/10 to-transparent" />
         </motion.div>
       )}
 
       <div className="flex flex-col md:flex-row">
         {/* Left column - Pricing details */}
-        <div className="p-6 md:p-8 md:w-1/2 flex flex-col">
+        <div className="p-5 md:p-6 lg:p-8 md:w-1/2 flex flex-col">
           {badge && (
             <div className="flex items-center mb-4">
-              <Badge className="px-3 py-1 bg-findom-purple/10 border-findom-purple/30 text-findom-purple">
+              <Badge className="px-3 py-1 bg-primary/10 border-primary/30 text-primary">
                 {BadgeIcon && <BadgeIcon className="h-3.5 w-3.5 mr-1" />}
                 <span>{badge.text}</span>
               </Badge>
             </div>
           )}
 
-          <h3 className="text-2xl font-bold mb-2">{title}</h3>
-          <p className="text-findom-purple/80 mb-4">{subtitle}</p>
+          <h3 className="text-xl md:text-2xl font-bold mb-2">{title}</h3>
+          <p className="text-muted-foreground mb-4 text-sm md:text-base">{subtitle}</p>
 
-          <div className="flex items-baseline mb-6">
-            <span className="text-4xl font-bold text-findom-orange">{price.current}</span>
-            {price.original && <span className="text-findom-purple/50 ml-2 line-through">{price.original}</span>}
+          <div className="flex items-baseline mb-5">
+            <span className="text-3xl md:text-4xl font-bold">{price.current}</span>
+            {price.original && <span className="text-muted-foreground ml-2 line-through text-sm">{price.original}</span>}
             {price.discount && (
               <Badge
                 variant="outline"
-                className={`ml-3 border-green-400/30 text-green-400 ${price.discountBadgeClassName || ""}`}
+                className={`ml-3 border-green-400/30 text-green-500 ${price.discountBadgeClassName || ""}`}
               >
                 <span>{price.discount}</span>
               </Badge>
             )}
           </div>
 
-          <div className="space-y-4 mb-6">
+          <div className="space-y-3 mb-6">
             {benefits.map((benefit, index) => {
               const BenefitIcon = benefit.icon
 
               return (
                 <div key={index} className="flex items-center gap-2">
-                  <BenefitIcon className="h-4 w-4 text-findom-orange" />
+                  <BenefitIcon className="h-4 w-4 text-primary" />
                   <span className="text-sm">{benefit.text}</span>
                 </div>
               )
@@ -248,7 +248,7 @@ function SinglePricingCardContent({
 
           <div className="mt-auto space-y-3">
             <Button
-              className="w-full gap-2 group !bg-findom-orange text-white"
+              className="w-full gap-2 group"
               size="lg"
               onClick={primaryButton.onClick}
               asChild={!!primaryButton.href}
@@ -275,7 +275,7 @@ function SinglePricingCardContent({
             {secondaryButton && (
               <Button
                 variant="outline"
-                className="w-full gap-2 border-findom-purple/40 text-findom-purple"
+                className="w-full gap-2"
                 size="lg"
                 onClick={secondaryButton.onClick}
                 asChild={!!secondaryButton.href}
@@ -297,11 +297,11 @@ function SinglePricingCardContent({
         </div>
 
         {/* Right column - Features */}
-        <div className="p-6 md:p-8 md:w-1/2 md:border-l border-findom-purple/20">
+        <div className="p-5 md:p-6 lg:p-8 md:w-1/2 md:border-l border-primary/20">
           <div className="flex items-center mb-4">
             <h4 className="font-semibold">{featuresTitle}</h4>
             {featuresBadge && FeaturesBadgeIcon && (
-              <Badge className="ml-2 px-2 py-1 bg-findom-orange/10 border-findom-orange/30 text-findom-orange">
+              <Badge className="ml-2 px-2 py-0.5 bg-primary/10 border-primary/30 text-primary">
                 <FeaturesBadgeIcon className="h-3 w-3 mr-1" />
                 <span>{featuresBadge.text}</span>
               </Badge>
@@ -317,8 +317,8 @@ function SinglePricingCardContent({
                 transition={{ delay: 0.4 + i * 0.05, duration: 0.5 }}
                 className="flex items-center gap-3"
               >
-                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-findom-purple/15">
-                  <FeaturesIcon className="h-3 w-3 text-findom-purple" />
+                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15">
+                  <FeaturesIcon className="h-3 w-3 text-primary" />
                 </div>
                 <span className="text-sm">{feature.text}</span>
               </motion.div>
@@ -327,9 +327,9 @@ function SinglePricingCardContent({
 
           {testimonials.length > 0 && (
             <>
-              <Separator className="my-6 border-findom-purple/20" />
+              <Separator className="my-5 border-primary/20" />
 
-              <div className="rounded-lg p-4 border border-findom-purple/20 relative overflow-hidden min-h-[140px] bg-findom-dark/70">
+              <div className="rounded-lg p-4 border border-primary/20 relative overflow-hidden min-h-[140px]">
                 <AnimatePresence mode="wait">
                   {testimonials.map(
                     (testimonial, index) =>
@@ -352,14 +352,14 @@ function SinglePricingCardContent({
                             </div>
                             <div>
                               <p className="font-medium text-sm">{testimonial.name}</p>
-                              <p className="text-xs text-findom-purple/70">
+                              <p className="text-xs text-muted-foreground">
                                 {testimonial.role}
                                 {testimonial.company && ` at ${testimonial.company}`}
                               </p>
                             </div>
                             <div className="ml-auto flex">
                               {[...Array(testimonial.rating)].map((_, i) => (
-                                <Star key={i} className="h-3 w-3 fill-findom-orange text-findom-orange" />
+                                <Star key={i} className="h-3 w-3 fill-primary text-primary" />
                               ))}
                             </div>
                           </div>
@@ -376,14 +376,12 @@ function SinglePricingCardContent({
                     <button
                       key={index}
                       className={`h-1.5 rounded-full transition-all ${
-                        index === currentTestimonialIndex ? "w-4 bg-findom-orange" : "w-1.5 bg-findom-purple/40"
+                        index === currentTestimonialIndex ? "w-4 bg-primary" : "w-1.5 bg-primary/40"
                       }`}
                       onClick={() => {
                         // Only allow changing manually if testimonials exist
                         if (testimonials.length > 1) {
-                          (window as any).setCurrentTestimonialIndex
-                            ? (window as any).setCurrentTestimonialIndex(index)
-                            : null
+                          setCurrentTestimonialIndex(index)
                         }
                       }}
                       aria-label={`View testimonial ${index + 1}`}
