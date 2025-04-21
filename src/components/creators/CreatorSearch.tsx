@@ -10,6 +10,22 @@ interface CreatorSearchProps {
   selectedFilter: string;
 }
 
+// Map filter names to their appropriate badge variant
+const getFilterVariant = (filter: string): string => {
+  const filterMap: Record<string, string> = {
+    'Findom': 'findom',
+    'Catfish': 'catfish',
+    'AI Bots': 'aibot',
+    'Celebrities': 'celebrity',
+    'Twitter': 'twitter',
+    'Blackmail': 'blackmail',
+    'Pay Pigs': 'paypig',
+    'All': 'default'
+  };
+  
+  return filterMap[filter] || 'default';
+};
+
 const filters = ['All', 'Findom', 'Catfish', 'AI Bots', 'Celebrities', 'Twitter', 'Blackmail', 'Pay Pigs'];
 
 const CreatorSearch = ({ onSearch, onFilterChange, selectedFilter }: CreatorSearchProps) => (
@@ -23,13 +39,10 @@ const CreatorSearch = ({ onSearch, onFilterChange, selectedFilter }: CreatorSear
           transition={{ duration: 0.3, delay: index * 0.05 }}
         >
           <Badge
-            variant={selectedFilter === filter ? 'default' : 'outline'}
+            variant={selectedFilter === filter ? getFilterVariant(filter) : 'outline'}
             className={`
               cursor-pointer transition-all duration-200
-              ${selectedFilter === filter 
-                ? 'bg-black/80 border-[#8B5CF6]/80 text-[#E5DEFF]' 
-                : 'hover:bg-black/90 border-white/20'
-              }
+              ${selectedFilter === filter ? '' : 'hover:bg-black/60'}
             `}
             onClick={() => onFilterChange(filter)}
           >
