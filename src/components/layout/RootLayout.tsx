@@ -20,6 +20,24 @@ const RootLayout = () => {
     }
   }, [location.pathname, isMobile]);
 
+  // Close sidebar when clicking outside on mobile
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const sidebar = document.querySelector('[data-sidebar="sidebar"]');
+      const sidebarTrigger = document.querySelector('[data-sidebar-trigger="true"]');
+      
+      if (isMobile && sidebarOpen && sidebar && !sidebar.contains(event.target as Node) && 
+          sidebarTrigger && !sidebarTrigger.contains(event.target as Node)) {
+        setSidebarOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isMobile, sidebarOpen]);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
@@ -35,7 +53,13 @@ const RootLayout = () => {
       )}
       
       <Navbar>
-        <Button variant="ghost" size="icon" className="md:hidden" onClick={toggleSidebar}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="md:hidden" 
+          onClick={toggleSidebar}
+          data-sidebar-trigger="true"
+        >
           <Menu className="h-5 w-5" />
         </Button>
       </Navbar>
@@ -50,7 +74,7 @@ const RootLayout = () => {
             animate={{ opacity: 1, y: 0 }} 
             exit={{ opacity: 0, y: -10 }} 
             transition={{ duration: 0.3 }} 
-            className="container mx-auto px-4 sm:px-6 py-6 sm:py-8"
+            className="container mx-auto px-3 sm:px-6 py-4 sm:py-8"
           >
             <Outlet />
           </motion.div>

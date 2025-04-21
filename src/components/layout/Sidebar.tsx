@@ -52,7 +52,7 @@ export const Sidebar = ({
   
   return (
     <aside 
-      className={`w-[80%] max-w-[280px] md:w-[208px] h-screen fixed left-0 top-0 pt-[72px] bg-black border-r border-white/10 z-40 transition-transform duration-300 
+      className={`w-[85%] max-w-[280px] md:w-[208px] h-screen fixed left-0 top-0 pt-[72px] bg-black border-r border-white/10 z-40 transition-transform duration-300 
         ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
     >
       <div className="flex flex-col h-[calc(100%-72px)] p-0 overflow-y-auto">

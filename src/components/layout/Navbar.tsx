@@ -28,8 +28,8 @@ const Navbar = ({
 
   return (
     <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
-      <div className="container mx-auto px-4 sm:px-6 flex justify-between items-center h-[72px]">
-        <div className="flex items-center gap-2 md:gap-4">
+      <div className="container mx-auto px-3 sm:px-6 flex justify-between items-center h-[72px]">
+        <div className="flex items-center gap-1 sm:gap-4">
           <Logo />
           {children}
         </div>
@@ -42,7 +42,7 @@ const Navbar = ({
               type="text" 
               placeholder="Search creators..." 
               value={searchValue} 
-              onChange={e => setSearchValue(e.target.value)} 
+              onChange={e => setSearchValue(e.target.value)}
             />
           </form>
         </div>
@@ -65,9 +65,9 @@ const Navbar = ({
           </button>
         </div>
         
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-1 sm:gap-4">
           <Link to="/notifications" className="relative">
-            <Button variant="ghost" size="icon" className="text-white/80 hover:text-white">
+            <Button variant="ghost" size="icon" className="text-white/80 hover:text-white p-1 sm:p-2">
               <Bell className="h-5 w-5" />
               <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 flex items-center justify-center bg-findom-purple">3</Badge>
             </Button>
@@ -88,12 +88,12 @@ const Navbar = ({
         </div>
       </div>
       
-      {/* Mobile searchbox when active - now better positioned */}
+      {/* Mobile searchbox when active - better positioned */}
       {searchOpen && (
-        <div className="sm:hidden px-4 pb-4 bg-black/80 backdrop-blur-md">
+        <div className="sm:hidden px-3 pb-3 bg-black/80 backdrop-blur-md">
           <form onSubmit={onSearch} className="w-full">
             <Input 
-              className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all" 
+              className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all rounded-xl h-12" 
               type="text" 
               placeholder="Search creators..." 
               value={searchValue} 
