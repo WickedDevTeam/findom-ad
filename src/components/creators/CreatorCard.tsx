@@ -29,6 +29,7 @@ const getDicebearSrc = (name: string) =>
 const CreatorCard = ({ creator }: CreatorCardProps) => {
   const [imageError, setImageError] = useState(false);
 
+  // Use Dicebear fallback if no image or on error
   const imageSrc =
     !creator.profileImage || imageError
       ? getDicebearSrc(creator.name)
@@ -46,7 +47,7 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
         <img
           src={imageSrc}
           alt={creator.name}
-          className="w-full h-full object-cover transition duration-200 group-hover:scale-105"
+          className="w-full h-full object-cover transition duration-200 group-hover:scale-105 bg-findom-dark"
           onError={() => setImageError(true)}
         />
         <span className="absolute top-2 left-2 bg-black/70 rounded-full px-2 py-1 text-lg shadow text-white/90">
@@ -94,3 +95,4 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
 };
 
 export default CreatorCard;
+

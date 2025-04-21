@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import HeroSection from '@/components/home/HeroSection';
 import CreatorGrid from '@/components/creators/CreatorGrid';
@@ -20,7 +19,10 @@ const HomePage = () => {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, 500);
-    
+    // If search param provided (e.g., from navbar search), set it
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get('q');
+    if (q) setSearchQuery(q);
     return () => clearTimeout(timer);
   }, []);
   

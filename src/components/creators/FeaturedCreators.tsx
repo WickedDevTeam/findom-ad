@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Creator } from '@/types';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +7,11 @@ import { Link } from 'react-router-dom';
 interface FeaturedCreatorsProps {
   creators: Creator[];
 }
+
+const getDicebearSrc = (name: string) =>
+  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+    name.trim().substring(0, 20)
+  )}&backgroundColor=transparent`;
 
 const FeaturedCreators = ({ creators }: FeaturedCreatorsProps) => {
   if (creators.length === 0) return null;
@@ -30,24 +34,32 @@ const FeaturedCreators = ({ creators }: FeaturedCreatorsProps) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {creators.slice(0, 3).map((creator) => (
-          <Link 
-            key={creator.id} 
-            to={`/creator/${creator.username}`}
-            className="group relative aspect-square overflow-hidden rounded-lg"
-          >
-            <img 
-              src={creator.profileImage} 
-              alt={creator.name}
-              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-            <div className="absolute bottom-0 left-0 p-4">
-              <h3 className="text-lg font-semibold text-white mb-1">{creator.name}</h3>
-              <p className="text-sm text-white/70">{creator.username}</p>
-            </div>
-          </Link>
-        ))}
+        {creators.slice(0, 3).map((creator) => {
+          const [imageError, setImageError] = React.useState(false);
+          const imageSrc =
+            !creator.profileImage || imageError
+              ? getDicebearSrc(creator.name)
+              : creator.profileImage;
+          return (
+            <Link 
+              key={creator.id} 
+              to={`/creator/${creator.username}`}
+              className="group relative aspect-square overflow-hidden rounded-lg"
+            >
+              <img 
+                src={imageSrc}
+                alt={creator.name}
+                onError={() => setImageError(true)}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 bg-findom-dark"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 p-4">
+                <h3 className="text-lg font-semibold text-white mb-1">{creator.name}</h3>
+                <p className="text-sm text-white/70">{creator.username}</p>
+              </div>
+            </Link>
+          )
+        })}
       </div>
     </div>
   );

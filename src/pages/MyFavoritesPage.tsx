@@ -10,6 +10,31 @@ const getCurrentUserId = async () => {
   return data.user?.id ?? null;
 };
 
+// Helper to parse and check socialLinks safely.
+const parseSocialLinks = (social_links: any) => {
+  // Accept only object with expected keys
+  if (
+    social_links &&
+    typeof social_links === "object" &&
+    !Array.isArray(social_links)
+  ) {
+    return {
+      twitter: typeof social_links.twitter === "string" ? social_links.twitter : undefined,
+      throne: typeof social_links.throne === "string" ? social_links.throne : undefined,
+      cashapp: typeof social_links.cashapp === "string" ? social_links.cashapp : undefined,
+      onlyfans: typeof social_links.onlyfans === "string" ? social_links.onlyfans : undefined,
+      other: typeof social_links.other === "string" ? social_links.other : undefined,
+    };
+  }
+  return {
+    twitter: undefined,
+    throne: undefined,
+    cashapp: undefined,
+    onlyfans: undefined,
+    other: undefined,
+  };
+};
+
 const fetchMyFavorites = async (): Promise<Creator[]> => {
   const userId = await getCurrentUserId();
   if (!userId) return [];
@@ -19,56 +44,33 @@ const fetchMyFavorites = async (): Promise<Creator[]> => {
     .select("creator_id")
     .eq("user_id", userId);
   if (!favs || favs.length === 0) return [];
-  const ids = favs.map((row) => row.creator_id);
+  const ids = favs.map((row: any) => row.creator_id);
 
   // Step 2: Load creator data
-  const { data: creators } = await supabase
+  const { data: creatorsRaw } = await supabase
     .from("creators")
     .select("*")
     .in("id", ids);
 
-  if (!creators) return [];
+  if (!creatorsRaw) return [];
 
   // Map database creators to frontend Creator type
-  return creators.map((c) => {
-    // Safely extract social links
-    let socialLinks = {
-      twitter: undefined,
-      throne: undefined,
-      cashapp: undefined,
-      onlyfans: undefined,
-      other: undefined
-    };
-    
-    // Only try to access properties if social_links is an object and not an array
-    if (c.social_links && typeof c.social_links === 'object' && !Array.isArray(c.social_links)) {
-      const links = c.social_links as Record<string, string>;
-      socialLinks = {
-        twitter: links.twitter,
-        throne: links.throne,
-        cashapp: links.cashapp,
-        onlyfans: links.onlyfans,
-        other: links.other
-      };
-    }
-
-    return {
-      id: c.id,
-      name: c.name,
-      username: c.username,
-      profileImage: c.profile_image,
-      coverImage: c.cover_image || undefined,
-      bio: c.bio,
-      socialLinks: socialLinks,
-      isVerified: c.is_verified,
-      isFeatured: c.is_featured,
-      isNew: c.is_new,
-      type: c.type,
-      categories: [], // We'll populate these if needed in the future
-      gallery: [], // We'll populate these if needed in the future
-      createdAt: c.created_at
-    };
-  });
+  return creatorsRaw.map((c: any) => ({
+    id: c.id,
+    name: c.name,
+    username: c.username,
+    profileImage: c.profile_image,
+    coverImage: c.cover_image || undefined,
+    bio: c.bio,
+    socialLinks: parseSocialLinks(c.social_links),
+    isVerified: !!c.is_verified,
+    isFeatured: !!c.is_featured,
+    isNew: !!c.is_new,
+    type: c.type,
+    categories: Array.isArray(c.categories) ? c.categories : [],
+    gallery: Array.isArray(c.gallery) ? c.gallery : [],
+    createdAt: c.created_at,
+  }));
 };
 
 const MyFavoritesPage = () => {

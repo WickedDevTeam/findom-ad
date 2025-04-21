@@ -1,10 +1,14 @@
-
 import React, { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 
 interface CreatorGalleryProps {
   images: string[];
 }
+
+const getDicebearSrc = (name?: string, seed?: number) =>
+  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
+    name?.trim().substring(0, 20) || "User"
+  )}${seed !== undefined ? `_${seed}` : ""}&backgroundColor=transparent`;
 
 const CreatorGallery = ({ images }: CreatorGalleryProps) => {
   const fallbackImages = [
@@ -21,9 +25,23 @@ const CreatorGallery = ({ images }: CreatorGalleryProps) => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {images.map((image, index) => (
-        <ImageTile key={index} image={image} fallbackImage={getRandomFallbackImage()} index={index} />
-      ))}
+      {images.length > 0
+        ? images.map((image, index) => (
+            <ImageTile
+              key={index}
+              image={image}
+              fallbackImage={getDicebearSrc("Gallery", index)}
+              index={index}
+            />
+          ))
+        : Array.from({ length: 3 }).map((_, idx) => (
+            <ImageTile
+              key={idx}
+              image={""}
+              fallbackImage={getDicebearSrc("Gallery", idx)}
+              index={idx}
+            />
+          ))}
     </div>
   );
 };
@@ -39,9 +57,9 @@ const ImageTile = ({ image, fallbackImage, index }: ImageTileProps) => {
   const [isLoading, setIsLoading] = useState(true);
 
   return (
-    <div className="aspect-square rounded-lg overflow-hidden bg-black/30 border border-white/10">
+    <div className="aspect-square rounded-lg overflow-hidden bg-black/30 border border-white/10 relative">
       <img 
-        src={imageError ? fallbackImage : image} 
+        src={imageError || !image ? fallbackImage : image} 
         alt={`Gallery image ${index + 1}`} 
         className={`w-full h-full object-cover hover:scale-105 transition-transform duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onError={() => setImageError(true)}
