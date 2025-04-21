@@ -11,7 +11,7 @@ const RootLayout = () => {
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
-  return <div className="min-h-screen bg-findom-dark text-white">
+  return <div className="min-h-screen text-white bg-findom-dark">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && <div className="fixed inset-0 bg-black/50 z-40 md:hidden" onClick={() => setSidebarOpen(false)} />}
       
@@ -36,7 +36,7 @@ const RootLayout = () => {
           y: -10
         }} transition={{
           duration: 0.3
-        }} className="container mx-auto sm:px-6 py-8 px-[90px]">
+        }} className="container mx-auto sm:px-6 py-8 px-[25px]">
             <Outlet />
           </motion.div>
         </AnimatePresence>
