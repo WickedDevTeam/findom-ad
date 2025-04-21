@@ -59,7 +59,7 @@ const FindomSidebar = () => {
                   <SidebarMenuButton asChild isActive={location.pathname === link.to}>
                     <Link to={link.to}>
                       <span className="text-xl">{link.emoji}</span>
-                      <span className="text-base font-medium">{link.label}</span>
+                      <span className="font-medium text-lg text-left">{link.label}</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>)}
