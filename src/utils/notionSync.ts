@@ -24,9 +24,31 @@ export const defaultSyncConfig: NotionSyncConfig = {
   notionApiKey: "",
   notionDatabaseId: "",
   lastSyncedAt: null,
-  syncInterval: 60, // default to hourly
+  syncInterval: 60,
   autoSync: false,
 };
+
+function parseConfig(val: any): NotionSyncConfig {
+  // Defensive parsing
+  if (!val) return defaultSyncConfig;
+  try {
+    if (typeof val === "string") val = JSON.parse(val);
+    if (
+      typeof val.enabled === "boolean" &&
+      typeof val.notionApiKey === "string" &&
+      typeof val.notionDatabaseId === "string" &&
+      (typeof val.lastSyncedAt === "string" || val.lastSyncedAt === null) &&
+      typeof val.syncInterval === "number" &&
+      typeof val.autoSync === "boolean"
+    ) {
+      return val as NotionSyncConfig;
+    }
+    // Fallback: Shallow merge with default 
+    return { ...defaultSyncConfig, ...val };
+  } catch {
+    return defaultSyncConfig;
+  }
+}
 
 export async function getSyncConfig(): Promise<NotionSyncConfig> {
   try {
@@ -34,14 +56,14 @@ export async function getSyncConfig(): Promise<NotionSyncConfig> {
       .from("site_config")
       .select("value")
       .eq("key", "notion_sync_config")
-      .single();
+      .maybeSingle();
 
     if (error) {
       console.error("Error fetching Notion sync configuration:", error);
       return defaultSyncConfig;
     }
-
-    return data?.value as NotionSyncConfig || defaultSyncConfig;
+    // Defensive parsing - might be absent or missing fields
+    return parseConfig(data?.value);
   } catch (error) {
     console.error("Error in getSyncConfig:", error);
     return defaultSyncConfig;
@@ -53,11 +75,13 @@ export async function updateSyncConfig(config: NotionSyncConfig): Promise<boolea
     const { error } = await supabase
       .from("site_config")
       .upsert(
-        { 
-          key: "notion_sync_config", 
-          value: config,
-          updated_at: new Date().toISOString()
-        },
+        [
+          { 
+            key: "notion_sync_config", 
+            value: config,
+            updated_at: new Date().toISOString()
+          }
+        ],
         { onConflict: "key" }
       );
 
@@ -65,7 +89,6 @@ export async function updateSyncConfig(config: NotionSyncConfig): Promise<boolea
       console.error("Error updating Notion sync configuration:", error);
       return false;
     }
-
     return true;
   } catch (error) {
     console.error("Error in updateSyncConfig:", error);
@@ -73,7 +96,6 @@ export async function updateSyncConfig(config: NotionSyncConfig): Promise<boolea
   }
 }
 
-// These functions would be implemented in the edge function
 export async function initiateSync(): Promise<{ success: boolean; message: string }> {
   try {
     const { data, error } = await supabase.functions.invoke("notion-sync", {
@@ -116,10 +138,11 @@ export async function testNotionConnection(config: NotionSyncConfig): Promise<{ 
 
 export async function getSyncHistory(limit: number = 10): Promise<any[]> {
   try {
+    // Use generic .from since sync_history is a tracked table now
     const { data, error } = await supabase
       .from("sync_history")
       .select("*")
-      .order("created_at", { ascending: false })
+      .order("started_at", { ascending: false })
       .limit(limit);
 
     if (error) {

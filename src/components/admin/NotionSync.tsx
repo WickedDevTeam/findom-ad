@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -163,6 +162,8 @@ const NotionSync = () => {
     );
   }
 
+  // --- FORMS PATCH: use react-hook-form FormProvider properly ---
+  // instead of <Form ... onSubmit={form.handleSubmit}> place <FormProvider> + explicitly add <form ... onSubmit=...>
   return (
     <div className="space-y-6">
       <div>
@@ -183,104 +184,105 @@ const NotionSync = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Form {...form} onSubmit={form.handleSubmit(onSubmit)}>
-              <div className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="enabled"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
-                      <div className="space-y-0.5">
-                        <FormLabel className="text-base">Enable Notion Sync</FormLabel>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)}>
+                <div className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="enabled"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border border-white/10 p-4">
+                        <div className="space-y-0.5">
+                          <FormLabel className="text-base">Enable Notion Sync</FormLabel>
+                          <FormDescription>
+                            Turn the Notion sync feature on or off
+                          </FormDescription>
+                        </div>
+                        <FormControl>
+                          <Switch 
+                            checked={field.value} 
+                            onCheckedChange={field.onChange} 
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="notionApiKey"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notion API Key</FormLabel>
+                        <div className="relative">
+                          <FormControl>
+                            <Input 
+                              type={showApiKey ? "text" : "password"}
+                              placeholder="Enter your Notion API secret token" 
+                              {...field} 
+                            />
+                          </FormControl>
+                          <Button 
+                            type="button" 
+                            variant="ghost" 
+                            size="sm" 
+                            className="absolute right-2 top-1/2 -translate-y-1/2"
+                            onClick={() => setShowApiKey(!showApiKey)}
+                          >
+                            {showApiKey ? "Hide" : "Show"}
+                          </Button>
+                        </div>
                         <FormDescription>
-                          Turn the Notion sync feature on or off
+                          Create an integration in Notion and paste the secret token here
                         </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch 
-                          checked={field.value} 
-                          onCheckedChange={field.onChange} 
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="notionApiKey"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notion API Key</FormLabel>
-                      <div className="relative">
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="notionDatabaseId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Notion Database ID</FormLabel>
                         <FormControl>
                           <Input 
-                            type={showApiKey ? "text" : "password"}
-                            placeholder="Enter your Notion API secret token" 
+                            placeholder="Enter your Notion database ID" 
                             {...field} 
                           />
                         </FormControl>
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="sm" 
-                          className="absolute right-2 top-1/2 -translate-y-1/2"
-                          onClick={() => setShowApiKey(!showApiKey)}
+                        <FormDescription>
+                          The ID of your Notion database (found in the URL)
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="syncInterval"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Sync Interval</FormLabel>
+                        <Select 
+                          onValueChange={(value) => field.onChange(parseInt(value))}
+                          defaultValue={field.value.toString()}
                         >
-                          {showApiKey ? "Hide" : "Show"}
-                        </Button>
-                      </div>
-                      <FormDescription>
-                        Create an integration in Notion and paste the secret token here
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="notionDatabaseId"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Notion Database ID</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Enter your Notion database ID" 
-                          {...field} 
-                        />
-                      </FormControl>
-                      <FormDescription>
-                        The ID of your Notion database (found in the URL)
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="syncInterval"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sync Interval</FormLabel>
-                      <Select 
-                        onValueChange={(value) => field.onChange(parseInt(value))}
-                        defaultValue={field.value.toString()}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select sync frequency" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="15">Every 15 minutes</SelectItem>
-                          <SelectItem value="30">Every 30 minutes</SelectItem>
-                          <SelectItem value="60">Every hour</SelectItem>
-                          <SelectItem value="360">Every 6 hours</SelectItem>
-                          <SelectItem value="720">Every 12 hours</SelectItem>
-                          <SelectItem value="1440">Every day</SelectItem>
-                        </SelectContent>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select sync frequency" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="15">Every 15 minutes</SelectItem>
+                            <SelectItem value="30">Every 30 minutes</SelectItem>
+                            <SelectItem value="60">Every hour</SelectItem>
+                            <SelectItem value="360">Every 6 hours</SelectItem>
+                            <SelectItem value="720">Every 12 hours</SelectItem>
+                            <SelectItem value="1440">Every day</SelectItem>
+                          </SelectContent>
                       </Select>
                       <FormDescription>
                         How often should the automatic sync run
@@ -335,7 +337,7 @@ const NotionSync = () => {
                   )}
                 </Button>
               </div>
-            </Form>
+            </form>
           </CardContent>
         </Card>
 

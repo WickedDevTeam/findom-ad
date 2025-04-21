@@ -326,6 +326,39 @@ export type Database = {
         }
         Relationships: []
       }
+      sync_history: {
+        Row: {
+          completed_at: string | null
+          id: string
+          message: string | null
+          started_at: string
+          stats: Json | null
+          status: string
+          success: boolean | null
+          sync_type: string
+        }
+        Insert: {
+          completed_at?: string | null
+          id?: string
+          message?: string | null
+          started_at?: string
+          stats?: Json | null
+          status?: string
+          success?: boolean | null
+          sync_type?: string
+        }
+        Update: {
+          completed_at?: string | null
+          id?: string
+          message?: string | null
+          started_at?: string
+          stats?: Json | null
+          status?: string
+          success?: boolean | null
+          sync_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
