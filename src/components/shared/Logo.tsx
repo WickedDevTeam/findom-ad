@@ -15,7 +15,7 @@ const Logo = ({
       <span className={forSidebar ? "text-findom-green text-3xl font-black shrink-0" : "text-findom-green text-2xl font-black shrink-0"}>
         💸
       </span>
-      <span className={forSidebar ? "font-bold text-lg truncate" : "font-bold text-base truncate"}>Findom.ad</span>
+      <span className="font-bold text-2xl text-left">Findom.ad</span>
     </Link>;
 };
 export default Logo;
