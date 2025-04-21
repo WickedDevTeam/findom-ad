@@ -1,119 +1,129 @@
 
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import Logo from '@/components/shared/Logo';
+import React from "react";
+import {
+  Sidebar as UISidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarFooter,
+} from "@/components/ui/sidebar";
+import { InfoCard, InfoCardContent, InfoCardTitle, InfoCardDescription, InfoCardFooter as InfoCardFooterEl, InfoCardDismiss, InfoCardAction } from "@/components/ui/info-card";
+import {
+  Home,
+  Inbox,
+  Calendar,
+  Search,
+  Settings,
+  ExternalLink,
+  User,
+  ChevronsUpDown,
+} from "lucide-react";
+import { Link } from "react-router-dom";
 
-const CATEGORY_LINKS = [{
-  to: '/findoms',
-  emoji: '👑',
-  label: 'Findoms'
-}, {
-  to: '/pay-pigs',
-  emoji: '🐷',
-  label: 'Pay Pigs'
-}, {
-  to: '/catfish',
-  emoji: '🐟',
-  label: 'Catfish'
-}, {
-  to: '/ai-bots',
-  emoji: '🤖',
-  label: 'AI Bots'
-}, {
-  to: '/twitter',
-  emoji: '🐦',
-  label: '(X) Twitter'
-}, {
-  to: '/celebrities',
-  emoji: '🌟',
-  label: 'Celebrities'
-}, {
-  to: '/blackmail',
-  emoji: '💸',
-  label: 'Blackmail'
-}, {
-  to: '/bots',
-  emoji: '⚡️',
-  label: 'Bots'
-}];
+const items = [
+  {
+    title: "Home",
+    url: "/",
+    icon: Home,
+  },
+  {
+    title: "Inbox",
+    url: "/notifications",
+    icon: Inbox,
+  },
+  {
+    title: "Calendar",
+    url: "#",
+    icon: Calendar,
+  },
+  {
+    title: "Search",
+    url: "#",
+    icon: Search,
+  },
+  {
+    title: "Settings",
+    url: "#",
+    icon: Settings,
+  },
+];
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const Sidebar = ({
+const Sidebar = ({
   isOpen,
-  onClose
+  onClose,
 }: SidebarProps) => {
-  const location = useLocation();
-  
+  // isOpen and onClose are accepted in case the parent needs them, but shadcn Sidebar handles collapse.
   return (
-    <aside 
-      data-sidebar="sidebar"
-      className={`w-[85%] max-w-[280px] md:w-[208px] h-screen fixed left-0 top-0 pt-[72px] bg-black border-r border-white/10 z-40 transition-transform duration-300 
-        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
-    >
-      <div className="flex flex-col h-[calc(100%-72px)] p-0 overflow-y-auto">
-        {/* Mobile close button */}
-        <div className="flex justify-end md:hidden px-2 py-2">
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="h-5 w-5" />
-          </Button>
-        </div>
-        
-        <nav className="space-y-0.5 flex-1 mt-1 my-[5px] px-0"> 
-          <SidebarItem 
-            to="/" 
-            icon={<span className="text-xl">🏠</span>} 
-            label="Back Home" 
-            isActive={location.pathname === '/'} 
-            onClick={onClose} 
-          />
-          
-          {CATEGORY_LINKS.map(link => (
-            <SidebarItem 
-              key={link.to} 
-              to={link.to} 
-              icon={<span className="text-xl">{link.emoji}</span>} 
-              label={link.label} 
-              isActive={location.pathname === link.to} 
-              onClick={onClose} 
-            />
-          ))}
-        </nav>
-      </div>
-    </aside>
-  );
-};
-
-interface SidebarItemProps {
-  to: string;
-  icon: React.ReactNode;
-  label: string;
-  isActive?: boolean;
-  onClick?: () => void;
-}
-
-const SidebarItem = ({
-  to,
-  icon,
-  label,
-  isActive = false,
-  onClick
-}: SidebarItemProps) => {
-  return (
-    <Link 
-      to={to} 
-      className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all
-        ${isActive ? 'text-white bg-findom-purple/20 border-l-2 border-findom-purple' : 'text-white/80 hover:text-white hover:bg-white/10'}`} 
-      onClick={onClick}
-    >
-      {icon}
-      <span className="text-slate-50 text-base font-normal text-left truncate">{label}</span>
-    </Link>
+    <UISidebar>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Application</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton asChild>
+                    {/* Use Link for client-side routing if path is present */}
+                    <Link to={item.url}>
+                      <item.icon className="mr-2" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarFooter>
+        <InfoCard>
+          <InfoCardContent>
+            <div className="relative">
+              <div className="absolute -top-4 -right-4 w-[14px] h-[14px] bg-blue-500 rounded-full animate-ping" />
+              <div className="absolute -top-4 -right-4 w-[14px] h-[14px] bg-blue-500 rounded-full" />
+              <InfoCardTitle>Simple Announcement</InfoCardTitle>
+              <InfoCardDescription>
+                This is a simple announcement without any media content.
+              </InfoCardDescription>
+              <InfoCardFooterEl>
+                <InfoCardDismiss>Dismiss</InfoCardDismiss>
+                <InfoCardAction>
+                  <a
+                    href="#"
+                    className="flex flex-row items-center gap-1 underline"
+                  >
+                    Read more <ExternalLink size={12} />
+                  </a>
+                </InfoCardAction>
+              </InfoCardFooterEl>
+            </div>
+          </InfoCardContent>
+        </InfoCard>
+        <SidebarGroup>
+          <SidebarMenuButton className="w-full justify-between gap-3 h-12">
+            <div className="flex items-center gap-2">
+              <User className="h-5 w-5 rounded-md" />
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-medium">KL</span>
+                <span className="text-xs text-muted-foreground">
+                  kl@example.com
+                </span>
+              </div>
+            </div>
+            <ChevronsUpDown className="h-5 w-5 rounded-md" />
+          </SidebarMenuButton>
+        </SidebarGroup>
+      </SidebarFooter>
+    </UISidebar>
   );
 };
 
