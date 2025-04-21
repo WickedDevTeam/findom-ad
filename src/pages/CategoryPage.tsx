@@ -14,21 +14,25 @@ const CategoryPage = () => {
   const [categoryName, setCategoryName] = useState('');
   
   useEffect(() => {
-    // Simulate loading for smoother transitions
     setLoading(true);
     
-    setTimeout(() => {
-      if (category) {
-        // Format category name properly (first letter uppercase, rest lowercase)
-        const formattedCategory = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
-        setCategoryName(formattedCategory);
-        
-        // Get creators for this category
-        const filteredCreators = getCreatorsByCategory(formattedCategory);
-        setCreators(filteredCreators);
-      }
+    if (category) {
+      // Convert URL format to proper category name
+      let formattedCategory = category
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      
+      // Special handling for specific categories
+      if (category === 'findoms') formattedCategory = 'Findoms';
+      if (category === 'ai-bots') formattedCategory = 'AI Bots';
+      if (category === 'pay-pigs') formattedCategory = 'Pay Pigs';
+      
+      setCategoryName(formattedCategory);
+      const filteredCreators = getCreatorsByCategory(formattedCategory);
+      setCreators(filteredCreators);
       setLoading(false);
-    }, 300);
+    }
   }, [category]);
   
   if (loading) {
@@ -39,12 +43,17 @@ const CategoryPage = () => {
     );
   }
   
-  if (!category) {
+  if (!category || creators.length === 0) {
     return (
       <div className="text-center py-12">
         <AlertCircle className="w-16 h-16 mx-auto text-findom-orange mb-4" />
-        <h1 className="text-2xl font-bold">Category Not Found</h1>
-        <p className="text-white/70 mt-2">The category you're looking for doesn't exist.</p>
+        <h1 className="text-2xl font-bold">No Creators Found</h1>
+        <p className="text-white/70 mt-2">
+          {!category 
+            ? "The category you're looking for doesn't exist."
+            : `There are currently no creators in the ${categoryName} category.`
+          }
+        </p>
       </div>
     );
   }
@@ -59,20 +68,10 @@ const CategoryPage = () => {
         </p>
       </div>
       
-      {creators.length > 0 ? (
-        <CreatorGrid 
-          creators={creators} 
-          title={`${categoryName} Creators`} 
-        />
-      ) : (
-        <div className="bg-black/20 border border-white/10 rounded-lg p-8 text-center">
-          <AlertCircle className="w-12 h-12 mx-auto text-findom-orange mb-4" />
-          <h3 className="text-xl font-medium">No creators found</h3>
-          <p className="text-white/70 mt-2">
-            There are no creators in the {categoryName} category yet.
-          </p>
-        </div>
-      )}
+      <CreatorGrid 
+        creators={creators} 
+        title={`${categoryName} Creators`} 
+      />
     </div>
   );
 };
