@@ -47,9 +47,6 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
               onError={() => setImageError(true)}
             />
           </div>
-          <div className="absolute left-0 -bottom-8 w-full flex justify-center">
-            <FavoriteButton creatorId={creator.id} className="mt-2 z-20" />
-          </div>
           {creator.isFeatured && (
             <div className="absolute -top-2 -right-2">
               <AppBadge variant="featured" className="shadow-xl">
@@ -57,6 +54,9 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
               </AppBadge>
             </div>
           )}
+          <div className="absolute -right-2 bottom-2">
+            <FavoriteButton creatorId={creator.id} />
+          </div>
         </div>
         
         <div className="flex-1 flex flex-col items-center md:items-start text-center md:text-left">
