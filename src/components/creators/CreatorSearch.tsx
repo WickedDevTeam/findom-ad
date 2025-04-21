@@ -11,8 +11,8 @@ interface CreatorSearchProps {
 }
 
 // Map filter names to their appropriate badge variant
-const getFilterVariant = (filter: string): string => {
-  const filterMap: Record<string, string> = {
+const getFilterVariant = (filter: string): "findom" | "catfish" | "aibot" | "celebrity" | "twitter" | "blackmail" | "paypig" | "default" => {
+  const filterMap: Record<string, "findom" | "catfish" | "aibot" | "celebrity" | "twitter" | "blackmail" | "paypig" | "default"> = {
     'Findom': 'findom',
     'Catfish': 'catfish',
     'AI Bots': 'aibot',
