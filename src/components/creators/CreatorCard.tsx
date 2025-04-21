@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
@@ -29,14 +28,12 @@ const getDicebearSrc = (name: string) =>
 const CreatorCard = ({ creator }: CreatorCardProps) => {
   const [imageError, setImageError] = useState(false);
 
-  // Use Dicebear fallback if no image or on error
   const imageSrc =
     !creator.profileImage || imageError
       ? getDicebearSrc(creator.name)
       : creator.profileImage;
 
-  // Category emoji
-  const emoji = CATEGORY_EMOJIS[creator.categories[0]] || CATEGORY_EMOJIS["Other"];
+  const mainCategory = creator.categories[0] || "Other";
 
   return (
     <Link
@@ -50,9 +47,6 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
           className="w-full h-full object-cover transition duration-200 group-hover:scale-105 bg-findom-dark"
           onError={() => setImageError(true)}
         />
-        <span className="absolute top-2 left-2 bg-black/70 rounded-full px-2 py-1 text-lg shadow text-white/90">
-          {emoji}
-        </span>
         <div className="absolute top-2 right-2 flex flex-col gap-1 items-end">
           <FavoriteButton creatorId={creator.id} />
           {creator.isFeatured && (
@@ -82,10 +76,13 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
           >
             {creator.type}
           </AppBadge>
-          {creator.categories[0] && (
-            <AppBadge variant="category" className="text-xs py-0.5 px-2 flex items-center gap-1">
-              <span>{emoji}</span>
-              {creator.categories[0]}
+          {mainCategory && (
+            <AppBadge
+              variant="category"
+              className="text-xs py-0.5 px-2"
+              categoryName={mainCategory}
+            >
+              {mainCategory}
             </AppBadge>
           )}
         </div>
@@ -95,4 +92,3 @@ const CreatorCard = ({ creator }: CreatorCardProps) => {
 };
 
 export default CreatorCard;
-

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Creator } from '@/types';
@@ -34,7 +33,6 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
       ? getDicebearSrc(creator.name)
       : creator.profileImage;
   const mainCategory = creator.categories[0];
-  const categoryEmoji = CATEGORY_EMOJIS[mainCategory] || CATEGORY_EMOJIS["Other"];
 
   return (
     <div className="space-y-6">
@@ -68,9 +66,9 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
               <AppBadge
                 key={category}
                 variant="category"
-                className="flex items-center gap-1 text-sm font-semibold"
+                categoryName={category}
+                className="text-sm font-semibold"
               >
-                <span>{CATEGORY_EMOJIS[category] || ''}</span>
                 {category}
               </AppBadge>
             ))}
@@ -121,9 +119,10 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
                 <AppBadge
                   key={category}
                   variant="category"
-                  className="flex items-center gap-1"
+                  categoryName={category}
+                  className="text-base"
                 >
-                  <span>{CATEGORY_EMOJIS[category] || ''}</span>{category}
+                  {category}
                 </AppBadge>
               ))}
             </div>
@@ -146,7 +145,6 @@ const CreatorDetailHero = ({ creator }: CreatorDetailHeroProps) => {
   );
 };
 
-// Add this import to fix the error
 const Crown = ({ className }: { className?: string }) => (
   <svg 
     xmlns="http://www.w3.org/2000/svg" 
