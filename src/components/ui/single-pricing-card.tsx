@@ -401,5 +401,3 @@ function SinglePricingCardContent({
     </Card>
   )
 }
-
-export { SinglePricingCard }
