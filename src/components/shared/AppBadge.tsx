@@ -4,18 +4,19 @@ import { X, Check, Info, AlertTriangle } from "lucide-react";
 import clsx from "clsx";
 
 /**
- * Subtle, pastel-style category badge colors, inspired by the user-provided mockup.
+ * Slightly more vibrant, harmonious category badge colors.
+ * Each is a custom pastel+vibrant hue chosen for pleasing contrast per user.
  */
 const CATEGORY_COLORS: Record<string, string> = {
-  Findoms:    "border-[#B49DF9] text-[#B49DF9] bg-transparent",       // Soft purple outline, text
-  Catfish:    "border-[#6FD3F7] text-[#6FD3F7] bg-transparent",       // Pastel blue
-  "AI Bots":  "border-[#7CDEB0] text-[#7CDEB0] bg-transparent",       // Soft teal/green
-  "Pay Pigs": "border-[#F6C288] text-[#F6C288] bg-transparent",       // Soft orange/beige
-  Celebrities: "border-[#F7ADC0] text-[#F7ADC0] bg-transparent",      // Soft pink
-  Blackmail:  "border-[#EAADBC] text-[#EAADBC] bg-transparent",       // Gentle red/pink
-  Twitter:    "border-[#99B7EE] text-[#99B7EE] bg-transparent",       // Muted blue
-  Bots:       "border-[#B6A3E4] text-[#B6A3E4] bg-transparent",       // Soft violet
-  Other:      "border-white/40 text-white/80 bg-transparent"
+  Findoms:    "border-[#A88BFE] text-[#A88BFE] bg-[#F5F2FF]/50 hover:bg-[#A88BFE]/10",     // Violet
+  Catfish:    "border-[#4FC3EA] text-[#4FC3EA] bg-[#E8F7FB]/40 hover:bg-[#4FC3EA]/10",     // Blue-cyan
+  "AI Bots":  "border-[#51CD9B] text-[#51CD9B] bg-[#E3FCEF]/40 hover:bg-[#51CD9B]/10",     // Mint green
+  "Pay Pigs": "border-[#FEAC70] text-[#FEAC70] bg-[#FFF5E6]/50 hover:bg-[#FEAC70]/10",     // Peach
+  Celebrities: "border-[#F97EA1] text-[#F97EA1] bg-[#FFF0F6]/50 hover:bg-[#F97EA1]/10",    // Soft pink
+  Blackmail:  "border-[#EAADBC] text-[#EAADBC] bg-[#FAF1F4]/60 hover:bg-[#EAADBC]/10",     // Muted rose
+  Twitter:    "border-[#85A9F9] text-[#85A9F9] bg-[#EEF4FE]/50 hover:bg-[#85A9F9]/10",     // Blue
+  Bots:       "border-[#B6A3E4] text-[#B6A3E4] bg-[#F2EEFB]/45 hover:bg-[#B6A3E4]/10",     // Soft violet
+  Other:      "border-[#E1E1E1] text-[#CCCCCC] bg-[#30313C]/30 hover:bg-[#363647]/10"
 };
 
 type AppBadgeVariant =
@@ -48,16 +49,16 @@ interface AppBadgeProps {
 }
 
 const badgeStyles = {
-  // Mimic your image: transparent bg, pastel border/text, slightly larger radius
-  success: "border-[#6EC4A1] text-[#6EC4A1] bg-transparent",    // Soft green
-  warning: "border-[#E2C182] text-[#E2C182] bg-transparent",    // Soft yellow/gold
-  info:    "border-[#91B4D5] text-[#91B4D5] bg-transparent",    // Soft blue
-  danger:  "border-[#E39AA1] text-[#E39AA1] bg-transparent",    // Soft red/pink
-  category: "", // Override below with CATEGORY_COLORS
-  type: "border-[#9b87f5]/70 text-[#9b87f5] bg-transparent",    // Brand-matched soft purple
-  featured: "border-[#B49DF9] text-[#B49DF9] bg-transparent",   // Soft purple
-  vip: "border-[#F5DF89] text-[#F5DF89] bg-transparent",        // Mellow yellow/gold
-  default: "border-white/20 text-white/80 bg-transparent",
+  // Slightly upped vibrancy for non-category badges
+  success: "border-[#5CCC91] text-[#5CCC91] bg-[#EDF9F3]/60 hover:bg-[#5CCC91]/10",
+  warning: "border-[#FFD180] text-[#FFD180] bg-[#FFF6E3]/60 hover:bg-[#FFD180]/10",
+  info:    "border-[#62A6F7] text-[#62A6F7] bg-[#ECF4FB]/70 hover:bg-[#62A6F7]/10",
+  danger:  "border-[#FF7A85] text-[#FF7A85] bg-[#FFF1F2]/60 hover:bg-[#FF7A85]/10",
+  category: "", // set below with CATEGORY_COLORS
+  type: "border-[#A085F9] text-[#A085F9] bg-[#F5F2FF]/60 hover:bg-[#A085F9]/10", // purple
+  featured: "border-[#B49DF9] text-[#B49DF9] bg-[#F1EDFF]/60 hover:bg-[#B49DF9]/10",
+  vip: "border-[#FEDE89] text-[#FEDE89] bg-[#FFF7DE]/50 hover:bg-[#FEDE89]/10",
+  default: "border-white/15 text-white/80 bg-black/10 hover:bg-white/5",
 };
 
 export function AppBadge({
@@ -68,34 +69,37 @@ export function AppBadge({
   onClick,
   categoryName,
 }: AppBadgeProps) {
-  // Use colored badge if variant=category and categoryName is provided
+  // Use vibrant color for category variant if categoryName is provided
+  const isCategory = variant === "category";
   const customClass =
-    variant === "category" && categoryName && CATEGORY_COLORS[categoryName]
+    isCategory && categoryName && CATEGORY_COLORS[categoryName]
       ? CATEGORY_COLORS[categoryName]
       : badgeStyles[variant];
 
-  // Only variant-based icons (danger, warning, etc). No emoji nor icon for categories.
+  // Only show an icon for non-category badges; never for category
   const IconComponent =
     icon !== undefined
       ? icon
-      : variant !== "category" && variant in ICONS
-      ? ICONS[variant as keyof typeof ICONS]
-      : null;
+      : (!isCategory && variant in ICONS
+        ? ICONS[variant as keyof typeof ICONS]
+        : null);
 
   return (
     <span
       className={clsx(
-        // Universal badge look: pill, subtle border, cleaner layout, match your mockup closely
-        "inline-flex items-center gap-1.5 rounded-2xl border px-3 py-1 text-sm font-semibold transition-all",
-        "shadow-none ring-0",
+        // Universal badge look: pill, smooth font, subtle border+bg, spacing, some hover
+        "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 min-h-[32px] min-w-0 text-sm font-semibold shadow-none ring-0 select-none transition-all duration-150",
+        "focus:outline-none focus-visible:ring-2 focus-visible:ring-findom-purple/30",
+        "hover:shadow-md hover:scale-[1.04]", // slight interactive feedback
         customClass,
         onClick && "cursor-pointer",
         className
       )}
       onClick={onClick}
-      style={{ lineHeight: "1.2", minHeight: 32, minWidth: 0 }} // Balanced vertical sizing
+      style={{ lineHeight: "1.2" }}
     >
-      {IconComponent && (
+      {/* Never show any icon for categories! */}
+      {!isCategory && IconComponent && (
         <span className="opacity-80 flex items-center">{IconComponent}</span>
       )}
       <span className="truncate">{children}</span>

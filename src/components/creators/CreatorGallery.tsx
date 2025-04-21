@@ -1,65 +1,47 @@
+
 import React, { useState } from 'react';
-import { ImageOff } from 'lucide-react';
 
 interface CreatorGalleryProps {
   images: string[];
 }
 
-const getDicebearSrc = (name?: string, seed?: number) =>
-  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(
-    name?.trim().substring(0, 20) || "User"
-  )}${seed !== undefined ? `_${seed}` : ""}&backgroundColor=transparent`;
-
 const CreatorGallery = ({ images }: CreatorGalleryProps) => {
-  const fallbackImages = [
-    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158',
-    'https://images.unsplash.com/photo-1649972904349-6e44c42644a7',
-    'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b',
-    'https://images.unsplash.com/photo-1518770660439-4636190af475',
-    'https://images.unsplash.com/photo-1461749280684-dccba630e2f6'
-  ];
-
-  const getRandomFallbackImage = () => {
-    return fallbackImages[Math.floor(Math.random() * fallbackImages.length)];
-  };
+  // If there are no images, render nothing
+  if (!images || images.length === 0) {
+    return null;
+  }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {images.length > 0
-        ? images.map((image, index) => (
-            <ImageTile
-              key={index}
-              image={image}
-              fallbackImage={getDicebearSrc("Gallery", index)}
-              index={index}
-            />
-          ))
-        : Array.from({ length: 3 }).map((_, idx) => (
-            <ImageTile
-              key={idx}
-              image={""}
-              fallbackImage={getDicebearSrc("Gallery", idx)}
-              index={idx}
-            />
-          ))}
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      {images.map((image, index) => (
+        <ImageTile
+          key={index}
+          image={image}
+          index={index}
+        />
+      ))}
     </div>
   );
 };
 
 interface ImageTileProps {
   image: string;
-  fallbackImage: string;
   index: number;
 }
 
-const ImageTile = ({ image, fallbackImage, index }: ImageTileProps) => {
+const ImageTile = ({ image, index }: ImageTileProps) => {
   const [imageError, setImageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // If the src is broken or empty, do not render the image.
+  if (!image || imageError) {
+    return null;
+  }
 
   return (
     <div className="aspect-square rounded-lg overflow-hidden bg-black/30 border border-white/10 relative">
       <img 
-        src={imageError || !image ? fallbackImage : image} 
+        src={image}
         alt={`Gallery image ${index + 1}`} 
         className={`w-full h-full object-cover hover:scale-105 transition-transform duration-500 ${isLoading ? 'opacity-0' : 'opacity-100'}`}
         onError={() => setImageError(true)}
