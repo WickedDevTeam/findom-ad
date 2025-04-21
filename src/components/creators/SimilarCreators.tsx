@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Creator } from '@/types';
 import CreatorCard from './CreatorCard';
@@ -17,7 +18,7 @@ const SimilarCreators = ({
   }
   return <div className="space-y-6">
       <h2 className="text-2xl font-bold text-white">You May Also Like:</h2>
-      <div className="grid grid-cols-6 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
         {similarCreators.map(creator => <CreatorCard key={creator.id} creator={creator} />)}
       </div>
     </div>;

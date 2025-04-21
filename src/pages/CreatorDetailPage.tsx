@@ -15,16 +15,16 @@ const CreatorDetailPage = () => {
   }
   
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       <CreatorDetailHero creator={creator} />
       
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white">Bio</h2>
-        <p className="text-white/80 text-lg">{creator.bio}</p>
+      <div className="space-y-4 sm:space-y-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-white">Bio</h2>
+        <p className="text-white/80 text-base sm:text-lg">{creator.bio}</p>
       </div>
       
-      <div className="space-y-6">
-        <h2 className="text-2xl font-bold text-white">Gallery</h2>
+      <div className="space-y-4 sm:space-y-6">
+        <h2 className="text-xl sm:text-2xl font-bold text-white">Gallery</h2>
         <CreatorGallery images={creator.gallery} />
       </div>
       
