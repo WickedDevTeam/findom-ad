@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { getCreatorByUsername, creators } from '@/data/creators';
 import CreatorDetailHero from '@/components/creators/CreatorDetailHero';
@@ -9,6 +9,11 @@ import SimilarCreators from '@/components/creators/SimilarCreators';
 const CreatorDetailPage = () => {
   const { username } = useParams<{ username: string }>();
   const creator = username ? getCreatorByUsername(username) : undefined;
+  
+  // Scroll to top when the page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
   
   if (!creator) {
     return <Navigate to="/not-found" />;
@@ -23,10 +28,12 @@ const CreatorDetailPage = () => {
         <p className="text-white/80 text-base sm:text-lg">{creator.bio}</p>
       </div>
       
-      <div className="space-y-3 sm:space-y-4">
-        <h2 className="text-xl sm:text-2xl font-bold text-white">Gallery</h2>
-        <CreatorGallery images={creator.gallery} />
-      </div>
+      {creator.gallery && creator.gallery.length > 0 && (
+        <div className="space-y-3 sm:space-y-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-white">Gallery</h2>
+          <CreatorGallery images={creator.gallery} />
+        </div>
+      )}
       
       <SimilarCreators currentCreator={creator} allCreators={creators} />
     </div>

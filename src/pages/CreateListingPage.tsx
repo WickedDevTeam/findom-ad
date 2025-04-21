@@ -1,8 +1,13 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import ListingSubmissionForm from '@/components/forms/ListingSubmissionForm';
 
 const CreateListingPage = () => {
+  // Scroll to top when the page loads
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+  
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       <div className="space-y-4">
