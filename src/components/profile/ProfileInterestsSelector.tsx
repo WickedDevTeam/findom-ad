@@ -15,20 +15,26 @@ interface ProfileInterestsSelectorProps {
   categories: Category[];
   interests: string[];
   toggleInterest: (categoryId: string) => void;
+  loading: boolean;
 }
 
 const ProfileInterestsSelector: React.FC<ProfileInterestsSelectorProps> = ({
   categories,
   interests,
-  toggleInterest
+  toggleInterest,
+  loading
 }) => (
   <div>
     <Label className="block font-semibold text-white mb-1">Select Your Interests</Label>
     
-    {categories.length === 0 ? (
+    {loading ? (
       <div className="flex items-center justify-center h-16 bg-white/5 rounded-md">
         <Loader className="w-5 h-5 text-white/50 animate-spin mr-2" />
         <span className="text-white/70 text-sm">Loading categories...</span>
+      </div>
+    ) : categories.length === 0 ? (
+      <div className="flex items-center justify-center h-16 bg-white/5 rounded-md">
+        <span className="text-white/70 text-sm">No categories available</span>
       </div>
     ) : (
       <>
@@ -47,6 +53,7 @@ const ProfileInterestsSelector: React.FC<ProfileInterestsSelectorProps> = ({
                     : 'bg-transparent text-white/80 border-white/30 hover:bg-white/10'
                 )}
                 aria-pressed={selected}
+                disabled={loading}
               >
                 {cat.emoji && <span className="mr-1">{cat.emoji}</span>}
                 {cat.name}

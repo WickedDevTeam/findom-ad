@@ -4,162 +4,112 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-
-interface Category {
-  id: string;
-  name: string;
-  slug: string;
-  emoji?: string | null;
-}
+import { useProfileAvatar } from './useProfileAvatar';
+import { useProfileValidation } from './useProfileValidation';
+import { useProfileInterests } from './useProfileInterests';
 
 export function useProfile() {
   const toast = useToast();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  
+  // Composite hooks
+  const { avatarUrl, setAvatarUrl, avatarFile, onAvatarChange, uploadAvatar, uploadLoading } = useProfileAvatar();
+  const { errors, validateProfile, setErrors } = useProfileValidation();
+  const { interests, setInterests, categories, categoriesLoading, toggleInterest } = useProfileInterests();
 
+  // Profile state
   const [displayName, setDisplayName] = useState('');
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [bio, setBio] = useState('');
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [interests, setInterests] = useState<string[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
 
   // Fetch user profile
-  const fetchUserProfile = async () => {
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
 
-      if (!session?.user) {
-        toast.toast({
-          title: 'Not logged in',
-          description: 'You must be logged in to edit your profile',
-          variant: 'destructive',
-        });
-        navigate('/');
-        return;
-      }
+        if (!session?.user) {
+          toast.toast({
+            title: 'Not logged in',
+            description: 'You must be logged in to edit your profile',
+            variant: 'destructive',
+          });
+          navigate('/');
+          return;
+        }
 
-      const userId = session.user.id;
-      setLoading(true);
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('display_name, username, email, bio, avatar_url, interests')
-        .eq('id', userId)
-        .single();
+        const userId = session.user.id;
+        setLoading(true);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('display_name, username, email, bio, avatar_url, interests')
+          .eq('id', userId)
+          .single();
 
-      if (error && error.code !== 'PGRST116') throw error;
+        if (error && error.code !== 'PGRST116') throw error;
 
-      if (data) {
-        setDisplayName(data.display_name ?? '');
-        setUsername(data.username ?? '');
-        setEmail(session.user.email ?? '');
-        setBio(data.bio ?? '');
-        setAvatarUrl(data.avatar_url);
+        if (data) {
+          setDisplayName(data.display_name ?? '');
+          setUsername(data.username ?? '');
+          setEmail(session.user.email ?? '');
+          setBio(data.bio ?? '');
+          setAvatarUrl(data.avatar_url);
 
-        // interests: ensure array of strings
-        if (data.interests && Array.isArray(data.interests)) {
-          setInterests((data.interests as any[]).map(String));
+          // interests: ensure array of strings
+          if (data.interests && Array.isArray(data.interests)) {
+            setInterests((data.interests as any[]).map(String));
+          } else {
+            setInterests([]);
+          }
         } else {
+          setDisplayName('');
+          setUsername('');
+          setEmail(session.user.email ?? '');
+          setBio('');
+          setAvatarUrl(null);
           setInterests([]);
         }
-      } else {
-        setDisplayName('');
-        setUsername('');
-        setEmail(session.user.email ?? '');
-        setBio('');
-        setAvatarUrl(null);
-        setInterests([]);
-      }
-    } catch (err) {
-      console.error('Error fetching profile:', err);
-      toast.toast({
-        title: 'Error',
-        description: 'Failed to load profile info',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-      setInitialLoading(false);
-    }
-  };
-
-  // Fetch interest categories
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id, name, slug, emoji')
-        .order('name');
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (err) {
-      console.error('Error loading categories:', err);
-      toast.toast({
-        title: 'Error',
-        description: 'Failed to load categories',
-        variant: 'destructive',
-      });
-    }
-  };
-
-  useEffect(() => {
-    fetchUserProfile();
-    fetchCategories();
-    // eslint-disable-next-line
-  }, []);
-
-  // Upload avatar
-  const uploadAvatar = async (file: File) => {
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${fileName}`;
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      return data.publicUrl;
-    } catch (error) {
-      console.error('Error uploading avatar:', error);
-      throw error;
-    }
-  };
-
-  // Avatar change handler
-  const onAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      // Validate image types
-      if (!file.type.startsWith('image/')) {
+      } catch (err: any) {
+        console.error('Error fetching profile:', err);
         toast.toast({
-          title: 'Invalid file',
-          description: 'Please upload an image file',
+          title: 'Error',
+          description: err.message || 'Failed to load profile info',
           variant: 'destructive',
         });
-        return;
+      } finally {
+        setLoading(false);
+        setInitialLoading(false);
       }
-      setAvatarFile(file);
-      setAvatarUrl(URL.createObjectURL(file));
-    } else {
-      // If clearing the avatar
-      setAvatarFile(null);
-      setAvatarUrl(null);
-    }
-  };
+    };
+
+    fetchUserProfile();
+  }, [navigate, setAvatarUrl, setInterests, toast]);
 
   // Save profile to supabase
   const handleSave = async () => {
-    setLoading(true);
+    // Clear previous errors
+    setErrors({});
+    
+    // Validate profile data
+    const isValid = validateProfile(displayName, username, bio);
+    if (!isValid) {
+      // Validation failed, the errors are already set in the errors state
+      toast.toast({
+        title: 'Validation Error',
+        description: 'Please fix the errors in the form',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setSavingProfile(true);
     try {
       const {
         data: { session },
@@ -171,7 +121,7 @@ export function useProfile() {
           description: 'You must be logged in to update your profile',
           variant: 'destructive',
         });
-        setLoading(false);
+        setSavingProfile(false);
         navigate('/');
         return;
       }
@@ -180,14 +130,23 @@ export function useProfile() {
 
       let finalAvatarUrl = avatarUrl;
       if (avatarFile) {
-        finalAvatarUrl = await uploadAvatar(avatarFile);
-        setAvatarUrl(finalAvatarUrl); // Immediately show after upload
+        try {
+          finalAvatarUrl = await uploadAvatar(avatarFile);
+          setAvatarUrl(finalAvatarUrl); // Immediately show after upload
+        } catch (error: any) {
+          toast.toast({
+            title: 'Avatar Upload Failed',
+            description: error.message || 'Failed to upload avatar',
+            variant: 'destructive',
+          });
+          // Continue with profile update even if avatar upload fails
+        }
       }
 
       const updates = {
         id: userId,
         display_name: displayName.trim(),
-        username,
+        username: username.trim(),
         bio: bio.trim(),
         avatar_url: finalAvatarUrl,
         interests,
@@ -212,28 +171,30 @@ export function useProfile() {
         variant: 'destructive',
       });
     } finally {
-      setLoading(false);
+      setSavingProfile(false);
     }
   };
 
-  // Toggle interest
-  const toggleInterest = (categoryId: string) => {
-    setInterests((prev) =>
-      prev.includes(categoryId)
-        ? prev.filter((id) => id !== categoryId)
-        : [...prev, categoryId]
-    );
-  };
-
   return {
+    // Profile data
     displayName, setDisplayName,
     username, setUsername,
     email,
     bio, setBio,
-    avatarUrl, avatarFile, onAvatarChange,
-    loading, initialLoading,
+    
+    // Avatar
+    avatarUrl, onAvatarChange,
+    
+    // Loading states
+    loading, initialLoading, savingProfile,
+    
+    // Interests
+    categories, interests, toggleInterest, categoriesLoading,
+    
+    // Actions
     handleSave,
-    categories, interests,
-    toggleInterest,
+    
+    // Validation
+    errors,
   };
 }

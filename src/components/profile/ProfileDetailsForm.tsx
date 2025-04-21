@@ -2,6 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ProfileDetailsFormProps {
   displayName: string;
@@ -12,6 +13,11 @@ interface ProfileDetailsFormProps {
   bio: string;
   setBio: (value: string) => void;
   loading: boolean;
+  errors: {
+    displayName?: string;
+    username?: string;
+    bio?: string;
+  };
 }
 
 const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
@@ -22,7 +28,8 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
   email,
   bio,
   setBio,
-  loading
+  loading,
+  errors
 }) => (
   <>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -38,7 +45,11 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
           placeholder="Your display name"
           disabled={loading}
           maxLength={50}
+          className={errors.displayName ? "border-red-500" : ""}
         />
+        {errors.displayName && (
+          <p className="text-red-500 text-xs mt-1">{errors.displayName}</p>
+        )}
       </div>
 
       {/* Username (now editable) */}
@@ -53,10 +64,15 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
           placeholder="Your username"
           disabled={loading}
           maxLength={30}
+          className={errors.username ? "border-red-500" : ""}
         />
-        <p className="text-xs text-white/70 mt-1">
-          Only lowercase letters, numbers, and underscores
-        </p>
+        {errors.username ? (
+          <p className="text-red-500 text-xs mt-1">{errors.username}</p>
+        ) : (
+          <p className="text-xs text-white/70 mt-1">
+            Only lowercase letters, numbers, and underscores
+          </p>
+        )}
       </div>
     </div>
 
@@ -76,7 +92,7 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
       <Label htmlFor="bio" className="block font-semibold text-white mb-1">
         Bio
       </Label>
-      <textarea
+      <Textarea
         id="bio"
         rows={4}
         value={bio}
@@ -84,11 +100,15 @@ const ProfileDetailsForm: React.FC<ProfileDetailsFormProps> = ({
         placeholder="Tell us about yourself"
         disabled={loading}
         maxLength={500}
-        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+        className={`w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${errors.bio ? "border-red-500" : ""}`}
       />
-      <p className="text-xs text-white/70 mt-1">
-        {bio.length}/500 characters
-      </p>
+      {errors.bio ? (
+        <p className="text-red-500 text-xs mt-1">{errors.bio}</p>
+      ) : (
+        <p className="text-xs text-white/70 mt-1">
+          {bio.length}/500 characters
+        </p>
+      )}
     </div>
   </>
 );
