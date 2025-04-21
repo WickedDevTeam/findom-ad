@@ -49,12 +49,6 @@ const CATEGORY_LINKS = [{
   label: 'Bots'
 }];
 
-interface SidebarProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-// Note: The new Sidebar component manages open/close state itself with SidebarProvider in RootLayout
 const FindomSidebar = () => {
   const location = useLocation();
 
