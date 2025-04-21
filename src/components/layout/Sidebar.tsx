@@ -51,7 +51,7 @@ const FindomSidebar = () => {
                 <SidebarMenuButton asChild isActive={location.pathname === '/'}>
                   <Link to="/">
                     <span className="text-xl">🏠</span>
-                    <span className="font-normal text-lg">Back Home</span>
+                    <span className="font-normal text-base text-left">Back Home</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
