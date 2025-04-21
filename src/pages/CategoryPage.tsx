@@ -51,17 +51,17 @@ const CategoryPage = () => {
   const [creators, setCreators] = useState<Creator[]>([]);
   const [categoryName, setCategoryName] = useState('');
   const [categorySlug, setCategorySlug] = useState('');
-  const [error, setError] = useState(false);
   
   useEffect(() => {
+    console.log('CategoryPage mounted with category param:', category);
+    
     if (!category) {
-      setError(true);
+      console.error('No category parameter found');
       setLoading(false);
       return;
     }
 
     setLoading(true);
-    setError(false);
     setCategorySlug(category);
     
     // Get the display name from our mapping or generate it from the slug
@@ -70,6 +70,7 @@ const CategoryPage = () => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
     
+    console.log('Setting category name to:', displayName);
     setCategoryName(displayName);
     
     // Get creators for this category
@@ -80,8 +81,18 @@ const CategoryPage = () => {
     setLoading(false);
   }, [category]);
   
-  // Return error state if category parameter is missing
-  if (error || !category) {
+  // Return loading state if still loading
+  if (loading) {
+    return (
+      <div className="w-full h-64 flex items-center justify-center">
+        <div className="h-8 w-8 border-4 border-findom-purple/30 border-t-findom-purple rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+  
+  // Make sure we have a valid category
+  if (!category || !categorySlug) {
+    console.error('Category is undefined or empty after processing');
     return (
       <div className="text-center py-12">
         <AlertCircle className="w-16 h-16 mx-auto text-findom-orange mb-4" />
@@ -92,15 +103,6 @@ const CategoryPage = () => {
         <Button asChild className="mt-6">
           <Link to="/">Back to Home</Link>
         </Button>
-      </div>
-    );
-  }
-  
-  // Return loading state if still loading
-  if (loading) {
-    return (
-      <div className="w-full h-64 flex items-center justify-center">
-        <div className="h-8 w-8 border-4 border-findom-purple/30 border-t-findom-purple rounded-full animate-spin"></div>
       </div>
     );
   }

@@ -128,31 +128,38 @@ export const getNewCreators = (): Creator[] => {
 export const getCreatorsByCategory = (categorySlug: string): Creator[] => {
   console.log('Searching for category slug:', categorySlug); // Debug log
   
-  // Convert slug to display name format
-  const categoryMapping: Record<string, string> = {
-    'findoms': 'Findom',
-    'catfish': 'Catfish',
-    'ai-bots': 'AI Bots',
-    'celebrities': 'Celebrities',
-    'twitter': 'Twitter',
-    'blackmail': 'Blackmail',
-    'pay-pigs': 'Pay Pigs',
-    'bots': 'Bots'
+  // Convert slug to display name format - add more mappings as needed
+  const categoryMapping: Record<string, string[]> = {
+    'findoms': ['Findom'],
+    'catfish': ['Catfish'],
+    'ai-bots': ['AI Bots'],
+    'celebrities': ['Celebrities'],
+    'twitter': ['Twitter'],
+    'blackmail': ['Blackmail'],
+    'pay-pigs': ['Pay Pigs'],
+    'bots': ['Bots']
   };
   
-  const normalizedCategory = categoryMapping[categorySlug] || 
+  // Get normalized category names (array of possible matches)
+  const possibleCategoryNames = categoryMapping[categorySlug] || [
     categorySlug.split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+      .join(' ')
+  ];
   
-  console.log('Normalized category name:', normalizedCategory); // Debug log
+  console.log('Possible category names:', possibleCategoryNames); // Debug log
   
+  // Find creators that match any of the possible category names
   const result = creators.filter(creator => 
-    creator.categories.some(c => 
-      c.toLowerCase() === normalizedCategory.toLowerCase()
+    creator.categories.some(creatorCategory => 
+      possibleCategoryNames.some(possibleName => 
+        creatorCategory.toLowerCase() === possibleName.toLowerCase()
+      )
     )
   );
   
+  // Log all creators' categories for debugging
+  console.log('All creators categories:', creators.map(c => c.categories));
   console.log('Found creators:', result.length, result.map(c => c.name)); // Debug log
   return result;
 };
