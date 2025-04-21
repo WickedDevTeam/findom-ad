@@ -1,29 +1,64 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const SidebarUserProfile = () => {
   const { user } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user) return;
+      
+      try {
+        // Fetch profile from profiles table
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('avatar_url, display_name')
+          .eq('id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching profile:', error);
+          return;
+        }
+        
+        if (data) {
+          setAvatarUrl(data.avatar_url);
+          setDisplayName(data.display_name);
+        }
+      } catch (error) {
+        console.error('Error in profile fetch:', error);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [user]);
   
   if (!user) return null;
 
   // For debugging
   console.log('User object in SidebarUserProfile:', user);
   console.log('User metadata:', user.user_metadata);
+  console.log('Avatar URL from profile:', avatarUrl);
+  
+  const userName = displayName || user.user_metadata?.name || user.user_metadata?.full_name || 'User';
 
   return (
     <div className="flex items-center gap-3 px-2 py-3 min-w-0">
       <Avatar className="h-10 w-10 border border-white/10">
-        <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.name || 'User avatar'} />
+        <AvatarImage src={avatarUrl || user.user_metadata?.avatar_url} alt={userName} />
         <AvatarFallback>
           <User className="h-6 w-6" />
         </AvatarFallback>
       </Avatar>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-white truncate">
-          {user.user_metadata?.name || user.user_metadata?.full_name || 'User'}
+          {userName}
         </p>
         <p className="text-xs text-white/60 truncate">
           {user.email}
