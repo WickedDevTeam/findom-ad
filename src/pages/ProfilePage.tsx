@@ -69,7 +69,15 @@ const ProfilePage = () => {
         setEmail(session.user.email ?? ''); // Use auth email as source of truth
         setBio(data.bio ?? '');
         setAvatarUrl(data.avatar_url);
-        setInterests(Array.isArray(data.interests) ? data.interests : []);
+        
+        // Fix for the first TypeScript error: handle the Json[] type correctly
+        if (data.interests && Array.isArray(data.interests)) {
+          // Convert any non-string values to strings to ensure string[] type
+          const interestsArray = data.interests.map(item => String(item));
+          setInterests(interestsArray);
+        } else {
+          setInterests([]);
+        }
       } else {
         // No profile found, initialize empty state
         setDisplayName('');
@@ -181,8 +189,9 @@ const ProfilePage = () => {
         description: 'Profile updated successfully!',
       });
 
-      // Invalidate queries if using react-query for profile elsewhere
-      queryClient.invalidateQueries(['profile']);
+      // Fix for the second TypeScript error: use the correct type for invalidateQueries
+      // Use an object with a queryKey property instead of a string array
+      queryClient.invalidateQueries({ queryKey: ['profile'] });
     } catch (error) {
       console.error('Error updating profile:', error);
       toast.toast({
