@@ -1,4 +1,3 @@
-
 import React, { useContext } from 'react';
 import {
   BrowserRouter as Router,
@@ -8,7 +7,6 @@ import {
 } from 'react-router-dom';
 import { AuthProvider } from '@/components/auth/AuthProvider';
 import { AuthContext } from '@/components/auth/AuthProvider';
-import Index from '@/pages/Index';
 import HomePage from '@/pages/HomePage';
 import SigninPage from '@/pages/SigninPage';
 import SignupPage from '@/pages/SignupPage';
@@ -58,8 +56,7 @@ const App = () => {
     <AuthProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route path="/" element={<HomePage />} />
           <Route path="/signin" element={<SigninPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route path="/tos" element={<TOSPage />} />
@@ -67,14 +64,6 @@ const App = () => {
           <Route path="/category/:categorySlug" element={<CategoryPage />} />
           <Route path="/listing/:listingId" element={<ListingDetailPage />} />
           <Route path="/login" element={<Navigate to="/signin" replace />} />
-          <Route path="/findoms" element={<CategoryPage />} />
-          <Route path="/pay-pigs" element={<CategoryPage />} />
-          <Route path="/catfish" element={<CategoryPage />} />
-          <Route path="/ai-bots" element={<CategoryPage />} />
-          <Route path="/twitter" element={<CategoryPage />} />
-          <Route path="/celebrities" element={<CategoryPage />} />
-          <Route path="/blackmail" element={<CategoryPage />} />
-          <Route path="/bots" element={<CategoryPage />} />
 
           {/* Protected Routes */}
           <Route

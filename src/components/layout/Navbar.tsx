@@ -1,14 +1,12 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Logo from '../shared/Logo';
 import { Bell, Search as SearchIcon, X, Menu } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
 import { useSidebar } from '@/components/ui/sidebar';
-import { useIsMobile } from '@/hooks/use-mobile';
-import NavbarProfileMenu from './NavbarProfileMenu';
 
 const Navbar = ({
   children
@@ -19,8 +17,7 @@ const Navbar = ({
   const [searchValue, setSearchValue] = useState('');
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { openMobile, setOpenMobile } = useSidebar();
-  const isMobile = useIsMobile();
+  const { toggleSidebar } = useSidebar();
   
   const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,8 +34,7 @@ const Navbar = ({
     }
   }, [searchOpen]);
   
-  return (
-    <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
+  return <header className="fixed top-0 left-0 right-0 bg-black/80 backdrop-blur-md z-50 border-b border-white/10">
       <div className="container mx-auto px-3 sm:px-6 flex justify-between items-center h-[72px]">
         <div className="flex items-center gap-1 sm:gap-4">
           {children}
@@ -46,36 +42,22 @@ const Navbar = ({
             variant="ghost" 
             size="icon" 
             className="md:hidden text-white/80 hover:text-white"
-            onClick={() => setOpenMobile(!openMobile)}
-            aria-label="Toggle sidebar"
+            onClick={toggleSidebar}
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <Logo hideInHeader={false} className="md:ml-0" />
+          <Logo hideInHeader={false} />
         </div>
         
         <div className="hidden sm:flex flex-1 justify-center px-4 max-w-md mx-auto">
           <form onSubmit={onSearch} className="w-full">
-            <Input 
-              className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all" 
-              type="text" 
-              placeholder="Search creators..." 
-              value={searchValue} 
-              onChange={e => setSearchValue(e.target.value)}
-            />
+            <Input className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all" type="text" placeholder="Search creators..." value={searchValue} onChange={e => setSearchValue(e.target.value)} />
           </form>
         </div>
         
-        <div className="sm:hidden flex items-center justify-center">
-          <button 
-            aria-label={searchOpen ? "Close search" : "Open search"} 
-            className={clsx("rounded-full p-2 hover:bg-black/30 transition focus:outline-none", searchOpen && "bg-black/40")} 
-            onClick={() => setSearchOpen(o => !o)}
-          >
-            {searchOpen ? 
-              <X className="w-5 h-5 text-white" /> : 
-              <SearchIcon className="w-5 h-5 text-white" />
-            }
+        <div className="sm:hidden flex-1 flex justify-center">
+          <button aria-label={searchOpen ? "Close search" : "Open search"} className={clsx("rounded-full p-2 hover:bg-black/30 transition focus:outline-none", searchOpen && "bg-black/40")} onClick={() => setSearchOpen(o => !o)}>
+            {searchOpen ? <X className="w-5 h-5 text-white" /> : <SearchIcon className="w-5 h-5 text-white" />}
           </button>
         </div>
         
@@ -90,38 +72,28 @@ const Navbar = ({
               </div>
             </Button>
           </Link>
-          <NavbarProfileMenu />
-          <div className="hidden sm:flex items-center gap-2">
-            <Button variant="ghost" asChild className="hidden sm:flex">
-              <Link to="/promotion" className="text-white/80 hover:text-white">
-                Promotion
-              </Link>
-            </Button>
-            <Button variant="ghost" asChild className="hidden sm:flex">
-              <Link to="/create-listing" className="text-white/80 hover:text-white">
-                Create Listing
-              </Link>
-            </Button>
-          </div>
+          <Button variant="ghost" asChild className="hidden sm:flex">
+            <Link to="/promotion" className="text-white/80 hover:text-white">
+              Promotion
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild className="hidden sm:flex">
+            <Link to="/create-listing" className="text-white/80 hover:text-white">
+              Create Listing
+            </Link>
+          </Button>
+          <Button variant="outline" asChild className="hidden xs:flex">
+            <Link to="/admin">Admin</Link>
+          </Button>
         </div>
       </div>
       
-      {searchOpen && (
-        <div className="sm:hidden px-3 pb-3 bg-black/80 backdrop-blur-md">
+      {searchOpen && <div className="sm:hidden px-3 pb-3 bg-black/80 backdrop-blur-md">
           <form onSubmit={onSearch} className="w-full relative">
-            <Input 
-              ref={searchInputRef} 
-              className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all rounded-xl h-12" 
-              type="text" 
-              placeholder="Search creators..." 
-              value={searchValue} 
-              onChange={e => setSearchValue(e.target.value)} 
-            />
+            <Input ref={searchInputRef} className="w-full bg-black/30 border-white/10 focus:bg-black/40 focus:border-findom-purple transition-all rounded-xl h-12" type="text" placeholder="Search creators..." value={searchValue} onChange={e => setSearchValue(e.target.value)} />
           </form>
-        </div>
-      )}
-    </header>
-  );
+        </div>}
+    </header>;
 };
 
 export default Navbar;
