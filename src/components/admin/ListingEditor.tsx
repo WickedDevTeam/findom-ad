@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { toast } from '@/components/ui/sonner';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -28,6 +28,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { supabase } from '@/integrations/supabase/client';
 import { AlertCircle, Check, Image, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { SocialLinks } from '@/types';
 import { Json } from '@/integrations/supabase/types';
 
@@ -477,8 +478,8 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
   }
 
   return (
-    <Card className="w-full max-w-3xl mx-auto bg-black/30 backdrop-blur-sm border border-white/10">
-      <CardHeader>
+    <Card className="w-full max-w-3xl mx-auto bg-black/30 backdrop-blur-sm border border-white/10 overflow-hidden">
+      <CardHeader className="sticky top-0 z-10 bg-black/40 backdrop-blur-lg border-b border-white/5">
         <CardTitle className="text-2xl font-bold">
           {listingId ? 'Edit Listing' : 'Create New Listing'}
         </CardTitle>
@@ -489,291 +490,294 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
         </CardDescription>
       </CardHeader>
       
-      <CardContent>
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        <div className="mb-6">
-          <div className="flex items-center mb-4">
-            <Avatar className="h-20 w-20 mr-4 border-2 border-findom-purple">
-              <AvatarImage 
-                src={profileImageUrl || ''} 
-                alt="Profile" 
-                className="object-cover"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&fit=crop';
-                }}
-              />
-              <AvatarFallback className="bg-findom-purple text-white text-xl">
-                {form.getValues().name?.charAt(0) || '?'}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div>
-              <label 
-                htmlFor="profileImage" 
-                className="flex items-center gap-2 px-4 py-2 rounded-md bg-findom-purple/70 hover:bg-findom-purple text-white cursor-pointer transition-colors"
-              >
-                <Image className="h-4 w-4" />
-                Upload Image
-              </label>
-              <input 
-                id="profileImage" 
-                type="file" 
-                accept="image/*" 
-                onChange={handleImageChange} 
-                className="hidden" 
-              />
-              <p className="text-xs text-white/60 mt-1">
-                Maximum 5MB. JPG, PNG or GIF.
-              </p>
+      <ScrollArea className="h-[calc(100vh-14rem)] max-h-[800px]">
+        <CardContent className="p-6">
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-4">
+              <Avatar className="h-20 w-20 border-2 border-findom-purple">
+                <AvatarImage 
+                  src={profileImageUrl || ''} 
+                  alt="Profile" 
+                  className="object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=100&h=100&fit=crop';
+                  }}
+                />
+                <AvatarFallback className="bg-findom-purple text-white text-xl">
+                  {form.getValues().name?.charAt(0) || '?'}
+                </AvatarFallback>
+              </Avatar>
+              
+              <div>
+                <label 
+                  htmlFor="profileImage" 
+                  className="flex items-center gap-2 px-4 py-2 rounded-md bg-findom-purple/70 hover:bg-findom-purple text-white cursor-pointer transition-colors"
+                >
+                  <Image className="h-4 w-4" />
+                  Upload Image
+                </label>
+                <input 
+                  id="profileImage" 
+                  type="file" 
+                  accept="image/*" 
+                  onChange={handleImageChange} 
+                  className="hidden" 
+                />
+                <p className="text-xs text-white/60 mt-1">
+                  Maximum 5MB. JPG, PNG or GIF.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Display Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Emma Watson" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Your public display name
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="username"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. emma-watson" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Unique username for your profile URL
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value}
-                      value={field.value}
-                    >
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Display Name</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
+                        <Input placeholder="e.g. Emma Watson" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {CATEGORIES.map((category) => (
-                          <SelectItem key={category.value} value={category.value}>
-                            {category.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormDescription>
-                      The primary category for this listing
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Listing Type</FormLabel>
-                    <Select 
-                      onValueChange={field.onChange} 
-                      defaultValue={field.value || 'standard'}
-                      value={field.value || 'standard'}
-                    >
+                      <FormDescription>
+                        Your public display name
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="username"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Username</FormLabel>
                       <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a type" />
-                        </SelectTrigger>
+                        <Input placeholder="e.g. emma-watson" {...field} />
                       </FormControl>
-                      <SelectContent>
-                        {LISTING_TYPES.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      <FormDescription>
+                        Unique username for your profile URL
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="z-50 bg-black/90 border border-white/10">
+                          {CATEGORIES.map((category) => (
+                            <SelectItem key={category.value} value={category.value}>
+                              {category.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        The primary category for this listing
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Listing Type</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        defaultValue={field.value || 'standard'}
+                        value={field.value || 'standard'}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent className="z-50 bg-black/90 border border-white/10">
+                          {LISTING_TYPES.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        {isAdmin 
+                          ? 'Set the listing type (premium features may apply)'
+                          : 'Free listings are approved faster'}
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <FormField
+                control={form.control}
+                name="bio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Bio</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Tell us about yourself..." 
+                        className="min-h-[120px]" 
+                        {...field} 
+                      />
+                    </FormControl>
                     <FormDescription>
-                      {isAdmin 
-                        ? 'Set the listing type (premium features may apply)'
-                        : 'Free listings are approved faster'}
+                      A short description that will appear on your profile
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-            </div>
-            
-            <FormField
-              control={form.control}
-              name="bio"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Bio</FormLabel>
-                  <FormControl>
-                    <Textarea 
-                      placeholder="Tell us about yourself..." 
-                      className="min-h-[120px]" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    A short description that will appear on your profile
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="email" 
-                      placeholder="your@email.com" 
-                      {...field} 
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {isAdmin
-                      ? 'Contact email for the creator'
-                      : 'We\'ll use this to notify you of your submission status'}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              
               <FormField
                 control={form.control}
-                name="twitter"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Twitter Handle</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="@username" {...field} />
+                      <Input 
+                        type="email" 
+                        placeholder="your@email.com" 
+                        {...field} 
+                      />
                     </FormControl>
+                    <FormDescription>
+                      {isAdmin
+                        ? 'Contact email for the creator'
+                        : 'We\'ll use this to notify you of your submission status'}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
               
-              <FormField
-                control={form.control}
-                name="cashapp"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>CashApp</FormLabel>
-                    <FormControl>
-                      <Input placeholder="$cashapp" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="onlyfans"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>OnlyFans</FormLabel>
-                    <FormControl>
-                      <Input placeholder="onlyfans.com/username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="throne"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Amazon Wishlist / Throne</FormLabel>
-                    <FormControl>
-                      <Input placeholder="throne.me/username" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="twitter"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Twitter Handle</FormLabel>
+                      <FormControl>
+                        <Input placeholder="@username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="cashapp"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>CashApp</FormLabel>
+                      <FormControl>
+                        <Input placeholder="$cashapp" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="onlyfans"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>OnlyFans</FormLabel>
+                      <FormControl>
+                        <Input placeholder="onlyfans.com/username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="throne"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Amazon Wishlist / Throne</FormLabel>
+                      <FormControl>
+                        <Input placeholder="throne.me/username" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </ScrollArea>
 
-            <div className="flex justify-end gap-4 pt-4">
-              {onCancel && (
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={onCancel}
-                  disabled={loading}
-                >
-                  Cancel
-                </Button>
-              )}
-              <Button 
-                type="submit"
-                disabled={loading}
-                className="bg-findom-purple hover:bg-findom-purple/80"
-              >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {loading 
-                  ? 'Saving...' 
-                  : listingId 
-                    ? 'Save Changes' 
-                    : isAdmin 
-                      ? 'Create Listing' 
-                      : 'Submit for Review'
-                }
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </CardContent>
+      <CardFooter className="flex justify-end gap-4 p-6 bg-black/40 border-t border-white/5 sticky bottom-0 z-10">
+        {onCancel && (
+          <Button 
+            type="button"
+            variant="outline" 
+            onClick={onCancel}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+        )}
+        <Button 
+          type="submit"
+          disabled={loading}
+          className="bg-findom-purple hover:bg-findom-purple/80"
+          onClick={form.handleSubmit(onSubmit)}
+        >
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          {loading 
+            ? 'Saving...' 
+            : listingId 
+              ? 'Save Changes' 
+              : isAdmin 
+                ? 'Create Listing' 
+                : 'Submit for Review'
+          }
+        </Button>
+      </CardFooter>
     </Card>
   );
 }

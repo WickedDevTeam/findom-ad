@@ -9,7 +9,7 @@ const CreateListingPage = () => {
   }, []);
   
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8 pb-16">
       <div className="space-y-4">
         <h1 className="text-4xl font-bold text-white">Create Your Listing</h1>
         <p className="text-white/70 text-lg">
@@ -17,7 +17,7 @@ const CreateListingPage = () => {
         </p>
       </div>
       
-      <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg p-6">
+      <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-lg">
         <ListingSubmissionForm />
       </div>
 
