@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { ReactNode } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
@@ -8,7 +8,11 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { Footer } from '@/components/ui/footer';
 
-const RootLayout = () => {
+interface RootLayoutProps {
+  children?: ReactNode;
+}
+
+const RootLayout = ({ children }: RootLayoutProps) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   
@@ -18,7 +22,9 @@ const RootLayout = () => {
         <Navbar />
         <div className="flex flex-1 w-full relative">
           <Sidebar />
-          <RootContent location={location} />
+          <RootContent location={location}>
+            {children}
+          </RootContent>
         </div>
       </div>
     </SidebarProvider>
@@ -26,7 +32,10 @@ const RootLayout = () => {
 };
 
 // Separated component to use the useSidebar hook
-const RootContent = ({ location }: { location: ReturnType<typeof useLocation> }) => {
+const RootContent = ({ location, children }: { 
+  location: ReturnType<typeof useLocation>;
+  children?: ReactNode;
+}) => {
   const { open } = useSidebar();
   const isMobile = useIsMobile();
   
@@ -45,7 +54,7 @@ const RootContent = ({ location }: { location: ReturnType<typeof useLocation> })
           transition={{ duration: 0.3 }}
           className="flex-1 flex flex-col justify-start px-3 sm:px-6 py-4 sm:py-8"
         >
-          <Outlet />
+          {children || <Outlet />}
         </motion.div>
       </AnimatePresence>
       <Footer />
