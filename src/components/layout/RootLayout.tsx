@@ -4,8 +4,6 @@ import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar';
 import { Footer } from '@/components/ui/footer';
@@ -13,14 +11,19 @@ import { Footer } from '@/components/ui/footer';
 const RootLayout = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { open } = useSidebar();
   
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex flex-col w-full text-white overflow-x-hidden bg-zinc-950">
         <Navbar />
         <div className="flex flex-1 w-full relative">
           <Sidebar />
-          <main className="flex-1 w-full pt-[72px] transition-all duration-300 flex flex-col min-h-screen">
+          <main 
+            className={`flex-1 w-full pt-[72px] transition-all duration-300 flex flex-col min-h-screen ${
+              open && !isMobile ? 'md:pl-[16rem]' : ''
+            }`}
+          >
             <AnimatePresence mode="wait">
               <motion.div 
                 key={location.pathname} 

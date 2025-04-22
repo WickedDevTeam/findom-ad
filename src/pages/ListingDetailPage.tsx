@@ -7,9 +7,9 @@ const ListingDetailPage = () => {
   const { listingId } = useParams();
 
   return (
-    <div className="max-w-4xl mx-auto p-4">
-      <h1 className="text-3xl font-bold mb-6 text-white">Listing Details</h1>
-      <Card className="bg-black/30 backdrop-blur-sm border border-white/10 p-6">
+    <div className="w-full max-w-4xl mx-auto p-4">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-white">Listing Details</h1>
+      <Card className="bg-black/30 backdrop-blur-sm border border-white/10 p-4 sm:p-6">
         <p className="text-white/70 mb-4">
           Viewing listing ID: {listingId}
         </p>

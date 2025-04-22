@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -15,11 +14,6 @@ const Logo = ({
   className = ""
 }: LogoProps) => {
   const isMobile = useIsMobile();
-  
-  // Don't render logo at all in sidebar on mobile
-  if (forSidebar && isMobile) {
-    return null;
-  }
   
   // Don't render in header if requested
   if (!forSidebar && hideInHeader) {
