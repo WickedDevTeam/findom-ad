@@ -147,9 +147,10 @@ const ListingSubmissionForm = () => {
         status: 'pending',
         profile_image: profileImagePath,
         user_id: user.id,
-        is_public: false, // New listings start as non-public
+        is_public: false,
         is_deleted: false,
-        has_pending_changes: false
+        has_pending_changes: false,
+        username: `user_${user.id.substring(0, 8)}`,
       };
       
       const { error: insertError } = await supabase
