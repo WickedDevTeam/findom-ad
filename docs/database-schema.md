@@ -208,3 +208,127 @@ Authentication is managed by Supabase Auth, which provides:
 - Social provider authentication (configurable)
 - Session management
 - User metadata
+
+## Data Access Patterns
+
+### Creator Retrieval with Categories and Galleries
+
+```sql
+SELECT c.*, 
+  COALESCE(
+    json_agg(DISTINCT cat.*) FILTER (WHERE cat.id IS NOT NULL), 
+    '[]'
+  ) as categories,
+  COALESCE(
+    json_agg(DISTINCT g.*) FILTER (WHERE g.id IS NOT NULL), 
+    '[]'
+  ) as galleries
+FROM creators c
+LEFT JOIN creator_categories cc ON c.id = cc.creator_id
+LEFT JOIN categories cat ON cc.category_id = cat.id
+LEFT JOIN creator_galleries g ON c.id = g.creator_id
+WHERE c.username = 'username'
+GROUP BY c.id;
+```
+
+### User Favorites with Creator Details
+
+```sql
+SELECT c.*, f.created_at as favorited_at
+FROM favorites f
+JOIN creators c ON f.creator_id = c.id
+WHERE f.user_id = auth.uid()
+ORDER BY f.created_at DESC;
+```
+
+### Pending Listing Submissions
+
+```sql
+SELECT l.*, 
+  p.display_name as submitter_name, 
+  p.avatar_url as submitter_avatar
+FROM listings l
+LEFT JOIN profiles p ON l.user_id = p.id
+WHERE l.status = 'pending'
+ORDER BY l.submitted_at DESC;
+```
+
+## Database Indexes
+
+To optimize query performance, the database includes indexes on:
+
+- `creators.username` (for fast lookup by username)
+- `favorites.user_id` and `favorites.creator_id` (for checking favorite status)
+- `listings.status` (for filtering by status)
+- `profiles.id` (primary key matching auth.users)
+- `notifications.user_id` and `notifications.is_read` (for retrieving unread notifications)
+
+## Trigger Configuration
+
+The database includes triggers to maintain data consistency:
+
+```sql
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+```
+
+This trigger ensures that each new user automatically gets a profile record in the public schema.
+
+## JSON Structure Examples
+
+### Creator Social Links
+
+```json
+{
+  "twitter": "username",
+  "instagram": "username",
+  "onlyfans": "username",
+  "cashapp": "$username",
+  "throne": "https://throne.com/wishlist/username",
+  "other": [
+    {
+      "name": "Website",
+      "url": "https://example.com"
+    }
+  ]
+}
+```
+
+### Profile Interests
+
+```json
+[
+  "findom",
+  "blackmail",
+  "paypig",
+  "sissy"
+]
+```
+
+### Sync History Stats
+
+```json
+{
+  "added": 42,
+  "updated": 15,
+  "deleted": 3,
+  "failed": 1,
+  "errors": [
+    {
+      "id": "rec123",
+      "error": "Invalid username format"
+    }
+  ]
+}
+```
+
+## Database Migrations
+
+Database changes are managed through SQL migrations. The migration workflow involves:
+
+1. Creating SQL migration files
+2. Testing migrations in a development environment
+3. Applying migrations to production
+
+New migrations should follow naming conventions and include both `up` and `down` functionality for rollbacks if possible.

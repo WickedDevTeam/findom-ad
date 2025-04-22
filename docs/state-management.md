@@ -1,3 +1,4 @@
+
 # State Management
 
 The application uses a combination of state management approaches to handle different aspects of application state.
@@ -311,3 +312,58 @@ The application includes debugging capabilities for state:
 - React Query Devtools (when in development mode)
 - Console logging for critical state changes
 - Error boundaries for UI recovery
+
+## Feature Flags
+
+The application can use feature flags to control access to new or experimental features. This is implemented through:
+
+1. **Database Configuration** - Feature flags stored in the `site_config` table
+2. **Context Provider** - A FeatureFlagsProvider to expose flags throughout the app
+3. **Custom Hook** - A `useFeatureFlag` hook to check if features are enabled
+
+Example usage:
+```typescript
+// In a component
+const isNewFeatureEnabled = useFeatureFlag('new-feature');
+
+return (
+  <div>
+    {isNewFeatureEnabled ? (
+      <NewFeatureComponent />
+    ) : (
+      <LegacyComponent />
+    )}
+  </div>
+);
+```
+
+## Supabase Realtime Updates
+
+For real-time collaborative features, the application leverages Supabase's Realtime functionality:
+
+```typescript
+useEffect(() => {
+  // Subscribe to changes
+  const channel = supabase
+    .channel('table-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'tablename'
+      },
+      (payload) => {
+        // Handle new data
+        console.log('New record:', payload.new);
+        // Update local state or trigger refresh
+      }
+    )
+    .subscribe();
+
+  // Cleanup subscription
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
+```
