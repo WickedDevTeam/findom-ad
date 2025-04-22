@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -94,6 +95,7 @@ const ListingSubmissionForm = () => {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) {
         setError('You must be logged in to submit a listing');
+        setLoading(false);
         return;
       }
 
@@ -101,44 +103,55 @@ const ListingSubmissionForm = () => {
       
       // Handle profile image upload if selected
       if (profileImage) {
-        // First, check if the storage bucket exists
-        const { data: buckets } = await supabase.storage.listBuckets();
-        const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
-        
-        if (!avatarBucketExists) {
-          console.error('Avatars bucket does not exist');
-          toast.error('Storage configuration error. Please contact support.');
+        try {
+          // Check if the storage bucket exists
+          const { data: buckets } = await supabase.storage.listBuckets();
+          const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
+          
+          if (!avatarBucketExists) {
+            console.error('Avatars bucket does not exist');
+            toast.error('Storage configuration error. Please contact support.');
+            setLoading(false);
+            return;
+          }
+          
+          const fileExt = profileImage.name.split('.').pop();
+          const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+          const filePath = `${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, profileImage, { upsert: true });
+            
+          if (uploadError) {
+            console.error('Error uploading profile image:', uploadError);
+            setError('Failed to upload profile image: ' + uploadError.message);
+            setLoading(false);
+            return;
+          }
+          
+          const { data: urlData } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
+            
+          profileImagePath = urlData.publicUrl;
+        } catch (uploadError: any) {
+          console.error('Error in image upload process:', uploadError);
+          setError('Image upload error: ' + uploadError.message);
           setLoading(false);
           return;
         }
-        
-        const fileExt = profileImage.name.split('.').pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
-        const filePath = `${fileName}`;
-        
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(filePath, profileImage, { upsert: true });
-          
-        if (uploadError) {
-          console.error('Error uploading profile image:', uploadError);
-          setError('Failed to upload profile image');
-          setLoading(false);
-          return;
-        }
-        
-        const { data: urlData } = supabase.storage
-          .from('avatars')
-          .getPublicUrl(filePath);
-          
-        profileImagePath = urlData.publicUrl;
       }
+      
+      // Generate a username based on user ID to satisfy the database constraint
+      // This is temporary until the types are fully updated
+      const generatedUsername = `user_${user.id.substring(0, 8)}`;
       
       // Prepare listing data
       const listingData = {
         name: data.name,
         category: data.category,
-        bio: data.bio,
+        bio: data.bio || '',
         email: data.email,
         twitter: data.twitter || null,
         cashapp: data.cashapp || null,
@@ -150,25 +163,31 @@ const ListingSubmissionForm = () => {
         is_public: false,
         is_deleted: false,
         has_pending_changes: false,
-        username: `user_${user.id.substring(0, 8)}`,
+        username: generatedUsername, // Required until database types are updated
       };
       
-      const { error: insertError } = await supabase
-        .from('listings')
-        .insert(listingData);
+      try {
+        const { error: insertError } = await supabase
+          .from('listings')
+          .insert(listingData);
+          
+        if (insertError) {
+          console.error('Error submitting listing:', insertError);
+          setError(insertError.message || 'Failed to submit listing');
+          return;
+        }
         
-      if (insertError) {
-        console.error('Error submitting listing:', insertError);
-        setError(insertError.message || 'Failed to submit listing');
+        toast.success('Listing submitted successfully! We will review it shortly.');
+        form.reset();
+        setProfileImage(null);
+        setProfileImageUrl(null);
+      } catch (dbError: any) {
+        console.error('Database operation error:', dbError);
+        setError('Database error: ' + dbError.message);
         return;
       }
-      
-      toast.success('Listing submitted successfully! We will review it shortly.');
-      form.reset();
-      setProfileImage(null);
-      setProfileImageUrl(null);
     } catch (error: any) {
-      console.error('Error:', error);
+      console.error('Unexpected error:', error);
       setError(error.message || 'An unexpected error occurred');
       toast.error('Failed to submit listing');
     } finally {
