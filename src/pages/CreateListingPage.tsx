@@ -2,13 +2,22 @@
 import React, { useEffect } from 'react';
 import ListingSubmissionForm from '@/components/forms/ListingSubmissionForm';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useAuth } from '@/hooks/use-auth';
+import { Navigate } from 'react-router-dom';
 
 const CreateListingPage = () => {
+  const { user } = useAuth();
+
   // Scroll to top when the page loads
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
   
+  // Redirect if not logged in
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
   return (
     <div className="max-w-4xl mx-auto space-y-8 pb-16 px-4 sm:px-6">
       <div className="space-y-4">

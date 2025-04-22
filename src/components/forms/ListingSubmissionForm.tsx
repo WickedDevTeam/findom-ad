@@ -22,11 +22,6 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 // Form schema validation
 const listingFormSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters long' }),
-  username: z.string()
-    .min(3, { message: 'Username must be at least 3 characters long' })
-    .regex(/^[a-z0-9_-]+$/, {
-      message: 'Username can only contain lowercase letters, numbers, underscores, and hyphens'
-    }),
   email: z.string().email({ message: 'Please enter a valid email address' }),
   bio: z.string().min(10, { message: 'Bio must be at least 10 characters long' }).optional(),
   twitter: z.string().optional(),
@@ -59,7 +54,6 @@ const ListingSubmissionForm = () => {
     resolver: zodResolver(listingFormSchema),
     defaultValues: {
       name: '',
-      username: '',
       email: '',
       bio: '',
       twitter: '',
@@ -96,20 +90,13 @@ const ListingSubmissionForm = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Check if username is unique
-      const { data: existingUsername, error: usernameError } = await supabase
-        .from('listings')
-        .select('id')
-        .eq('username', data.username)
-        .maybeSingle();
-      
-      if (existingUsername) {
-        setError('This username is already taken');
-        setLoading(false);
+
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) {
+        setError('You must be logged in to submit a listing');
         return;
       }
-      
+
       let profileImagePath = null;
       
       // Handle profile image upload if selected
@@ -126,7 +113,7 @@ const ListingSubmissionForm = () => {
         }
         
         const fileExt = profileImage.name.split('.').pop();
-        const fileName = `${data.username}-${Date.now()}.${fileExt}`;
+        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
         
         const { error: uploadError } = await supabase.storage
@@ -150,7 +137,6 @@ const ListingSubmissionForm = () => {
       // Prepare listing data
       const listingData = {
         name: data.name,
-        username: data.username,
         category: data.category,
         bio: data.bio,
         email: data.email,
@@ -160,7 +146,10 @@ const ListingSubmissionForm = () => {
         throne: data.throne || null,
         status: 'pending',
         profile_image: profileImagePath,
-        user_id: (await supabase.auth.getUser()).data.user?.id,
+        user_id: user.id,
+        is_public: false, // New listings start as non-public
+        is_deleted: false,
+        has_pending_changes: false
       };
       
       const { error: insertError } = await supabase
@@ -241,23 +230,6 @@ const ListingSubmissionForm = () => {
                   <FormControl>
                     <Input placeholder="Your display name" {...field} />
                   </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="username"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Username</FormLabel>
-                  <FormControl>
-                    <Input placeholder="@username" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    Used for your profile URL, cannot be changed later
-                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
