@@ -2,12 +2,13 @@
 import { useContext, useCallback, useState } from 'react';
 import { AuthContext } from '@/components/auth/AuthProvider';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
 export function useAuth() {
   const authContext = useContext(AuthContext);
   const navigate = useNavigate();
+  const toast = useToast();
   const [authError, setAuthError] = useState<string | null>(null);
 
   const requireAuth = useCallback(() => {
@@ -18,16 +19,17 @@ export function useAuth() {
 
     if (!authContext.user) {
       console.log('User not authenticated, redirecting to signin');
-      toast('Authentication required', {
+      toast.toast({
+        title: 'Authentication required',
         description: 'Please sign in to view this page',
-        className: 'bg-red-500',
+        variant: 'destructive',
       });
       navigate('/signin');
       return false;
     }
     
     return true;
-  }, [authContext.loading, authContext.user, navigate]);
+  }, [authContext.loading, authContext.user, navigate, toast]);
 
   const signIn = async (email: string, password: string) => {
     setAuthError(null);
