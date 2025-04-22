@@ -108,6 +108,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
       const fetchListing = async () => {
         try {
           setFetchLoading(true);
+          setError(null);
           
           // For admins, check in both creators and listings tables
           let data;
@@ -118,7 +119,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               .from('creators')
               .select('*')
               .eq('id', listingId)
-              .single();
+              .maybeSingle();
               
             if (creatorData) {
               // Parse social_links from JSON if it's a string
@@ -142,6 +143,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                   };
                 } catch (e) {
                   console.error('Error parsing social_links JSON:', e);
+                  setError('Error parsing creator data');
                 }
               } else if (creatorData.social_links && typeof creatorData.social_links === 'object') {
                 const links = creatorData.social_links as Record<string, any>;
@@ -187,13 +189,17 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                   data.category = categoryInfo.name;
                 }
               }
-            } else {
-              // If not found in creators, check listings table
+            } else if (creatorError) {
+              console.error('Error fetching creator:', creatorError);
+            }
+            
+            // If not found in creators, check listings table
+            if (!data) {
               const { data: listingData, error: listingError } = await supabase
                 .from('listings')
                 .select('*')
                 .eq('id', listingId)
-                .single();
+                .maybeSingle();
                 
               if (listingData) {
                 data = {
@@ -208,6 +214,9 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                   onlyfans: listingData.onlyfans || '',
                   throne: listingData.throne || '',
                 };
+              } else if (listingError) {
+                console.error('Error fetching listing:', listingError);
+                setError('Failed to find listing data');
               }
             }
           } else {
@@ -216,7 +225,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               .from('listings')
               .select('*')
               .eq('id', listingId)
-              .single();
+              .maybeSingle();
               
             if (listingData) {
               data = {
@@ -231,16 +240,21 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                 onlyfans: listingData.onlyfans || '',
                 throne: listingData.throne || '',
               };
+            } else if (listingError) {
+              console.error('Error fetching listing:', listingError);
+              setError('Failed to load listing details');
             }
           }
           
           if (data) {
             setInitialValues(data);
             form.reset(data);
+          } else {
+            setError('No listing data found');
           }
-        } catch (error) {
+        } catch (error: any) {
           console.error('Error fetching listing:', error);
-          setError('Failed to load listing details');
+          setError('Failed to load listing details: ' + error.message);
         } finally {
           setFetchLoading(false);
         }
@@ -287,6 +301,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
       
       if (existingUsername) {
         setError('This username is already taken');
+        setLoading(false);
         return;
       }
       
@@ -294,6 +309,17 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
       
       // Handle profile image upload if a new one was selected
       if (profileImage) {
+        // First, check if the storage bucket exists
+        const { data: buckets } = await supabase.storage.listBuckets();
+        const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
+        
+        if (!avatarBucketExists) {
+          console.error('Avatars bucket does not exist');
+          setError('Storage configuration error. Please contact support.');
+          setLoading(false);
+          return;
+        }
+        
         const fileExt = profileImage.name.split('.').pop();
         const fileName = `${values.username}-${Date.now()}.${fileExt}`;
         const filePath = `${fileName}`;
@@ -303,7 +329,10 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
           .upload(filePath, profileImage, { upsert: true });
           
         if (uploadError) {
-          throw uploadError;
+          console.error('Error uploading image:', uploadError);
+          setError('Failed to upload profile image: ' + uploadError.message);
+          setLoading(false);
+          return;
         }
         
         const { data: urlData } = supabase.storage
@@ -343,15 +372,25 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .update(creatorData)
             .eq('id', listingId);
             
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error('Error updating creator:', updateError);
+            setError('Failed to update listing: ' + updateError.message);
+            setLoading(false);
+            return;
+          }
           
           // If the category was changed, update it
           // First get category ID
-          const { data: categoryData } = await supabase
+          const { data: categoryData, error: categoryError } = await supabase
             .from('categories')
             .select('id')
             .eq('name', values.category)
             .single();
+            
+          if (categoryError) {
+            console.error('Error finding category:', categoryError);
+            // We'll still proceed, just log the error
+          }
             
           if (categoryData) {
             // Remove old categories
@@ -361,12 +400,17 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               .eq('creator_id', listingId);
               
             // Add new category
-            await supabase
+            const { error: categoryAssignError } = await supabase
               .from('creator_categories')
               .insert({
                 creator_id: listingId,
                 category_id: categoryData.id
               });
+              
+            if (categoryAssignError) {
+              console.error('Error assigning category:', categoryAssignError);
+              // We'll still proceed, just log the error
+            }
           }
           
           toast.success('Listing updated successfully');
@@ -379,23 +423,38 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .select()
             .single();
             
-          if (insertError) throw insertError;
+          if (insertError) {
+            console.error('Error creating creator:', insertError);
+            setError('Failed to create listing: ' + insertError.message);
+            setLoading(false);
+            return;
+          }
           
           // Get category ID
-          const { data: categoryData } = await supabase
+          const { data: categoryData, error: categoryError } = await supabase
             .from('categories')
             .select('id')
             .eq('name', values.category)
             .single();
             
+          if (categoryError) {
+            console.error('Error finding category:', categoryError);
+            // We'll still proceed, just log the error
+          }
+            
           if (categoryData && newCreator) {
             // Add category
-            await supabase
+            const { error: categoryAssignError } = await supabase
               .from('creator_categories')
               .insert({
                 creator_id: newCreator.id,
                 category_id: categoryData.id
               });
+              
+            if (categoryAssignError) {
+              console.error('Error assigning category:', categoryAssignError);
+              // We'll still proceed, just log the error
+            }
           }
           
           toast.success('New listing created successfully');
@@ -432,6 +491,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
           throne: values.throne || null,
           status: 'pending',
           user_id: (await supabase.auth.getUser()).data.user?.id,
+          profile_image: profileImagePath,
         };
         
         if (listingId) {
@@ -441,7 +501,12 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .update(listingData)
             .eq('id', listingId);
             
-          if (updateError) throw updateError;
+          if (updateError) {
+            console.error('Error updating listing:', updateError);
+            setError('Failed to update listing: ' + updateError.message);
+            setLoading(false);
+            return;
+          }
           
           toast.success('Listing submission updated');
           if (onSuccess) onSuccess(listingId, false);
@@ -453,7 +518,12 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .select()
             .single();
             
-          if (insertError) throw insertError;
+          if (insertError) {
+            console.error('Error creating listing:', insertError);
+            setError('Failed to create listing: ' + insertError.message);
+            setLoading(false);
+            return;
+          }
           
           toast.success('Listing submitted for review');
           if (onSuccess) onSuccess(newListing.id, true);
@@ -478,7 +548,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
   }
 
   return (
-    <Card className="w-full max-w-3xl mx-auto bg-black/30 backdrop-blur-sm border border-white/10 overflow-hidden">
+    <Card className="w-full max-w-3xl mx-auto bg-black/30 backdrop-blur-sm border border-white/10 overflow-visible">
       <CardHeader className="sticky top-0 z-10 bg-black/40 backdrop-blur-lg border-b border-white/5">
         <CardTitle className="text-2xl font-bold">
           {listingId ? 'Edit Listing' : 'Create New Listing'}
@@ -490,7 +560,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
         </CardDescription>
       </CardHeader>
       
-      <ScrollArea className="h-[calc(100vh-14rem)] max-h-[800px]">
+      <ScrollArea className="h-[calc(100vh-14rem)] max-h-[600px]">
         <CardContent className="p-6">
           {error && (
             <Alert variant="destructive" className="mb-6">
@@ -593,7 +663,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                             <SelectValue placeholder="Select a category" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-50 bg-black/90 border border-white/10">
+                        <SelectContent className="z-[100] bg-black/90 border border-white/10 max-h-60">
                           {CATEGORIES.map((category) => (
                             <SelectItem key={category.value} value={category.value}>
                               {category.label}
@@ -625,7 +695,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
                             <SelectValue placeholder="Select a type" />
                           </SelectTrigger>
                         </FormControl>
-                        <SelectContent className="z-50 bg-black/90 border border-white/10">
+                        <SelectContent className="z-[100] bg-black/90 border border-white/10 max-h-60">
                           {LISTING_TYPES.map((type) => (
                             <SelectItem key={type.value} value={type.value}>
                               {type.label}
