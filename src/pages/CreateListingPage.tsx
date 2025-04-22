@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import ListingSubmissionForm from '@/components/forms/ListingSubmissionForm';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
 const CreateListingPage = () => {
@@ -11,7 +10,7 @@ const CreateListingPage = () => {
   }, []);
   
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-16">
+    <div className="max-w-4xl mx-auto space-y-8 pb-16 px-4 sm:px-6">
       <div className="space-y-4">
         <h1 className="text-4xl font-bold text-white">Create Your Listing</h1>
         <p className="text-white/70 text-lg">
@@ -27,9 +26,7 @@ const CreateListingPage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <ScrollArea className="max-h-[calc(100vh-16rem)]">
-            <ListingSubmissionForm />
-          </ScrollArea>
+          <ListingSubmissionForm />
         </CardContent>
       </Card>
 

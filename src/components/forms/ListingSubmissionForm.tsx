@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -15,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Upload } from 'lucide-react';
@@ -189,7 +187,7 @@ const ListingSubmissionForm = () => {
   };
   
   return (
-    <div className="p-6">
+    <div className="p-6 overflow-auto">
       {error && (
         <div className="mb-6 p-4 border border-red-500 bg-red-100/10 rounded-md text-red-500">
           {error}
