@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Upload } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useNavigate } from 'react-router-dom';
 
 // Form schema validation
 const listingFormSchema = z.object({
@@ -50,6 +51,7 @@ const ListingSubmissionForm = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const form = useForm<ListingFormValues>({
     resolver: zodResolver(listingFormSchema),
@@ -92,10 +94,12 @@ const ListingSubmissionForm = () => {
       setLoading(true);
       setError(null);
 
-      const user = (await supabase.auth.getUser()).data.user;
+      // Check if user is authenticated
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        setError('You must be logged in to submit a listing');
+        toast.error('You must be logged in to submit a listing');
         setLoading(false);
+        navigate('/signin');
         return;
       }
 
@@ -105,7 +109,13 @@ const ListingSubmissionForm = () => {
       if (profileImage) {
         try {
           // Check if the storage bucket exists
-          const { data: buckets } = await supabase.storage.listBuckets();
+          const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+          
+          if (bucketsError) {
+            console.error('Error checking buckets:', bucketsError);
+            throw new Error('Could not check storage buckets');
+          }
+          
           const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
           
           if (!avatarBucketExists) {
@@ -125,9 +135,7 @@ const ListingSubmissionForm = () => {
             
           if (uploadError) {
             console.error('Error uploading profile image:', uploadError);
-            setError('Failed to upload profile image: ' + uploadError.message);
-            setLoading(false);
-            return;
+            throw new Error('Failed to upload profile image: ' + uploadError.message);
           }
           
           const { data: urlData } = supabase.storage
@@ -164,6 +172,7 @@ const ListingSubmissionForm = () => {
         is_deleted: false,
         has_pending_changes: false,
         username: generatedUsername, // Required until database types are updated
+        type: 'standard', // Set default listing type
       };
       
       try {
@@ -173,14 +182,33 @@ const ListingSubmissionForm = () => {
           
         if (insertError) {
           console.error('Error submitting listing:', insertError);
-          setError(insertError.message || 'Failed to submit listing');
-          return;
+          throw new Error(insertError.message || 'Failed to submit listing');
         }
         
         toast.success('Listing submitted successfully! We will review it shortly.');
         form.reset();
         setProfileImage(null);
         setProfileImageUrl(null);
+        
+        // Create a notification for the user
+        try {
+          await supabase.from('notifications').insert({
+            user_id: user.id,
+            title: 'Listing Submitted',
+            message: 'Your listing has been submitted and is awaiting review.',
+            type: 'info',
+            link: '/profile'
+          });
+        } catch (notificationError) {
+          // Non-critical error, just log it but don't block user flow
+          console.error('Failed to create notification:', notificationError);
+        }
+        
+        // Redirect to a success page or profile page after a short delay
+        setTimeout(() => {
+          navigate('/profile');
+        }, 2000);
+        
       } catch (dbError: any) {
         console.error('Database operation error:', dbError);
         setError('Database error: ' + dbError.message);
