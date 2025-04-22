@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import clsx from 'clsx';
 import { useSidebar } from '@/components/ui/sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import NavbarProfileMenu from './NavbarProfileMenu';
 
 const Navbar = ({
   children
@@ -18,7 +19,7 @@ const Navbar = ({
   const [searchValue, setSearchValue] = useState('');
   const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const { toggleSidebar, openMobile, setOpenMobile } = useSidebar();
+  const { openMobile, setOpenMobile } = useSidebar();
   const isMobile = useIsMobile();
   
   const onSearch = (e: React.FormEvent<HTMLFormElement>) => {
@@ -46,10 +47,11 @@ const Navbar = ({
             size="icon" 
             className="md:hidden text-white/80 hover:text-white"
             onClick={() => setOpenMobile(!openMobile)}
+            aria-label="Toggle sidebar"
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <Logo hideInHeader={false} />
+          <Logo hideInHeader={false} className="md:ml-0" />
         </div>
         
         <div className="hidden sm:flex flex-1 justify-center px-4 max-w-md mx-auto">
@@ -64,7 +66,7 @@ const Navbar = ({
           </form>
         </div>
         
-        <div className="sm:hidden flex-1 flex justify-center">
+        <div className="sm:hidden flex items-center justify-center">
           <button 
             aria-label={searchOpen ? "Close search" : "Open search"} 
             className={clsx("rounded-full p-2 hover:bg-black/30 transition focus:outline-none", searchOpen && "bg-black/40")} 
@@ -88,19 +90,19 @@ const Navbar = ({
               </div>
             </Button>
           </Link>
-          <Button variant="ghost" asChild className="hidden sm:flex">
-            <Link to="/promotion" className="text-white/80 hover:text-white">
-              Promotion
-            </Link>
-          </Button>
-          <Button variant="ghost" asChild className="hidden sm:flex">
-            <Link to="/create-listing" className="text-white/80 hover:text-white">
-              Create Listing
-            </Link>
-          </Button>
-          <Button variant="outline" asChild className="hidden xs:flex">
-            <Link to="/admin">Admin</Link>
-          </Button>
+          <NavbarProfileMenu />
+          <div className="hidden sm:flex items-center gap-2">
+            <Button variant="ghost" asChild className="hidden sm:flex">
+              <Link to="/promotion" className="text-white/80 hover:text-white">
+                Promotion
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="hidden sm:flex">
+              <Link to="/create-listing" className="text-white/80 hover:text-white">
+                Create Listing
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
       

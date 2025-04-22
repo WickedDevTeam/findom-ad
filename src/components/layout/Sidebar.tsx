@@ -85,6 +85,18 @@ const FindomSidebar = () => {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton 
+                  asChild 
+                  isActive={location.pathname === '/create-listing'}
+                  onClick={() => setOpenMobile(false)}
+                >
+                  <Link to="/create-listing">
+                    <span className="text-xl">✏️</span>
+                    <span className="font-normal text-base text-left">Create Listing</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               {CATEGORY_LINKS.map(link => (
                 <SidebarMenuItem key={link.to} className="py-0">
                   <SidebarMenuButton 

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -36,7 +37,9 @@ const Logo = ({
       }>
         💸
       </span>
-      <span className="font-bold text-2xl text-left">Findom.ad</span>
+      <span className={`font-bold text-xl sm:text-2xl text-left truncate ${isMobile && !forSidebar ? 'max-w-[120px]' : ''}`}>
+        Findom.ad
+      </span>
     </Link>
   );
 };
