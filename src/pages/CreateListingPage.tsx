@@ -4,14 +4,24 @@ import ListingSubmissionForm from '@/components/forms/ListingSubmissionForm';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
 import { Navigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 
 const CreateListingPage = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   // Scroll to top when the page loads
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
+  
+  // Show loading indicator while auth state is being determined
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-48">
+        <Loader2 className="h-8 w-8 animate-spin text-findom-purple" />
+      </div>
+    );
+  }
   
   // Redirect if not logged in
   if (!user) {
@@ -40,7 +50,7 @@ const CreateListingPage = () => {
       </Card>
 
       <div className="text-center text-white/50 text-sm">
-        <p>By submitting a listing, you agree to our terms of service and content guidelines.</p>
+        <p>By submitting a listing, you agree to our <a href="/tos" className="text-findom-purple hover:underline">terms of service</a> and content guidelines.</p>
       </div>
     </div>
   );
