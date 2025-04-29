@@ -9,10 +9,14 @@ const SidebarUserProfile = () => {
   const { user } = useAuth();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     const fetchUserProfile = async () => {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
       
       try {
         // Fetch profile from profiles table
@@ -33,6 +37,8 @@ const SidebarUserProfile = () => {
         }
       } catch (error) {
         console.error('Error in profile fetch:', error);
+      } finally {
+        setLoading(false);
       }
     };
     
@@ -40,21 +46,24 @@ const SidebarUserProfile = () => {
   }, [user]);
   
   if (!user) return null;
-
-  // For debugging
-  console.log('User object in SidebarUserProfile:', user);
-  console.log('User metadata:', user.user_metadata);
-  console.log('Avatar URL from profile:', avatarUrl);
   
   const userName = displayName || user.user_metadata?.name || user.user_metadata?.full_name || 'User';
 
   return (
     <div className="flex items-center gap-3 px-2 py-3 min-w-0">
       <Avatar className="h-10 w-10 border border-white/10">
-        <AvatarImage src={avatarUrl || user.user_metadata?.avatar_url} alt={userName} />
-        <AvatarFallback>
-          <User className="h-6 w-6" />
-        </AvatarFallback>
+        {loading ? (
+          <AvatarFallback className="animate-pulse bg-findom-purple/40">
+            <User className="h-5 w-5 opacity-70" />
+          </AvatarFallback>
+        ) : (
+          <>
+            <AvatarImage src={avatarUrl || user.user_metadata?.avatar_url} alt={userName} />
+            <AvatarFallback>
+              <User className="h-6 w-6" />
+            </AvatarFallback>
+          </>
+        )}
       </Avatar>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-white truncate">
