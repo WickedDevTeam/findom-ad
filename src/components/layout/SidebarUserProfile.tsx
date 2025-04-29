@@ -4,12 +4,15 @@ import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { User } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 const SidebarUserProfile = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [displayName, setDisplayName] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -19,6 +22,8 @@ const SidebarUserProfile = () => {
       }
       
       try {
+        setError(null);
+        
         // Fetch profile from profiles table
         const { data, error } = await supabase
           .from('profiles')
@@ -27,7 +32,9 @@ const SidebarUserProfile = () => {
           .single();
         
         if (error) {
-          console.error('Error fetching profile:', error);
+          if (error.code !== 'PGRST116') { // Not found error
+            setError(error.message);
+          }
           return;
         }
         
@@ -35,7 +42,8 @@ const SidebarUserProfile = () => {
           setAvatarUrl(data.avatar_url);
           setDisplayName(data.display_name);
         }
-      } catch (error) {
+      } catch (error: any) {
+        setError(error.message || 'Failed to fetch profile');
         console.error('Error in profile fetch:', error);
       } finally {
         setLoading(false);
@@ -43,7 +51,7 @@ const SidebarUserProfile = () => {
     };
     
     fetchUserProfile();
-  }, [user]);
+  }, [user, toast]);
   
   if (!user) return null;
   
@@ -72,6 +80,11 @@ const SidebarUserProfile = () => {
         <p className="text-xs text-white/60 truncate">
           {user.email}
         </p>
+        {error && (
+          <p className="text-xs text-red-400 truncate hidden md:block">
+            Error loading profile
+          </p>
+        )}
       </div>
     </div>
   );

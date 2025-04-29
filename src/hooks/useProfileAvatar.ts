@@ -8,13 +8,17 @@ export function useProfileAvatar() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   // Avatar change handler - memoized to prevent recreation on re-renders
   const onAvatarChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setUploadError(null);
+    
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       // Validate image type
       if (!file.type.startsWith('image/')) {
+        setUploadError('Invalid file type');
         toast.toast({
           title: 'Invalid file',
           description: 'Please upload an image file',
@@ -25,6 +29,7 @@ export function useProfileAvatar() {
       
       // Validate file size (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
+        setUploadError('File too large');
         toast.toast({
           title: 'File too large',
           description: 'Please upload an image smaller than 5MB',
@@ -45,24 +50,34 @@ export function useProfileAvatar() {
   // Upload avatar to storage - memoized with useCallback
   const uploadAvatar = useCallback(async (userId: string, file: File) => {
     try {
+      setUploadError(null);
       setUploadLoading(true);
+      
+      // First check if the avatars bucket exists
+      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
+      
+      if (bucketsError) {
+        throw new Error(`Error accessing storage: ${bucketsError.message}`);
+      }
+      
+      // Check if the avatars bucket exists
+      const avatarsBucket = buckets?.find(bucket => bucket.name === 'avatars');
+      if (!avatarsBucket) {
+        // Create the bucket if it doesn't exist
+        const { error: createBucketError } = await supabase.storage.createBucket('avatars', {
+          public: true
+        });
+        
+        if (createBucketError) {
+          throw new Error(`Error creating avatars bucket: ${createBucketError.message}`);
+        }
+      }
+      
       const fileExt = file.name.split('.').pop();
       const fileName = `${userId}-${Date.now()}.${fileExt}`;
       const filePath = `${fileName}`;
       
-      console.log('Uploading avatar:', { fileName, filePath, size: file.size });
-
-      // First check if the bucket exists
-      const { data: buckets, error: bucketsError } = await supabase.storage.listBuckets();
-      
-      if (bucketsError) {
-        console.error('Error fetching buckets:', bucketsError);
-        throw bucketsError;
-      }
-      
-      console.log('Available buckets:', buckets);
-      
-      // Try to upload directly (the bucket should exist based on our SQL migration)
+      // Try to upload the file
       const { data, error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(filePath, file, { 
@@ -71,18 +86,15 @@ export function useProfileAvatar() {
         });
 
       if (uploadError) {
-        console.error('Error uploading avatar:', uploadError);
-        throw uploadError;
+        throw new Error(`Error uploading avatar: ${uploadError.message}`);
       }
-
-      console.log('Upload successful, data:', data);
 
       // Get public URL
       const { data: publicUrlData } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      console.log('Public URL:', publicUrlData.publicUrl);
       
       return publicUrlData.publicUrl;
-    } catch (error) {
+    } catch (error: any) {
+      setUploadError(error.message || 'Upload failed');
       console.error('Error uploading avatar:', error);
       throw error;
     } finally {
@@ -97,5 +109,7 @@ export function useProfileAvatar() {
     onAvatarChange,
     uploadAvatar,
     uploadLoading,
+    uploadError,
+    resetUploadError: () => setUploadError(null)
   };
 }
