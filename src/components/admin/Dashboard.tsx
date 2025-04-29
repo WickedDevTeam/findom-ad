@@ -13,6 +13,23 @@ interface DashboardProps {
 }
 
 const Dashboard = ({ statsData, activeCreatorsCount, isLoading = false }: DashboardProps) => {
+  // Calculate percentage changes for the stats (mock data for demo)
+  // In production, these would come from real analytics data
+  const calculateChange = (value: number): string => {
+    // This is a placeholder. In a real app, you would calculate this based on previous period data
+    const change = Math.floor(Math.random() * 40) - 10; // Random number between -10 and 30
+    const prefix = change > 0 ? '+' : '';
+    return `${prefix}${change}% from last month`;
+  };
+  
+  const visitorCount = statsData?.length > 0 
+    ? statsData[statsData.length - 1]?.visitors || 0 
+    : 0;
+    
+  const revenue = statsData?.length > 0 
+    ? `$${statsData[statsData.length - 1]?.revenue || 0}` 
+    : '$0';
+    
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -30,7 +47,7 @@ const Dashboard = ({ statsData, activeCreatorsCount, isLoading = false }: Dashbo
               <>
                 <div className="text-3xl font-bold">{activeCreatorsCount}</div>
                 <p className="text-xs text-white/70">
-                  {activeCreatorsCount > 0 ? '+12% from last month' : 'No active listings'}
+                  {activeCreatorsCount > 0 ? calculateChange(activeCreatorsCount) : 'No active listings'}
                 </p>
               </>
             )}
@@ -49,8 +66,8 @@ const Dashboard = ({ statsData, activeCreatorsCount, isLoading = false }: Dashbo
               <Skeleton className="h-8 w-24 bg-white/10" />
             ) : (
               <>
-                <div className="text-3xl font-bold">3,246</div>
-                <p className="text-xs text-white/70">+24% from last month</p>
+                <div className="text-3xl font-bold">{visitorCount.toLocaleString()}</div>
+                <p className="text-xs text-white/70">{calculateChange(visitorCount)}</p>
               </>
             )}
           </CardContent>
@@ -68,8 +85,8 @@ const Dashboard = ({ statsData, activeCreatorsCount, isLoading = false }: Dashbo
               <Skeleton className="h-8 w-24 bg-white/10" />
             ) : (
               <>
-                <div className="text-3xl font-bold">$820</div>
-                <p className="text-xs text-white/70">+32% from last month</p>
+                <div className="text-3xl font-bold">{revenue}</div>
+                <p className="text-xs text-white/70">{calculateChange(parseInt(revenue.replace('$', '')))}</p>
               </>
             )}
           </CardContent>

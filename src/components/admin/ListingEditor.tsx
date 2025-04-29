@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -31,6 +31,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SocialLinks } from '@/types';
 import { Json } from '@/integrations/supabase/types';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 // Form schema validation
 const listingFormSchema = z.object({
@@ -78,11 +79,22 @@ const LISTING_TYPES = [
 
 export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin = false }: ListingEditorProps) {
   const [loading, setLoading] = useState(false);
-  const [fetchLoading, setFetchLoading] = useState(!!listingId);
   const [error, setError] = useState<string | null>(null);
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-  const [initialValues, setInitialValues] = useState<Partial<ListingFormValues>>({});
+  const queryClient = useQueryClient();
+  
+  // Check if avatars bucket exists
+  const { data: bucketsData } = useQuery({
+    queryKey: ['avatarsBucket'],
+    queryFn: async () => {
+      const { data, error } = await supabase.storage.listBuckets();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const avatarBucketExists = bucketsData?.some(bucket => bucket.name === 'avatars');
 
   // Form initialization
   const form = useForm<ListingFormValues>({
@@ -98,172 +110,179 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
       cashapp: '',
       onlyfans: '',
       throne: '',
-      ...initialValues
     },
   });
 
-  // Fetch existing listing data if in edit mode
-  useEffect(() => {
-    if (listingId) {
-      const fetchListing = async () => {
-        try {
-          setFetchLoading(true);
-          setError(null);
-          
-          // For admins, check in both creators and listings tables
-          let data;
-          
-          if (isAdmin) {
-            // First check creators table
-            const { data: creatorData, error: creatorError } = await supabase
-              .from('creators')
-              .select('*')
-              .eq('id', listingId)
-              .maybeSingle();
-              
-            if (creatorData) {
-              // Parse social_links from JSON if it's a string
-              let socialLinks: SocialLinks = {
-                twitter: null,
-                throne: null,
-                cashapp: null,
-                onlyfans: null,
-                other: null
-              };
-              
-              if (typeof creatorData.social_links === 'string') {
-                try {
-                  const parsedLinks = JSON.parse(creatorData.social_links);
-                  socialLinks = {
-                    twitter: parsedLinks.twitter || null,
-                    throne: parsedLinks.throne || null,
-                    cashapp: parsedLinks.cashapp || null,
-                    onlyfans: parsedLinks.onlyfans || null,
-                    other: parsedLinks.other || null
-                  };
-                } catch (e) {
-                  console.error('Error parsing social_links JSON:', e);
-                  setError('Error parsing creator data');
-                }
-              } else if (creatorData.social_links && typeof creatorData.social_links === 'object') {
-                const links = creatorData.social_links as Record<string, any>;
+  // Fetch existing listing data
+  const { data: listingData, isLoading: fetchLoading } = useQuery({
+    queryKey: ['listing', listingId],
+    queryFn: async () => {
+      try {
+        // For admins, check in both creators and listings tables
+        if (isAdmin) {
+          // First check creators table
+          const { data: creatorData, error: creatorError } = await supabase
+            .from('creators')
+            .select('*')
+            .eq('id', listingId)
+            .maybeSingle();
+            
+          if (creatorData) {
+            // Parse social_links from JSON if it's a string
+            let socialLinks: SocialLinks = {
+              twitter: null,
+              throne: null,
+              cashapp: null,
+              onlyfans: null,
+              other: null
+            };
+            
+            if (typeof creatorData.social_links === 'string') {
+              try {
+                const parsedLinks = JSON.parse(creatorData.social_links);
                 socialLinks = {
-                  twitter: links.twitter || null,
-                  throne: links.throne || null,
-                  cashapp: links.cashapp || null,
-                  onlyfans: links.onlyfans || null,
-                  other: links.other || null
+                  twitter: parsedLinks.twitter || null,
+                  throne: parsedLinks.throne || null,
+                  cashapp: parsedLinks.cashapp || null,
+                  onlyfans: parsedLinks.onlyfans || null,
+                  other: parsedLinks.other || null
                 };
+              } catch (e) {
+                console.error('Error parsing social_links JSON:', e);
+                return null;
               }
-
-              data = {
-                name: creatorData.name,
-                username: creatorData.username,
-                bio: creatorData.bio,
-                type: creatorData.type,
-                // Map the social links
-                twitter: socialLinks.twitter || '',
-                cashapp: socialLinks.cashapp || '',
-                onlyfans: socialLinks.onlyfans || '',
-                throne: socialLinks.throne || '',
-                email: '', // Email isn't stored in creators table
-                category: '', // Categories are in a separate table for creators
+            } else if (creatorData.social_links && typeof creatorData.social_links === 'object') {
+              const links = creatorData.social_links as Record<string, any>;
+              socialLinks = {
+                twitter: links.twitter || null,
+                throne: links.throne || null,
+                cashapp: links.cashapp || null,
+                onlyfans: links.onlyfans || null,
+                other: links.other || null
               };
-              setProfileImageUrl(creatorData.profile_image);
+            }
+
+            const data = {
+              name: creatorData.name,
+              username: creatorData.username,
+              bio: creatorData.bio,
+              type: creatorData.type,
+              email: '', // Email isn't stored in creators table
+              twitter: socialLinks.twitter || '',
+              cashapp: socialLinks.cashapp || '',
+              onlyfans: socialLinks.onlyfans || '',
+              throne: socialLinks.throne || '',
+              category: '',
+              profile_image: creatorData.profile_image,
+            };
+            
+            // Get the first category for the creator
+            const { data: categoryData } = await supabase
+              .from('creator_categories')
+              .select('category_id')
+              .eq('creator_id', listingId)
+              .limit(1);
               
-              // Get the first category for the creator
-              const { data: categoryData } = await supabase
-                .from('creator_categories')
-                .select('category_id')
-                .eq('creator_id', listingId)
-                .limit(1);
+            if (categoryData && categoryData.length > 0) {
+              const { data: categoryInfo } = await supabase
+                .from('categories')
+                .select('name')
+                .eq('id', categoryData[0].category_id)
+                .single();
                 
-              if (categoryData && categoryData.length > 0) {
-                const { data: categoryInfo } = await supabase
-                  .from('categories')
-                  .select('name')
-                  .eq('id', categoryData[0].category_id)
-                  .single();
-                  
-                if (categoryInfo) {
-                  data.category = categoryInfo.name;
-                }
+              if (categoryInfo) {
+                data.category = categoryInfo.name;
               }
-            } else if (creatorError) {
-              console.error('Error fetching creator:', creatorError);
             }
             
-            // If not found in creators, check listings table
-            if (!data) {
-              const { data: listingData, error: listingError } = await supabase
-                .from('listings')
-                .select('*')
-                .eq('id', listingId)
-                .maybeSingle();
-                
-              if (listingData) {
-                data = {
-                  name: listingData.name,
-                  username: listingData.username,
-                  bio: listingData.bio || '',
-                  type: listingData.type || 'standard',
-                  category: listingData.category,
-                  email: listingData.email,
-                  twitter: listingData.twitter || '',
-                  cashapp: listingData.cashapp || '',
-                  onlyfans: listingData.onlyfans || '',
-                  throne: listingData.throne || '',
-                };
-              } else if (listingError) {
-                console.error('Error fetching listing:', listingError);
-                setError('Failed to find listing data');
-              }
-            }
-          } else {
-            // For users, just check listings table for their submissions
-            const { data: listingData, error: listingError } = await supabase
-              .from('listings')
-              .select('*')
-              .eq('id', listingId)
-              .maybeSingle();
-              
-            if (listingData) {
-              data = {
-                name: listingData.name,
-                username: listingData.username,
-                bio: listingData.bio || '',
-                type: listingData.type || 'standard',
-                category: listingData.category,
-                email: listingData.email,
-                twitter: listingData.twitter || '',
-                cashapp: listingData.cashapp || '',
-                onlyfans: listingData.onlyfans || '',
-                throne: listingData.throne || '',
-              };
-            } else if (listingError) {
-              console.error('Error fetching listing:', listingError);
-              setError('Failed to load listing details');
-            }
+            return data;
+          } else if (creatorError) {
+            console.error('Error fetching creator:', creatorError);
           }
           
-          if (data) {
-            setInitialValues(data);
-            form.reset(data);
-          } else {
-            setError('No listing data found');
+          // If not found in creators, check listings table
+          const { data: listingData, error: listingError } = await supabase
+            .from('listings')
+            .select('*')
+            .eq('id', listingId)
+            .maybeSingle();
+            
+          if (listingData) {
+            return {
+              name: listingData.name,
+              username: listingData.username || '',
+              bio: listingData.bio || '',
+              type: listingData.type || 'standard',
+              category: listingData.category,
+              email: listingData.email,
+              twitter: listingData.twitter || '',
+              cashapp: listingData.cashapp || '',
+              onlyfans: listingData.onlyfans || '',
+              throne: listingData.throne || '',
+              profile_image: listingData.profile_image,
+            };
+          } else if (listingError) {
+            console.error('Error fetching listing:', listingError);
+            return null;
           }
-        } catch (error: any) {
-          console.error('Error fetching listing:', error);
-          setError('Failed to load listing details: ' + error.message);
-        } finally {
-          setFetchLoading(false);
+        } else {
+          // For users, just check listings table for their submissions
+          const { data: listingData, error: listingError } = await supabase
+            .from('listings')
+            .select('*')
+            .eq('id', listingId)
+            .maybeSingle();
+            
+          if (listingData) {
+            return {
+              name: listingData.name,
+              username: listingData.username || '',
+              bio: listingData.bio || '',
+              type: listingData.type || 'standard',
+              category: listingData.category,
+              email: listingData.email,
+              twitter: listingData.twitter || '',
+              cashapp: listingData.cashapp || '',
+              onlyfans: listingData.onlyfans || '',
+              throne: listingData.throne || '',
+              profile_image: listingData.profile_image,
+            };
+          } else if (listingError) {
+            console.error('Error fetching listing:', listingError);
+            return null;
+          }
         }
-      };
+        
+        return null;
+      } catch (error: any) {
+        console.error('Error fetching listing:', error);
+        return null;
+      }
+    },
+    enabled: !!listingId,
+  });
+  
+  // Set form values when listingData changes
+  useEffect(() => {
+    if (listingData) {
+      form.reset({
+        name: listingData.name,
+        username: listingData.username || '',
+        bio: listingData.bio || '',
+        type: listingData.type || 'standard',
+        category: listingData.category || '',
+        email: listingData.email || '',
+        twitter: listingData.twitter || '',
+        cashapp: listingData.cashapp || '',
+        onlyfans: listingData.onlyfans || '',
+        throne: listingData.throne || '',
+      });
       
-      fetchListing();
+      setProfileImageUrl(listingData.profile_image || null);
     }
-  }, [listingId, form, isAdmin]);
+  }, [listingData, form]);
 
+  // Profile image handling
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -286,38 +305,37 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
     }
   };
 
-  const onSubmit = async (values: ListingFormValues) => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      // Check if username is unique (except for the current listing)
-      const { data: existingUsername, error: usernameError } = await supabase
+  // Username uniqueness check mutation
+  const checkUsernameUnique = useMutation({
+    mutationFn: async (username: string) => {
+      const { data, error } = await supabase
         .from('creators')
         .select('id')
-        .eq('username', values.username)
+        .eq('username', username)
         .not('id', 'eq', listingId || '0')
         .maybeSingle();
-      
-      if (existingUsername) {
-        setError('This username is already taken');
-        setLoading(false);
-        return;
+        
+      if (error) throw error;
+      return data === null; // true if username is available
+    }
+  });
+  
+  // Form submission mutation
+  const submitListing = useMutation({
+    mutationFn: async (values: ListingFormValues) => {
+      // Check username uniqueness
+      const isUsernameAvailable = await checkUsernameUnique.mutateAsync(values.username);
+      if (!isUsernameAvailable) {
+        throw new Error('This username is already taken');
       }
       
-      let profileImagePath = null;
+      let profileImagePath = profileImageUrl;
       
       // Handle profile image upload if a new one was selected
       if (profileImage) {
-        // First, check if the storage bucket exists
-        const { data: buckets } = await supabase.storage.listBuckets();
-        const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
-        
+        // Check if the avatars bucket exists
         if (!avatarBucketExists) {
-          console.error('Avatars bucket does not exist');
-          setError('Storage configuration error. Please contact support.');
-          setLoading(false);
-          return;
+          throw new Error('Storage configuration error. Please contact support.');
         }
         
         const fileExt = profileImage.name.split('.').pop();
@@ -329,10 +347,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
           .upload(filePath, profileImage, { upsert: true });
           
         if (uploadError) {
-          console.error('Error uploading image:', uploadError);
-          setError('Failed to upload profile image: ' + uploadError.message);
-          setLoading(false);
-          return;
+          throw new Error('Failed to upload profile image: ' + uploadError.message);
         }
         
         const { data: urlData } = supabase.storage
@@ -362,7 +377,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
           social_links: socialLinksJson,
           is_verified: true,
           is_new: !listingId, // Only new if creating
-          profile_image: profileImagePath || profileImageUrl, // Use existing or new image
+          profile_image: profileImagePath || null,
         };
         
         if (listingId) {
@@ -373,10 +388,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .eq('id', listingId);
             
           if (updateError) {
-            console.error('Error updating creator:', updateError);
-            setError('Failed to update listing: ' + updateError.message);
-            setLoading(false);
-            return;
+            throw new Error('Failed to update listing: ' + updateError.message);
           }
           
           // If the category was changed, update it
@@ -413,8 +425,21 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             }
           }
           
-          toast.success('Listing updated successfully');
-          if (onSuccess) onSuccess(listingId, false);
+          // If we're handling a pending submission, delete it after approving
+          const { data: pendingListing } = await supabase
+            .from('listings')
+            .select('id')
+            .eq('id', listingId)
+            .maybeSingle();
+            
+          if (pendingListing) {
+            await supabase
+              .from('listings')
+              .delete()
+              .eq('id', listingId);
+          }
+          
+          return { id: listingId, isNew: false };
         } else {
           // Create new creator
           const { data: newCreator, error: insertError } = await supabase
@@ -424,10 +449,11 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .single();
             
           if (insertError) {
-            console.error('Error creating creator:', insertError);
-            setError('Failed to create listing: ' + insertError.message);
-            setLoading(false);
-            return;
+            throw new Error('Failed to create listing: ' + insertError.message);
+          }
+          
+          if (!newCreator) {
+            throw new Error('Failed to retrieve created listing');
           }
           
           // Get category ID
@@ -457,27 +483,15 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             }
           }
           
-          toast.success('New listing created successfully');
-          if (onSuccess) onSuccess(newCreator.id, true);
-        }
-        
-        // If we're handling a pending submission, delete it after approving
-        if (listingId) {
-          const { data: pendingListing } = await supabase
-            .from('listings')
-            .select('id')
-            .eq('id', listingId)
-            .maybeSingle();
-            
-          if (pendingListing) {
-            await supabase
-              .from('listings')
-              .delete()
-              .eq('id', listingId);
-          }
+          return { id: newCreator.id, isNew: true };
         }
       } else {
         // User workflow - create or update a listing submission
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) {
+          throw new Error('Authentication required to submit a listing');
+        }
+        
         const listingData = {
           name: values.name,
           username: values.username,
@@ -490,8 +504,9 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
           onlyfans: values.onlyfans || null,
           throne: values.throne || null,
           status: 'pending',
-          user_id: (await supabase.auth.getUser()).data.user?.id,
+          user_id: userData.user.id,
           profile_image: profileImagePath,
+          submitted_at: new Date().toISOString(),
         };
         
         if (listingId) {
@@ -502,14 +517,10 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .eq('id', listingId);
             
           if (updateError) {
-            console.error('Error updating listing:', updateError);
-            setError('Failed to update listing: ' + updateError.message);
-            setLoading(false);
-            return;
+            throw new Error('Failed to update listing: ' + updateError.message);
           }
           
-          toast.success('Listing submission updated');
-          if (onSuccess) onSuccess(listingId, false);
+          return { id: listingId, isNew: false };
         } else {
           // Create new submission
           const { data: newListing, error: insertError } = await supabase
@@ -519,20 +530,39 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .single();
             
           if (insertError) {
-            console.error('Error creating listing:', insertError);
-            setError('Failed to create listing: ' + insertError.message);
-            setLoading(false);
-            return;
+            throw new Error('Failed to create listing: ' + insertError.message);
           }
           
-          toast.success('Listing submitted for review');
-          if (onSuccess) onSuccess(newListing.id, true);
+          if (!newListing) {
+            throw new Error('Failed to retrieve created listing');
+          }
+          
+          return { id: newListing.id, isNew: true };
         }
       }
-    } catch (error: any) {
-      console.error('Error saving listing:', error);
-      setError(error.message || 'Failed to save listing');
-      toast.error('Error saving listing');
+    },
+    onSuccess: (data) => {
+      toast.success(listingId ? 'Listing updated successfully' : 'Listing created successfully');
+      if (onSuccess) onSuccess(data.id, data.isNew);
+      queryClient.invalidateQueries({ queryKey: ['activeCreatorsCount'] });
+      queryClient.invalidateQueries({ queryKey: ['pendingSubmissions'] });
+    },
+    onError: (error: Error) => {
+      setError(error.message);
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive"
+      });
+    }
+  });
+
+  const onSubmit = async (values: ListingFormValues) => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      await submitListing.mutateAsync(values);
     } finally {
       setLoading(false);
     }

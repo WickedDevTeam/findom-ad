@@ -1,3 +1,4 @@
+
 import { type ToastProps, type ToastActionElement } from "@/components/ui/toast";
 import { useState, useEffect, useCallback } from "react";
 
@@ -168,6 +169,7 @@ export function useToast() {
 
   return {
     toast,
+    dismiss: (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
     toasts: state.toasts,
   };
 }
@@ -176,7 +178,7 @@ type Toast = ReturnType<typeof useToast>["toast"];
 
 // This creates a direct export for use in files that don't
 // want to import the hook directly
-export const toast: Toast = ({ ...props }) => {
+export const toast = ({ ...props }: Omit<ToasterToast, "id">) => {
   const id = genId();
 
   const update = (props: ToasterToast) =>

@@ -15,10 +15,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { toast } from 'sonner';
+import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, Upload } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useQuery } from '@tanstack/react-query';
 
 // Form schema validation
 const listingFormSchema = z.object({
@@ -50,6 +51,18 @@ const ListingSubmissionForm = () => {
   const [profileImage, setProfileImage] = useState<File | null>(null);
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Check if avatars bucket exists
+  const { data: bucketsData } = useQuery({
+    queryKey: ['avatarsBucket'],
+    queryFn: async () => {
+      const { data, error } = await supabase.storage.listBuckets();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const avatarBucketExists = bucketsData?.some(bucket => bucket.name === 'avatars');
 
   const form = useForm<ListingFormValues>({
     resolver: zodResolver(listingFormSchema),
@@ -92,25 +105,33 @@ const ListingSubmissionForm = () => {
       setLoading(true);
       setError(null);
 
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) {
+      // Check if user is authenticated
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError || !userData.user) {
         setError('You must be logged in to submit a listing');
         setLoading(false);
+        toast({
+          title: "Authentication error",
+          description: "Please sign in to submit a listing",
+          variant: "destructive"
+        });
         return;
       }
 
+      const user = userData.user;
       let profileImagePath = null;
       
       // Handle profile image upload if selected
       if (profileImage) {
         try {
           // Check if the storage bucket exists
-          const { data: buckets } = await supabase.storage.listBuckets();
-          const avatarBucketExists = buckets?.some(bucket => bucket.name === 'avatars');
-          
           if (!avatarBucketExists) {
             console.error('Avatars bucket does not exist');
-            toast.error('Storage configuration error. Please contact support.');
+            toast({
+              title: "Storage error",
+              description: "Storage configuration error. Please contact support.",
+              variant: "destructive"
+            });
             setLoading(false);
             return;
           }
@@ -144,10 +165,9 @@ const ListingSubmissionForm = () => {
       }
       
       // Generate a username based on user ID to satisfy the database constraint
-      // This is temporary until the types are fully updated
       const generatedUsername = `user_${user.id.substring(0, 8)}`;
       
-      // Prepare listing data
+      // Prepare listing data with improved validation and error handling
       const listingData = {
         name: data.name,
         category: data.category,
@@ -163,33 +183,43 @@ const ListingSubmissionForm = () => {
         is_public: false,
         is_deleted: false,
         has_pending_changes: false,
-        username: generatedUsername, // Required until database types are updated
+        username: generatedUsername,
+        type: 'standard',
+        submitted_at: new Date().toISOString(),
       };
       
-      try {
-        const { error: insertError } = await supabase
-          .from('listings')
-          .insert(listingData);
+      // Insert with improved error handling
+      const { error: insertError } = await supabase
+        .from('listings')
+        .insert(listingData);
           
-        if (insertError) {
-          console.error('Error submitting listing:', insertError);
-          setError(insertError.message || 'Failed to submit listing');
-          return;
-        }
-        
-        toast.success('Listing submitted successfully! We will review it shortly.');
-        form.reset();
-        setProfileImage(null);
-        setProfileImageUrl(null);
-      } catch (dbError: any) {
-        console.error('Database operation error:', dbError);
-        setError('Database error: ' + dbError.message);
+      if (insertError) {
+        console.error('Error submitting listing:', insertError);
+        setError(insertError.message || 'Failed to submit listing');
+        toast({
+          title: "Submission error",
+          description: "Failed to submit listing: " + insertError.message,
+          variant: "destructive"
+        });
         return;
       }
+      
+      toast({
+        title: "Listing submitted",
+        description: "Listing submitted successfully! We will review it shortly.",
+        variant: "default"
+      });
+      form.reset();
+      setProfileImage(null);
+      setProfileImageUrl(null);
     } catch (error: any) {
       console.error('Unexpected error:', error);
       setError(error.message || 'An unexpected error occurred');
-      toast.error('Failed to submit listing');
+      toast({
+        title: "Error",
+        description: "Failed to submit listing: " + error.message,
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }

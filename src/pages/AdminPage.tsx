@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { creators } from '@/data/creators';
 import { Search, ShieldAlert, Plus } from 'lucide-react';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 import { Creator } from '@/types';
 import { PendingSubmission, StatsData } from '@/types/admin';
 import Dashboard from '@/components/admin/Dashboard';
@@ -25,44 +25,43 @@ const AdminPage = () => {
   const { requireAuth, user } = useAuth();
   const { toast: toastNotify } = useToast();
   const [searchTerm, setSearchTerm] = useState('');
-  const [pendingSubmissions, setPendingSubmissions] = useState<PendingSubmission[]>([]);
   const [activeCreators, setActiveCreators] = useState<Creator[]>(creators);
   const [currentTab, setCurrentTab] = useState('dashboard');
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [adminCheckComplete, setAdminCheckComplete] = useState(false);
   const [isCreatorDialogOpen, setIsCreatorDialogOpen] = useState(false);
   
-  // Fetch admin status
-  useEffect(() => {
-    // First check authentication
-    const isAuthenticated = requireAuth();
-    
-    // If authenticated, check if user is admin
-    if (isAuthenticated && user) {
-      checkAdminStatus();
-    } else {
-      setIsLoading(false);
-      setAdminCheckComplete(true);
-    }
-  }, [requireAuth, user]);
+  // Admin status check
+  const { data: isAdmin = false, isLoading: isAdminLoading } = useQuery({
+    queryKey: ['adminStatus', user?.id],
+    queryFn: async () => {
+      try {
+        // Using the is_admin function from Supabase
+        const { data, error } = await supabase.rpc('is_admin');
+        
+        if (error) {
+          console.error('Error checking admin status:', error);
+          toastNotify({
+            title: 'Error',
+            description: 'Failed to verify admin status',
+            variant: 'destructive'
+          });
+          return false;
+        }
+        
+        return data || false;
+      } catch (error) {
+        console.error('Error in checkAdminStatus:', error);
+        return false;
+      }
+    },
+    enabled: !!user,
+  });
   
-  // Fetch dashboard stats data with React Query
+  // Fetch statistics data
   const { data: statsData = [], isLoading: statsLoading } = useQuery({
     queryKey: ['adminStats'],
     queryFn: async () => {
-      // This would ideally fetch real stats data from Supabase
-      // For now we'll use the sample data with proper typing
-      
-      // In a production app, you would fetch actual stats:
-      // const { data, error } = await supabase
-      //   .from('analytics')
-      //   .select('*')
-      //   .order('period', { ascending: true });
-      
-      // if (error) throw error;
-      // return data as StatsData[];
-      
+      // In a production app, you would fetch actual stats from a database table
+      // For now, we'll use sample data with proper typing
       return [
         { name: 'Jan', listings: 4, visitors: 1000, revenue: 240 },
         { name: 'Feb', listings: 6, visitors: 1200, revenue: 320 },
@@ -72,16 +71,17 @@ const AdminPage = () => {
         { name: 'Jun', listings: 20, visitors: 3000, revenue: 820 },
       ] as StatsData[];
     },
-    enabled: isAdmin && adminCheckComplete,
+    enabled: isAdmin,
   });
   
   // Fetch active creators count
-  const { data: activeCreatorsCount = 0 } = useQuery({
+  const { data: activeCreatorsCount = 0, isLoading: creatorCountLoading } = useQuery({
     queryKey: ['activeCreatorsCount'],
     queryFn: async () => {
       const { count, error } = await supabase
         .from('creators')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .eq('is_deleted', false);
         
       if (error) {
         toastNotify({
@@ -94,83 +94,57 @@ const AdminPage = () => {
       
       return count || 0;
     },
-    enabled: isAdmin && adminCheckComplete,
+    enabled: isAdmin,
   });
   
   // Fetch pending submissions
-  useEffect(() => {
-    if (user && isAdmin) {
-      fetchPendingSubmissions();
-    }
-  }, [user, isAdmin]);
-  
-  const checkAdminStatus = async () => {
-    try {
-      // Using the is_admin function from Supabase
-      const { data, error } = await supabase.rpc('is_admin');
-      
-      if (error) {
-        console.error('Error checking admin status:', error);
-        toastNotify({
-          title: 'Error',
-          description: 'Failed to verify admin status',
-          variant: 'destructive'
-        });
-        setIsAdmin(false);
-      } else {
-        setIsAdmin(data || false);
-      }
-    } catch (error) {
-      console.error('Error in checkAdminStatus:', error);
-      setIsAdmin(false);
-    } finally {
-      setIsLoading(false);
-      setAdminCheckComplete(true);
-    }
-  };
-  
-  const fetchPendingSubmissions = async () => {
-    try {
+  const { data: pendingSubmissions = [], isLoading: submissionsLoading, refetch: refetchSubmissions } = useQuery({
+    queryKey: ['pendingSubmissions'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('listings')
         .select('*')
-        .eq('status', 'pending');
+        .eq('status', 'pending')
+        .order('submitted_at', { ascending: false });
         
-      if (error) throw error;
-      
-      if (data) {
-        const submissions: PendingSubmission[] = data.map(item => ({
-          id: item.id,
-          name: item.name,
-          username: item.username,
-          category: item.category,
-          type: item.type || 'Free',
-          submittedAt: item.submitted_at,
-          email: item.email,
-          bio: item.bio || '',
-          twitter: item.twitter || '',
-          cashapp: item.cashapp || '',
-          onlyfans: item.onlyfans || '',
-          throne: item.throne || '',
-        }));
-        
-        setPendingSubmissions(submissions);
+      if (error) {
+        toastNotify({
+          title: 'Error',
+          description: 'Failed to fetch pending submissions',
+          variant: 'destructive'
+        });
+        return [];
       }
-    } catch (error) {
-      console.error('Error fetching pending submissions:', error);
-      toastNotify({
-        title: 'Error',
-        description: 'Failed to fetch pending submissions',
-        variant: 'destructive'
-      });
-    }
-  };
+      
+      // Transform the data
+      const submissions: PendingSubmission[] = data.map(item => ({
+        id: item.id,
+        name: item.name,
+        username: item.username || '',
+        category: item.category,
+        type: item.type || 'standard',
+        submittedAt: item.submitted_at,
+        email: item.email,
+        bio: item.bio || '',
+        twitter: item.twitter || '',
+        cashapp: item.cashapp || '',
+        onlyfans: item.onlyfans || '',
+        throne: item.throne || '',
+      }));
+      
+      return submissions;
+    },
+    enabled: isAdmin,
+  });
+  
+  // Initial authentication check
+  useEffect(() => {
+    requireAuth();
+  }, [requireAuth]);
   
   const handleApprove = async (id: string) => {
     try {
-      // In a real implementation, you would update the listing status to approved
-      // and create a new creator entry based on the listing data
-      
+      // Mark the submission as approved
       const { error } = await supabase
         .from('listings')
         .update({ status: 'approved' })
@@ -178,16 +152,17 @@ const AdminPage = () => {
         
       if (error) throw error;
       
-      setPendingSubmissions(prev => prev.filter(item => item.id !== id));
+      refetchSubmissions();
+      
       toastNotify({
         title: 'Success',
         description: 'Submission approved and published',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving submission:', error);
       toastNotify({
         title: 'Error',
-        description: 'Failed to approve submission',
+        description: 'Failed to approve submission: ' + error.message,
         variant: 'destructive'
       });
     }
@@ -202,16 +177,17 @@ const AdminPage = () => {
         
       if (error) throw error;
       
-      setPendingSubmissions(prev => prev.filter(item => item.id !== id));
+      refetchSubmissions();
+      
       toastNotify({
         title: 'Rejected',
         description: 'Submission has been rejected',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error rejecting submission:', error);
       toastNotify({
         title: 'Error',
-        description: 'Failed to reject submission',
+        description: 'Failed to reject submission: ' + error.message,
         variant: 'destructive'
       });
     }
@@ -243,11 +219,14 @@ const AdminPage = () => {
   
   const handleNewCreator = (id: string, isNew: boolean) => {
     setIsCreatorDialogOpen(false);
-    toast.success(`Listing ${isNew ? 'created' : 'updated'} successfully`);
+    toastNotify({
+      title: 'Success',
+      description: `Listing ${isNew ? 'created' : 'updated'} successfully`,
+    });
     // Would refresh the creators list here in a real implementation
   };
   
-  if (isLoading) {
+  if (isAdminLoading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="h-12 w-12 border-4 border-findom-purple/30 border-t-findom-purple rounded-full animate-spin"></div>
@@ -256,7 +235,7 @@ const AdminPage = () => {
   }
 
   // Show access denied if not admin
-  if (adminCheckComplete && !isAdmin) {
+  if (!isAdmin) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <Alert variant="destructive" className="max-w-md">
@@ -327,7 +306,7 @@ const AdminPage = () => {
           <Dashboard 
             statsData={statsData} 
             activeCreatorsCount={activeCreatorsCount}
-            isLoading={statsLoading} 
+            isLoading={statsLoading || creatorCountLoading} 
           />
         </TabsContent>
         
@@ -346,6 +325,7 @@ const AdminPage = () => {
             onApprove={handleApprove}
             onReject={handleReject}
             searchTerm={searchTerm}
+            isLoading={submissionsLoading}
           />
         </TabsContent>
 
