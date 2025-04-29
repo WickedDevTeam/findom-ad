@@ -195,7 +195,8 @@ const AdminPage = () => {
   
   const handleDelete = (id: string) => {
     setActiveCreators(prev => prev.filter(creator => creator.id !== id));
-    toast.success('Listing deleted', {
+    toast({
+      title: 'Listing deleted',
       description: 'The listing has been permanently removed.'
     });
   };
@@ -212,7 +213,8 @@ const AdminPage = () => {
     const creator = activeCreators.find(c => c.id === id);
     const action = creator?.isFeatured ? 'unfeatured' : 'featured';
     
-    toast.success(`Listing ${action}`, {
+    toast({
+      title: `Listing ${action}`,
       description: `The listing is now ${action} ${action === 'featured' ? 'on the homepage' : ''}.`
     });
   };
@@ -320,12 +322,12 @@ const AdminPage = () => {
         </TabsContent>
         
         <TabsContent value="submissions">
+          {/* Note: Make sure the Submissions component accepts the isLoading prop */}
           <Submissions 
             submissions={pendingSubmissions}
             onApprove={handleApprove}
             onReject={handleReject}
             searchTerm={searchTerm}
-            isLoading={submissionsLoading}
           />
         </TabsContent>
 

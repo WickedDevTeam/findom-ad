@@ -174,11 +174,17 @@ export function useToast() {
   };
 }
 
-type Toast = ReturnType<typeof useToast>["toast"];
+// Add convenient success, error, info, warning methods
+type ToastFunction = ReturnType<typeof useToast>["toast"];
+interface ExtendedToastFunction extends ToastFunction {
+  success: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+  error: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+  warning: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+  info: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+}
 
-// This creates a direct export for use in files that don't
-// want to import the hook directly
-export const toast = ({ ...props }: Omit<ToasterToast, "id">) => {
+// Define the toast function with extended methods
+const toast = (({ ...props }: Omit<ToasterToast, "id">) => {
   const id = genId();
 
   const update = (props: ToasterToast) =>
@@ -205,4 +211,35 @@ export const toast = ({ ...props }: Omit<ToasterToast, "id">) => {
     dismiss,
     update,
   };
+}) as ExtendedToastFunction;
+
+// Add helper methods for different toast types
+toast.success = (props) => {
+  return toast({
+    variant: "default",
+    ...props,
+  });
 };
+
+toast.error = (props) => {
+  return toast({
+    variant: "destructive",
+    ...props,
+  });
+};
+
+toast.warning = (props) => {
+  return toast({
+    variant: "default",
+    ...props,
+  });
+};
+
+toast.info = (props) => {
+  return toast({
+    variant: "default",
+    ...props,
+  });
+};
+
+export { toast };

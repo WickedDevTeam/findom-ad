@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -76,6 +75,26 @@ const LISTING_TYPES = [
   { value: 'premium', label: 'Premium' },
   { value: 'featured', label: 'Featured' },
 ];
+
+// Define an extended listing type to include profile_image
+interface ExtendedListing {
+  name: string;
+  username: string;
+  bio: string;
+  type: string;
+  category: string;
+  email: string;
+  twitter: string;
+  cashapp: string;
+  onlyfans: string;
+  throne: string;
+  profile_image?: string;
+  id?: string;
+  status?: string;
+  submitted_at?: string;
+  updated_at?: string;
+  user_id?: string;
+}
 
 export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin = false }: ListingEditorProps) {
   const [loading, setLoading] = useState(false);
@@ -162,7 +181,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               };
             }
 
-            const data = {
+            const data: ExtendedListing = {
               name: creatorData.name,
               username: creatorData.username,
               bio: creatorData.bio,
@@ -208,7 +227,7 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .maybeSingle();
             
           if (listingData) {
-            return {
+            const extendedListing: ExtendedListing = {
               name: listingData.name,
               username: listingData.username || '',
               bio: listingData.bio || '',
@@ -219,8 +238,10 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               cashapp: listingData.cashapp || '',
               onlyfans: listingData.onlyfans || '',
               throne: listingData.throne || '',
-              profile_image: listingData.profile_image,
+              // Add profile_image property with an optional default value
+              profile_image: listingData.profile_image || null,
             };
+            return extendedListing;
           } else if (listingError) {
             console.error('Error fetching listing:', listingError);
             return null;
@@ -234,7 +255,8 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
             .maybeSingle();
             
           if (listingData) {
-            return {
+            // Cast to ExtendedListing to ensure profile_image is available
+            const extendedListing: ExtendedListing = {
               name: listingData.name,
               username: listingData.username || '',
               bio: listingData.bio || '',
@@ -245,8 +267,9 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
               cashapp: listingData.cashapp || '',
               onlyfans: listingData.onlyfans || '',
               throne: listingData.throne || '',
-              profile_image: listingData.profile_image,
+              profile_image: listingData.profile_image || null,
             };
+            return extendedListing;
           } else if (listingError) {
             console.error('Error fetching listing:', listingError);
             return null;
@@ -542,7 +565,11 @@ export default function ListingEditor({ listingId, onSuccess, onCancel, isAdmin 
       }
     },
     onSuccess: (data) => {
-      toast.success(listingId ? 'Listing updated successfully' : 'Listing created successfully');
+      toast({
+        title: listingId ? 'Listing updated successfully' : 'Listing created successfully',
+        variant: "default"
+      });
+      
       if (onSuccess) onSuccess(data.id, data.isNew);
       queryClient.invalidateQueries({ queryKey: ['activeCreatorsCount'] });
       queryClient.invalidateQueries({ queryKey: ['pendingSubmissions'] });

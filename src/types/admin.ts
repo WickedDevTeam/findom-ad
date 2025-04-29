@@ -41,3 +41,21 @@ export interface AuditLogEntry {
   details?: string;
   timestamp: string;
 }
+
+// Add SyncHistoryItem interface to properly type the sync history
+export interface SyncHistoryItem {
+  id: string;
+  started_at: string;
+  completed_at: string | null;
+  success: boolean | null;
+  status: string;
+  message: string | null;
+  sync_type: string;
+  stats: {
+    added: number;
+    updated: number;
+    deleted: number;
+    failed: number;
+    errors: string[];
+  } | null;
+}

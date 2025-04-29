@@ -9,22 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
-
-interface SyncHistoryItem {
-  id: string;
-  started_at: string;
-  completed_at: string | null;
-  success: boolean | null;
-  status: string;
-  message: string | null;
-  stats: {
-    added: number;
-    updated: number;
-    deleted: number;
-    failed: number;
-    errors: string[];
-  } | null;
-}
+import { SyncHistoryItem } from '@/types/admin';
 
 const NotionSync = () => {
   const { toast } = useToast();
@@ -41,7 +26,24 @@ const NotionSync = () => {
         .limit(10);
       
       if (error) throw error;
-      return data as SyncHistoryItem[];
+      
+      // Properly cast the data to match SyncHistoryItem interface
+      return (data || []).map(item => ({
+        id: item.id,
+        started_at: item.started_at,
+        completed_at: item.completed_at,
+        success: item.success,
+        status: item.status,
+        message: item.message,
+        sync_type: item.sync_type || 'notion',
+        stats: item.stats ? {
+          added: item.stats.added || 0,
+          updated: item.stats.updated || 0,
+          deleted: item.stats.deleted || 0,
+          failed: item.stats.failed || 0,
+          errors: item.stats.errors || []
+        } : null
+      })) as SyncHistoryItem[];
     }
   });
   
