@@ -1,5 +1,4 @@
 
-// Update the Submissions component to include the isLoading prop
 import React, { useState } from 'react';
 import { PendingSubmission } from '@/types/admin';
 import { Card } from '@/components/ui/card';
@@ -89,7 +88,7 @@ const Submissions = ({ submissions, onApprove, onReject, searchTerm = '', isLoad
                 <Badge variant="outline" className="text-xs font-normal">
                   {submission.category}
                 </Badge>
-                <Badge variant={submission.type === 'premium' ? 'default' : 'secondary'} className="text-xs font-normal">
+                <Badge variant={submission.type === 'premium' ? 'default' : 'outline'} className="text-xs font-normal">
                   {submission.type === 'premium' ? 'Premium' : 'Standard'}
                 </Badge>
                 <span className="text-xs text-white/50">

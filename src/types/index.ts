@@ -1,4 +1,3 @@
-
 export interface Creator {
   id: string;
   name: string;
@@ -54,3 +53,4 @@ export interface NotionListing {
   is_verified?: boolean;
   is_new?: boolean;
 }
+
