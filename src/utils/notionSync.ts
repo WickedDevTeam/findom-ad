@@ -10,6 +10,11 @@ export interface NotionSyncConfig {
   lastSyncedAt: string | null;
   syncInterval: number; // in minutes
   autoSync: boolean;
+  // New fields for Notion as primary CMS
+  notionAsMainCms: boolean; // Flag to use Notion as primary data source
+  databaseUrl: string; // URL to the Notion database
+  listingTypeField: string; // Name of the field in Notion that stores the listing type
+  listingStatusField: string; // Name of the field in Notion that stores the status
 }
 
 export interface SyncStats {
@@ -27,6 +32,11 @@ export const defaultSyncConfig: NotionSyncConfig = {
   lastSyncedAt: null,
   syncInterval: 60,
   autoSync: false,
+  // New fields with default values
+  notionAsMainCms: true,
+  databaseUrl: "https://www.notion.so/subpirate/1f1805bf509680bd8868c0ef4c405494",
+  listingTypeField: "Type",
+  listingStatusField: "Status"
 };
 
 function parseConfig(val: any): NotionSyncConfig {
@@ -42,7 +52,15 @@ function parseConfig(val: any): NotionSyncConfig {
       typeof val.syncInterval === "number" &&
       typeof val.autoSync === "boolean"
     ) {
-      return val as NotionSyncConfig;
+      // Include new fields with fallbacks
+      return {
+        ...defaultSyncConfig,
+        ...val,
+        notionAsMainCms: typeof val.notionAsMainCms === "boolean" ? val.notionAsMainCms : defaultSyncConfig.notionAsMainCms,
+        databaseUrl: typeof val.databaseUrl === "string" ? val.databaseUrl : defaultSyncConfig.databaseUrl,
+        listingTypeField: typeof val.listingTypeField === "string" ? val.listingTypeField : defaultSyncConfig.listingTypeField,
+        listingStatusField: typeof val.listingStatusField === "string" ? val.listingStatusField : defaultSyncConfig.listingStatusField
+      };
     }
     // Fallback: Shallow merge with default 
     return { ...defaultSyncConfig, ...val };
@@ -109,6 +127,111 @@ export async function initiateSync(): Promise<{ success: boolean; message: strin
   } catch (error: any) {
     console.error("Error initiating sync:", error);
     return { success: false, message: "Failed to initiate sync due to an unexpected error" };
+  }
+}
+
+export async function submitListingToNotion(listing: any): Promise<{ success: boolean; message: string; listingId?: string }> {
+  try {
+    // Get config first to ensure we have the API key
+    const config = await getSyncConfig();
+    
+    if (!config.notionApiKey || !config.notionDatabaseId) {
+      return { success: false, message: "Notion API key or database ID not configured" };
+    }
+
+    const { data, error } = await supabase.functions.invoke("notion-sync", {
+      body: { 
+        action: "submit-listing",
+        listing: {
+          ...listing,
+          status: "Draft" // New listings are always drafts initially
+        }
+      }
+    });
+
+    if (error) {
+      console.error("Error submitting listing to Notion:", error);
+      return { success: false, message: `Submission failed: ${error.message}` };
+    }
+
+    return data || { 
+      success: true, 
+      message: "Listing submitted to Notion successfully",
+      listingId: data?.listingId
+    };
+  } catch (error: any) {
+    console.error("Error submitting listing:", error);
+    return { success: false, message: "Failed to submit listing due to an unexpected error" };
+  }
+}
+
+export async function fetchListingsFromNotion(options: { 
+  status?: string; 
+  limit?: number; 
+  cursor?: string;
+} = {}): Promise<{ 
+  success: boolean; 
+  message: string; 
+  listings?: any[]; 
+  nextCursor?: string;
+  total?: number;
+}> {
+  try {
+    const config = await getSyncConfig();
+    
+    if (!config.notionApiKey || !config.notionDatabaseId) {
+      return { success: false, message: "Notion API key or database ID not configured" };
+    }
+
+    const { data, error } = await supabase.functions.invoke("notion-sync", {
+      body: { 
+        action: "fetch-listings",
+        options
+      }
+    });
+
+    if (error) {
+      console.error("Error fetching listings from Notion:", error);
+      return { success: false, message: `Fetch failed: ${error.message}` };
+    }
+
+    return data || { 
+      success: true, 
+      message: "Listings fetched successfully",
+      listings: [],
+      total: 0
+    };
+  } catch (error: any) {
+    console.error("Error fetching listings:", error);
+    return { success: false, message: "Failed to fetch listings due to an unexpected error" };
+  }
+}
+
+export async function updateListingInNotion(listingId: string, updates: any): Promise<{ success: boolean; message: string }> {
+  try {
+    const config = await getSyncConfig();
+    
+    if (!config.notionApiKey || !config.notionDatabaseId) {
+      return { success: false, message: "Notion API key or database ID not configured" };
+    }
+
+    const { data, error } = await supabase.functions.invoke("notion-sync", {
+      body: { 
+        action: "update-listing",
+        listingId,
+        updates
+      }
+    });
+
+    if (error) {
+      console.error("Error updating listing in Notion:", error);
+      return { success: false, message: `Update failed: ${error.message}` };
+    }
+
+    return data || { success: true, message: "Listing updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating listing:", error);
+    return { success: false, message: "Failed to update listing due to an unexpected error" };
   }
 }
 

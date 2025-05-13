@@ -1,4 +1,3 @@
-
 import { type ToastProps, type ToastActionElement } from "@/components/ui/toast";
 import { useState, useEffect, useCallback } from "react";
 
@@ -167,6 +166,38 @@ export function useToast() {
     []
   );
 
+  // Add success method to toast
+  toast.success = (props: Omit<ToasterToast, "id">) => {
+    return toast({
+      variant: "default",
+      ...props,
+    });
+  };
+
+  // Add error method
+  toast.error = (props: Omit<ToasterToast, "id">) => {
+    return toast({
+      variant: "destructive",
+      ...props,
+    });
+  };
+
+  // Add warning method
+  toast.warning = (props: Omit<ToasterToast, "id">) => {
+    return toast({
+      variant: "default",
+      ...props,
+    });
+  };
+
+  // Add info method
+  toast.info = (props: Omit<ToasterToast, "id">) => {
+    return toast({
+      variant: "default",
+      ...props,
+    });
+  };
+
   return {
     toast,
     dismiss: (toastId?: string) => dispatch({ type: actionTypes.DISMISS_TOAST, toastId }),
@@ -174,7 +205,7 @@ export function useToast() {
   };
 }
 
-// Add convenient success, error, info, warning methods
+// Define the toast function with extended methods
 type ToastFunction = ReturnType<typeof useToast>["toast"];
 interface ExtendedToastFunction extends ToastFunction {
   success: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;

@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { SyncHistoryItem } from '@/types/admin';
+import { Json } from '@/integrations/supabase/types';
 
 const NotionSync = () => {
   const { toast } = useToast();
@@ -28,22 +29,38 @@ const NotionSync = () => {
       if (error) throw error;
       
       // Properly cast the data to match SyncHistoryItem interface
-      return (data || []).map(item => ({
-        id: item.id,
-        started_at: item.started_at,
-        completed_at: item.completed_at,
-        success: item.success,
-        status: item.status,
-        message: item.message,
-        sync_type: item.sync_type || 'notion',
-        stats: item.stats ? {
-          added: item.stats.added || 0,
-          updated: item.stats.updated || 0,
-          deleted: item.stats.deleted || 0,
-          failed: item.stats.failed || 0,
-          errors: item.stats.errors || []
-        } : null
-      })) as SyncHistoryItem[];
+      return (data || []).map(item => {
+        // Safely parse stats object
+        let parsedStats = {
+          added: 0,
+          updated: 0,
+          deleted: 0,
+          failed: 0,
+          errors: [] as string[]
+        };
+        
+        if (item.stats) {
+          const stats = item.stats as { [key: string]: any };
+          parsedStats = {
+            added: typeof stats.added === 'number' ? stats.added : 0,
+            updated: typeof stats.updated === 'number' ? stats.updated : 0,
+            deleted: typeof stats.deleted === 'number' ? stats.deleted : 0,
+            failed: typeof stats.failed === 'number' ? stats.failed : 0,
+            errors: Array.isArray(stats.errors) ? stats.errors : []
+          };
+        }
+        
+        return {
+          id: item.id,
+          started_at: item.started_at,
+          completed_at: item.completed_at,
+          success: item.success,
+          status: item.status,
+          message: item.message,
+          sync_type: item.sync_type || 'notion',
+          stats: parsedStats
+        } as SyncHistoryItem;
+      });
     }
   });
   

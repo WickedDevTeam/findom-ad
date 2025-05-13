@@ -1,5 +1,4 @@
 
-
 export interface Creator {
   id: string;
   name: string;
@@ -15,6 +14,7 @@ export interface Creator {
   categories: string[];
   gallery: string[];
   createdAt: string;
+  profile_image?: string; // Added to match Notion database structure
 }
 
 export interface PromotionPackage {
@@ -35,3 +35,22 @@ export interface SocialLinks {
   other?: string | null;
 }
 
+// New interface for Notion database listings
+export interface NotionListing {
+  id: string;
+  name: string;
+  username: string;
+  profile_image: string;
+  type: string;
+  bio: string;
+  categories: string[];
+  status: 'Draft' | 'Approved' | 'Rejected';
+  social_links: SocialLinks;
+  created_at: string;
+  updated_at: string;
+  submitted_by?: string;
+  cover_image?: string;
+  is_featured?: boolean;
+  is_verified?: boolean;
+  is_new?: boolean;
+}

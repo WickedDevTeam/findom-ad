@@ -12,6 +12,7 @@ export interface PendingSubmission {
   cashapp?: string;
   onlyfans?: string;
   throne?: string;
+  profile_image?: string;
 }
 
 export interface StatsData {
@@ -42,7 +43,6 @@ export interface AuditLogEntry {
   timestamp: string;
 }
 
-// Add SyncHistoryItem interface to properly type the sync history
 export interface SyncHistoryItem {
   id: string;
   started_at: string;
