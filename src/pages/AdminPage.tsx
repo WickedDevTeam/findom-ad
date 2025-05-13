@@ -19,7 +19,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import ListingEditor from '@/components/admin/ListingEditor';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { submitListingToNotion, fetchListingsFromNotion, getSyncConfig } from '@/utils/notionSync';
+import { submitListingToNotion, fetchListingsFromNotion, getSyncConfig, updateListingInNotion } from '@/utils/notionSync';
 
 const AdminPage = () => {
   const { requireAuth, user } = useAuth();
@@ -30,25 +30,17 @@ const AdminPage = () => {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isCreatorDialogOpen, setIsCreatorDialogOpen] = useState(false);
   
-  // Admin status check
+  // Admin status check - simplified query to avoid deep type instantiation
   const { data: isAdmin = false, isLoading: isAdminLoading } = useQuery({
     queryKey: ['adminStatus', user?.id],
     queryFn: async () => {
       try {
-        // Using the is_admin function from Supabase
         const { data, error } = await supabase.rpc('is_admin');
-        
         if (error) {
           console.error('Error checking admin status:', error);
-          toast({
-            title: 'Error',
-            description: 'Failed to verify admin status',
-            variant: 'destructive'
-          });
           return false;
         }
-        
-        return data || false;
+        return !!data;
       } catch (error) {
         console.error('Error in checkAdminStatus:', error);
         return false;
@@ -68,8 +60,6 @@ const AdminPage = () => {
   const { data: statsData = [], isLoading: statsLoading } = useQuery({
     queryKey: ['adminStats'],
     queryFn: async () => {
-      // In a production app, you would fetch actual stats from a database table
-      // For now, we'll use sample data with proper typing
       return [
         { name: 'Jan', listings: 4, visitors: 1000, revenue: 240 },
         { name: 'Feb', listings: 6, visitors: 1200, revenue: 320 },
@@ -195,7 +185,7 @@ const AdminPage = () => {
         
         refetchSubmissions();
         
-        toast({
+        toast.success({
           title: 'Success',
           description: 'Submission approved and published',
         });
@@ -210,17 +200,16 @@ const AdminPage = () => {
         
         refetchSubmissions();
         
-        toast({
+        toast.success({
           title: 'Success',
           description: 'Submission approved and published',
         });
       }
     } catch (error: any) {
       console.error('Error approving submission:', error);
-      toast({
+      toast.error({
         title: 'Error',
         description: 'Failed to approve submission: ' + error.message,
-        variant: 'destructive'
       });
     }
   };
@@ -237,7 +226,7 @@ const AdminPage = () => {
         
         refetchSubmissions();
         
-        toast({
+        toast.success({
           title: 'Rejected',
           description: 'Submission has been rejected',
         });
@@ -252,17 +241,16 @@ const AdminPage = () => {
         
         refetchSubmissions();
         
-        toast({
+        toast.success({
           title: 'Rejected',
           description: 'Submission has been rejected',
         });
       }
     } catch (error: any) {
       console.error('Error rejecting submission:', error);
-      toast({
+      toast.error({
         title: 'Error',
         description: 'Failed to reject submission: ' + error.message,
-        variant: 'destructive'
       });
     }
   };
@@ -293,7 +281,7 @@ const AdminPage = () => {
     });
   };
   
-  const handleNewCreator = async (id: string, isNew: boolean, listing: any) => {
+  const handleNewCreator = async (id: string, isNew: boolean, listing?: any) => {
     setIsCreatorDialogOpen(false);
     
     // If Notion is enabled and primary CMS, submit to Notion instead of Supabase
@@ -302,7 +290,7 @@ const AdminPage = () => {
         const result = await submitListingToNotion(listing);
         
         if (result.success) {
-          toast({
+          toast.success({
             title: 'Success',
             description: `Listing ${isNew ? 'created' : 'updated'} successfully in Notion`,
           });
@@ -311,14 +299,13 @@ const AdminPage = () => {
         }
       } catch (error: any) {
         console.error('Error submitting to Notion:', error);
-        toast({
+        toast.error({
           title: 'Error',
           description: `Failed to submit listing to Notion: ${error.message}`,
-          variant: 'destructive'
         });
       }
     } else {
-      toast({
+      toast.success({
         title: 'Success',
         description: `Listing ${isNew ? 'created' : 'updated'} successfully`,
       });
@@ -401,7 +388,7 @@ const AdminPage = () => {
           <TabsTrigger value="listings">Listings</TabsTrigger>
           <TabsTrigger value="submissions">
             Pending Submissions
-            <Badge className="ml-2 bg-findom-orange">{pendingSubmissions.length}</Badge>
+            <Badge className="ml-2 bg-findom-orange">{pendingSubmissions?.length || 0}</Badge>
           </TabsTrigger>
           <TabsTrigger value="notion-sync">Notion CMS</TabsTrigger>
         </TabsList>
@@ -409,7 +396,7 @@ const AdminPage = () => {
         <TabsContent value="dashboard">
           <Dashboard 
             statsData={statsData} 
-            activeCreatorsCount={activeCreatorsCount}
+            activeCreatorsCount={activeCreatorsCount || 0}
             isLoading={statsLoading || creatorCountLoading} 
           />
         </TabsContent>
@@ -424,8 +411,9 @@ const AdminPage = () => {
         </TabsContent>
         
         <TabsContent value="submissions">
+          {/* Add isLoading prop to Submissions component */}
           <Submissions 
-            submissions={pendingSubmissions}
+            submissions={pendingSubmissions || []}
             onApprove={handleApprove}
             onReject={handleReject}
             searchTerm={searchTerm}

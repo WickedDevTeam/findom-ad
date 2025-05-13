@@ -1,4 +1,5 @@
 
+// Add the missing updateListingInNotion function and update type definitions
 import { supabase } from "@/integrations/supabase/client";
 import { Creator } from "@/types";
 import { Json } from "@/integrations/supabase/types";
@@ -23,6 +24,23 @@ export interface SyncStats {
   deleted: number;
   failed: number;
   errors: string[];
+}
+
+export interface SyncHistoryItem {
+  id: string;
+  started_at: string;
+  completed_at: string | null;
+  success: boolean | null;
+  status: string;
+  message: string | null;
+  sync_type: string;
+  stats: {
+    added: number;
+    updated: number;
+    deleted: number;
+    failed: number;
+    errors: string[];
+  } | null;
 }
 
 export const defaultSyncConfig: NotionSyncConfig = {
@@ -207,6 +225,7 @@ export async function fetchListingsFromNotion(options: {
   }
 }
 
+// Add the missing function
 export async function updateListingInNotion(listingId: string, updates: any): Promise<{ success: boolean; message: string }> {
   try {
     const config = await getSyncConfig();

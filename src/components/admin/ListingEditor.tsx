@@ -1,3 +1,7 @@
+
+// The main issue is that the type definition is missing the profile_image property
+// We need to update the ExtendedListing interface to include profile_image 
+
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -54,7 +58,7 @@ type ListingFormValues = z.infer<typeof listingFormSchema>;
 
 interface ListingEditorProps {
   listingId?: string;
-  onSuccess?: (id: string, isNew: boolean) => void;
+  onSuccess?: (id: string, isNew: boolean, listing?: any) => void;
   onCancel?: () => void;
   isAdmin?: boolean;
 }
@@ -76,8 +80,9 @@ const LISTING_TYPES = [
   { value: 'featured', label: 'Featured' },
 ];
 
-// Define an extended listing type to include profile_image
+// Define an extended listing type with all needed fields
 interface ExtendedListing {
+  id?: string;
   name: string;
   username: string;
   bio: string;
@@ -89,7 +94,6 @@ interface ExtendedListing {
   onlyfans: string;
   throne: string;
   profile_image?: string;
-  id?: string;
   status?: string;
   submitted_at?: string;
   updated_at?: string;

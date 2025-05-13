@@ -1,3 +1,5 @@
+
+// We need to fix the type definitions for the toast methods
 import { type ToastProps, type ToastActionElement } from "@/components/ui/toast";
 import { useState, useEffect, useCallback } from "react";
 
@@ -121,6 +123,21 @@ function dispatch(action: Action) {
   });
 }
 
+// Define the toast function with extended methods
+type ToastFunction = (props: Omit<ToasterToast, "id">) => {
+  id: string;
+  dismiss: () => void;
+  update: (props: ToasterToast) => void;
+};
+
+// Define additional methods for the toast function
+interface ExtendedToastFunction extends ToastFunction {
+  success: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+  error: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+  warning: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+  info: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
+}
+
 export function useToast() {
   const [state, setState] = useState<State>(memoryState);
 
@@ -164,7 +181,7 @@ export function useToast() {
       };
     },
     []
-  );
+  ) as ExtendedToastFunction;
 
   // Add success method to toast
   toast.success = (props: Omit<ToasterToast, "id">) => {
@@ -205,16 +222,7 @@ export function useToast() {
   };
 }
 
-// Define the toast function with extended methods
-type ToastFunction = ReturnType<typeof useToast>["toast"];
-interface ExtendedToastFunction extends ToastFunction {
-  success: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
-  error: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
-  warning: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
-  info: (props: Omit<ToasterToast, "id">) => ReturnType<ToastFunction>;
-}
-
-// Define the toast function with extended methods
+// Redefine the standalone toast function with proper types
 const toast = (({ ...props }: Omit<ToasterToast, "id">) => {
   const id = genId();
 
