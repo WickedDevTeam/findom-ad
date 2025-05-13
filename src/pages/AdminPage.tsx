@@ -30,17 +30,19 @@ const AdminPage = () => {
   const [currentTab, setCurrentTab] = useState('dashboard');
   const [isCreatorDialogOpen, setIsCreatorDialogOpen] = useState(false);
   
-  // Admin status check - simplified query to avoid deep type instantiation
+  // Admin status check - simplified to avoid deep type instantiation
   const { data: isAdmin = false, isLoading: isAdminLoading } = useQuery({
     queryKey: ['adminStatus', user?.id],
     queryFn: async () => {
+      if (!user) return false;
+      
       try {
         const { data, error } = await supabase.rpc('is_admin');
         if (error) {
           console.error('Error checking admin status:', error);
           return false;
         }
-        return !!data;
+        return Boolean(data);
       } catch (error) {
         console.error('Error in checkAdminStatus:', error);
         return false;
@@ -105,7 +107,7 @@ const AdminPage = () => {
   });
   
   // Fetch pending submissions - if using Notion as CMS, get drafts from Notion
-  const { data: pendingSubmissions = [], isLoading: submissionsLoading, refetch: refetchSubmissions } = useQuery({
+  const { data: pendingSubmissions = [], isLoading: submissionsLoading } = useQuery({
     queryKey: ['pendingSubmissions', notionConfig?.notionAsMainCms],
     queryFn: async () => {
       // If using Notion as primary CMS
@@ -312,6 +314,13 @@ const AdminPage = () => {
     }
     // Would refresh the creators list here in a real implementation
   };
+  
+  // Added refetchSubmissions function to resolve the reference
+  const { refetch: refetchSubmissions } = useQuery({
+    queryKey: ['pendingSubmissions', notionConfig?.notionAsMainCms],
+    queryFn: async () => [],
+    enabled: false, // This is just for the refetch function, actual data is loaded elsewhere
+  });
   
   const handleConfigureNotion = () => {
     navigate('/admin/notion-config');

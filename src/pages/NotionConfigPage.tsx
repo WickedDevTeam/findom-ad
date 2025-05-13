@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Loader2, Check, AlertTriangle, Settings, Database } from 'lucide-react';
-import { NotionSyncConfig, getSyncConfig, updateSyncConfig, testNotionConnection } from '@/utils/notionSync';
+import { getSyncConfig, updateSyncConfig, testNotionConnection } from '@/utils/notionSync';
+import { NotionSyncConfig } from '@/types/admin';
 import { useAuth } from '@/hooks/use-auth';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -28,7 +29,7 @@ const NotionConfigPage = () => {
   // Update config when fetched
   useEffect(() => {
     if (syncConfig) {
-      setConfig(syncConfig);
+      setConfig(syncConfig as unknown as NotionSyncConfig);
     }
   }, [syncConfig]);
   

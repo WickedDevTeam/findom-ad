@@ -1,3 +1,4 @@
+
 export interface Creator {
   id: string;
   name: string;
@@ -54,3 +55,4 @@ export interface NotionListing {
   is_new?: boolean;
 }
 
+// Update the existing types/admin.ts file to include missing fields

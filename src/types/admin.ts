@@ -1,4 +1,6 @@
 
+// Add any additional types needed for admin functionality here
+
 export interface PendingSubmission {
   id: string;
   name: string;
@@ -7,12 +9,12 @@ export interface PendingSubmission {
   type: string;
   submittedAt: string;
   email?: string;
+  profile_image?: string; // Add this field
   bio?: string;
   twitter?: string;
   cashapp?: string;
   onlyfans?: string;
   throne?: string;
-  profile_image?: string;
 }
 
 export interface StatsData {
@@ -20,27 +22,6 @@ export interface StatsData {
   listings: number;
   visitors: number;
   revenue: number;
-}
-
-export interface AdminUser {
-  id: string;
-  email: string;
-  displayName?: string;
-  role: 'admin' | 'moderator' | 'user';
-  createdAt: string;
-  lastLogin?: string;
-}
-
-export interface AuditLogEntry {
-  id: string;
-  userId: string;
-  userName: string;
-  action: 'create' | 'update' | 'delete' | 'approve' | 'reject';
-  resourceType: 'listing' | 'user' | 'category' | 'setting';
-  resourceId: string;
-  resourceName: string;
-  details?: string;
-  timestamp: string;
 }
 
 export interface SyncHistoryItem {
@@ -57,5 +38,19 @@ export interface SyncHistoryItem {
     deleted: number;
     failed: number;
     errors: string[];
-  } | null;
+  };
+}
+
+// Add this interface to match the admin page imports
+export interface NotionSyncConfig {
+  enabled: boolean;
+  notionApiKey: string;
+  notionDatabaseId: string;
+  notionAsMainCms: boolean;
+  lastSyncedAt?: string;
+  listingStatusField?: string;
+  listingTypeField?: string;
+  databaseUrl?: string;
+  autoSync?: boolean;
+  syncInterval?: number;
 }
